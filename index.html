@@ -879,12 +879,26 @@ function buildPageNumbers() {
   const mid = document.getElementById('pf-page-info');
   if (!mid) return;
   const docEl = document.querySelector('.doc');
+  const ftr = document.querySelector('.doc-ftr');
   if (!docEl) return;
+
   const MM = 3.7795275591;
-  const usable = 270 * MM;
-  const docH = docEl.scrollHeight;
-  const total = Math.max(1, Math.ceil(docH / usable));
-  mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
+  const usable = 270 * MM; // (297-10-17)mm per page
+
+  // Content before doc-ftr (header, table, totals)
+  // Since doc-ftr has page-break-before:always, it starts a new page.
+  // So we count: pages for pre-footer content + pages for footer content
+  if (ftr) {
+    const preFooterH = ftr.offsetTop;
+    const footerH = ftr.scrollHeight;
+    const prePages = Math.max(1, Math.ceil(preFooterH / usable));
+    const ftrPages = Math.max(1, Math.ceil(footerH / usable));
+    const total = prePages + ftrPages;
+    mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
+  } else {
+    const total = Math.max(1, Math.ceil(docEl.scrollHeight / usable));
+    mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
+  }
 }
 
 function clearPageNumbers() {
