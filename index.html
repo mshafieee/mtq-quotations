@@ -297,7 +297,7 @@ table.qt td:last-child{border-left:none;}
   .topnav, .sidebar, .catalog-toggle, .doc-toolbar,
   .btn, .add-btn2, .no-print, .vat-lbl { display:none !important; }
   .workspace{ display:block !important; padding:0; max-width:100%; }
-  .doc{ box-shadow:none; border:none; border-radius:0; overflow:visible !important; padding-bottom:1.8cm !important; }
+  .doc{ box-shadow:none; border:none; border-radius:0; overflow:visible !important; padding-bottom:3cm !important; }
 
   /* Header: light stays light – logo shows on white */
   .doc-hdr{ background:white !important; border-bottom:2px solid var(--orange) !important; padding:.6rem 1rem; }
@@ -325,12 +325,14 @@ table.qt td:last-child{border-left:none;}
   .totals-section{
     padding:.5rem 0 !important; background:white !important;
     page-break-inside:avoid;
+    page-break-before:auto;
   }
   .totals-card{ border:1px solid var(--border) !important; }
   .tot-r.grand-row{ background:var(--primary) !important; color:white !important; }
 
   /* Footer: textareas expand, no borders */
-  .doc-ftr{ background:white !important; border-top:1px solid var(--border) !important; padding:.5rem 0 !important; page-break-inside:avoid; }
+  .doc-ftr{ background:white !important; border-top:1px solid var(--border) !important; padding:.5rem 0 !important; page-break-inside:avoid; margin-bottom:1cm !important; }
+  .keep-together{ page-break-inside:avoid; }
   .notes-area textarea{
     overflow:visible !important; height:auto !important; max-height:none !important;
     min-height:0 !important; resize:none !important;
@@ -349,7 +351,7 @@ table.qt td:last-child{border-left:none;}
 
 
 
-  @page{ margin:1cm; margin-bottom:1.8cm; size:A4 portrait; }
+  @page{ margin:1cm; margin-bottom:2.2cm; size:A4 portrait; }
 
   /* ── Orange fixed footer: position:fixed repeats on every printed page ── */
   .print-footer{
@@ -492,6 +494,7 @@ table.qt td:last-child{border-left:none;}
     </div>
 
     <!-- ★ TOTALS – directly below table ★ -->
+    <div class="keep-together">
     <div class="totals-section">
       <div class="totals-card">
         <div class="tot-r">
@@ -538,6 +541,7 @@ table.qt td:last-child{border-left:none;}
       </div>
     </div>
 
+    </div><!-- /keep-together -->
   </main>
 </div>
 
