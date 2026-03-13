@@ -471,26 +471,28 @@ table.qt td:last-child{border-left:none;}
       <div class="totals-card">
         <div class="tot-r">
           <span class="tl">المجموع / Subtotal</span>
-          <span class="tv" id="subTotal">0.00 ر.س</span>
+          <span class="tv" id="subTotal">٠ ر.س</span>
         </div>
         <div class="discount-row">
-          <span class="tl">خصم / Discount %</span>
-          <span class="tv">
-            <input type="number" id="discountPercent" min="0" max="100" step="1" value="0" onchange="recalc()" oninput="recalc()">
+          <span class="tl">خصم / Discount % <span id="discountLabel" style="color:var(--red);font-size:.72rem;"></span></span>
+          <span class="tv" style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="discountPercent" min="0" max="100" step="1" value="0"
+              onchange="syncDiscount(this.value)" oninput="syncDiscount(this.value)"
+              style="width:52px;border:1.5px solid var(--border);border-radius:6px;padding:.2rem;font-family:'Cairo',sans-serif;font-size:.82rem;text-align:center;direction:ltr;">
             <span style="font-size:.75rem;color:var(--muted)">%</span>
           </span>
         </div>
         <div class="tot-r">
           <span class="tl">بعد الخصم / After Discount</span>
-          <span class="tv" id="afterDiscount">0.00 ر.س</span>
+          <span class="tv" id="afterDiscount">٠ ر.س</span>
         </div>
         <div class="tot-r" id="vatRow" style="display:none">
           <span class="tl">ضريبة 15% / VAT</span>
-          <span class="tv" id="vatAmt">0.00 ر.س</span>
+          <span class="tv" id="vatAmt">٠ ر.س</span>
         </div>
         <div class="tot-r grand-row">
           <span class="tl">الإجمالي الكلي / Grand Total</span>
-          <span class="tv" id="grandTotal">0.00 ر.س</span>
+          <span class="tv" id="grandTotal">٠ ر.س</span>
         </div>
       </div>
     </div>
@@ -683,7 +685,7 @@ function renderCat(){
       <div class="cat-info">
         <span class="cat-code">${p.code}</span>
         <div class="cat-name">${dn}</div>
-        <div class="cat-price">${p.price>0?p.price.toLocaleString('en-US')+' ر.س':'—'}</div>
+        <div class="cat-price">${p.price>0?(()=>{const r=Math.round(p.price*100)/100;const dec=(r%1)!==0;return r.toLocaleString('ar-SA',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';})():'—'}</div>
       </div>
       <button class="add-btn2 ${inQ?'done':''}">${inQ?'✓':'+'}</button>
     </div>`;
@@ -706,8 +708,15 @@ function addItem(code){
 function removeItem(i){items.splice(i,1);renderQuote();renderCat();}
 function updatePrice(i,v){items[i].unitPrice=Math.max(0,parseFloat(v)||0);updateRowTotal(i);recalc();}
 function updateQty(i,v){items[i].qty=Math.max(0.01,parseFloat(v)||1);updateRowTotal(i);recalc();}
-function formatCurrency(v) {
-  return v.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ر.س';
+function updateRowTotal(i){
+  const rows=document.querySelectorAll('#quoteBody tr');
+  const tds=rows[i]?.querySelectorAll('td');
+  if(tds&&tds[6]){
+    const t=items[i].unitPrice*items[i].qty;
+    const r=Math.round(t*100)/100;
+    const dec=(r%1)!==0;
+    tds[6].textContent=r.toLocaleString('ar-SA',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';
+  }
 }
 function clearAll(){if(!items.length)return;items=[];renderQuote();renderCat();}
 
@@ -731,13 +740,17 @@ function renderQuote(){
         onchange="updatePrice(${i},this.value)" oninput="updatePrice(${i},this.value)" title="انقر لتعديل السعر"></td>
       <td><input class="editable qty-f" type="number" min="1" step="1" value="${it.qty}"
         onchange="updateQty(${i},this.value)" oninput="updateQty(${i},this.value)"></td>
-      <td class="row-total">${formatCurrency(t)}</td>
+      <td class="row-total">${(()=>{const r=Math.round(t*100)/100;const dec=(r%1)!==0;return r.toLocaleString('ar-SA',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2});})()}  ر.س</td>
       <td class="no-print"><button class="btn btn-del" onclick="removeItem(${i})">✕</button></td>
     </tr>`;
   }).join('');
   recalc();
 }
 
+function syncDiscount(v){
+  // keep input value as-is for editing, recalc handles display
+  recalc();
+}
 function recalc(){
   const sub=items.reduce((s,it)=>s+it.unitPrice*it.qty,0);
   const discountPercent=parseFloat(document.getElementById('discountPercent').value)||0;
@@ -746,10 +759,24 @@ function recalc(){
   const vat=document.getElementById('vatToggle').checked;
   const vatAmt=vat?afterDiscount*0.15:0;
   const grand=afterDiscount+vatAmt;
-  document.getElementById('subTotal').textContent=formatCurrency(sub);
-  document.getElementById('afterDiscount').textContent=formatCurrency(afterDiscount);
-  document.getElementById('vatAmt').textContent=formatCurrency(vatAmt);
-  document.getElementById('grandTotal').textContent=formatCurrency(grand);
+  // Smart number format: Arabic numerals, drops .00 decimals
+  const fmt=v=>{
+    const rounded=Math.round(v*100)/100;
+    const hasDecimals=(rounded%1)!==0;
+    return rounded.toLocaleString('ar-SA',{
+      minimumFractionDigits: hasDecimals ? (((rounded*10)%1!==0)?2:1) : 0,
+      maximumFractionDigits: 2
+    })+' ر.س';
+  };
+  document.getElementById('subTotal').textContent=fmt(sub);
+  document.getElementById('afterDiscount').textContent=fmt(afterDiscount);
+  // Show discount amount next to label
+  const discLabelEl=document.getElementById('discountLabel');
+  if(discLabelEl){
+    discLabelEl.textContent=discountAmount>0?'('+fmt(discountAmount)+')':'';
+  }
+  document.getElementById('vatAmt').textContent=fmt(vatAmt);
+  document.getElementById('grandTotal').textContent=fmt(grand);
   document.getElementById('vatRow').style.display=vat?'flex':'none';
 }
 
