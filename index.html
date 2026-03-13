@@ -318,6 +318,7 @@ table.qt td:last-child{border-left:none;}
   table.qt thead tr{ background:var(--primary) !important; color:white !important; }
   table.qt th, table.qt td{ padding:.28rem .45rem !important; }
   table.qt tbody tr{ page-break-inside:avoid; }
+  table.qt tbody tr:last-child td{ padding-bottom:.6rem !important; }
   table.qt tbody tr:nth-child(even){ background:#fafafa !important; }
   .tbl-wrap{ overflow:visible !important; }
   .td-pic img, .td-pic-ph{ width:52px !important; height:52px !important; }
@@ -325,7 +326,7 @@ table.qt td:last-child{border-left:none;}
 
   /* Totals */
   .totals-section{
-    padding:.5rem 0 !important; background:white !important;
+    padding:.5rem 0 .6rem 0 !important; background:white !important;
     page-break-inside:avoid;
   }
   .totals-card{ border:1px solid var(--border) !important; }
@@ -334,10 +335,10 @@ table.qt td:last-child{border-left:none;}
   /* Footer: notes/terms — no forced break, let browser flow naturally */
   .doc-ftr{
     background:white !important; border-top:1px solid var(--border) !important;
-    padding:.5rem 0 !important;
+    padding:.5rem 0 .6rem 0 !important;
   }
   /* Each notes block avoids splitting internally */
-  .notes-area{ page-break-inside:avoid; }
+  .notes-area{ page-break-inside:avoid; margin-bottom:.3rem !important; }
   /* Hide textareas in print, show mirror divs instead */
   .notes-area textarea{ display:none !important; }
   .print-mirror{
@@ -360,7 +361,7 @@ table.qt td:last-child{border-left:none;}
 
 
 
-  @page{ margin:1cm; margin-bottom:2cm; size:A4 portrait; }
+  @page{ margin:1cm; margin-bottom:1.7cm; size:A4 portrait; }
 
   /* ── Orange fixed footer: position:fixed repeats on every printed page ── */
   .print-footer{
