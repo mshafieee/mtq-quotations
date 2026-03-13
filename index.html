@@ -347,30 +347,62 @@ table.qt td:last-child{border-left:none;}
   .meta-block input{ border:none !important; background:transparent !important; color:var(--text) !important; }
   .discount-row input{ border:none !important; background:transparent !important; }
 
-  @page{ margin:1cm; margin-bottom:1.8cm; size:A4 portrait; }
 
-  /* Print footer: fixed at bottom of every page */
+
+  /* ── FIXED orange bar: appears at bottom of every printed page ── */
   .print-footer{
     display:flex !important;
-    position:absolute;
-    left:0; right:0;
+    position:fixed;
+    bottom:0; left:0; right:0;
     height:1.4cm;
     background:#e55a00 !important;
     -webkit-print-color-adjust:exact !important;
     print-color-adjust:exact !important;
-    color:white !important;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 1cm;
-    font-family:'Cairo',sans-serif;
-    font-size:8pt;
-    font-weight:600;
     z-index:9999;
   }
-  .print-footer .pf-left  { text-align:right; flex:1; }
-  .print-footer .pf-mid   { text-align:center; flex:1; }
-  .print-footer .pf-right { text-align:left; direction:ltr; flex:1; }
 
+  /* ── @page margin boxes overlay the orange bar with correct page numbers ── */
+  @page{
+    margin:1cm;
+    margin-bottom:1.8cm;
+    size:A4 portrait;
+
+    @bottom-left{
+      content:"شركة متقنون تك للتجارة";
+      font-family:'Cairo',sans-serif;
+      font-size:8pt;
+      font-weight:600;
+      color:white;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+      vertical-align:middle;
+      padding:0 0.2cm;
+    }
+    @bottom-center{
+      content:"صفحة " counter(page) " من " counter(pages);
+      font-family:'Cairo',sans-serif;
+      font-size:8pt;
+      font-weight:600;
+      color:white;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+      vertical-align:middle;
+      text-align:center;
+    }
+    @bottom-right{
+      content:"+966 50 248 0924";
+      font-family:'Cairo',sans-serif;
+      font-size:8pt;
+      font-weight:600;
+      color:white;
+      direction:ltr;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+      vertical-align:middle;
+      padding:0 0.2cm;
+      text-align:right;
+    }
+  }
 }
 </style>
 </head>
@@ -562,8 +594,8 @@ table.qt td:last-child{border-left:none;}
 
 <div id="toast"></div>
 
-<!-- Print footers injected dynamically by JS before printing -->
-<div id="print-footers-container"></div>
+<!-- Print footer: fixed orange bar (text rendered by @page margin boxes) -->
+<div class="print-footer" id="print-footer"></div>
 
 <script>
 let products=[],filtered=[],items=[],imgMap={},rawRows=[];
@@ -812,68 +844,7 @@ function doPrint(){if(!items.length){toast('⚠️ أضف منتجات أولا�
 let tt;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
 
-// ── Inject one footer per page before printing ─────────────────────────────
-// position:fixed counter(page) is unreliable in browsers.
-// Instead: measure content height, calculate pages, inject absolutely-positioned
-// footer divs — one per page — each showing correct "page X of Y".
-
-function buildPrintFooters() {
-  const container = document.getElementById('print-footers-container');
-  container.innerHTML = '';
-
-  // A4 page in pixels at 96 dpi
-  const MM_TO_PX   = 3.7795275591;
-  const A4_H_MM    = 297;
-  const TOP_MM     = 10;   // @page margin-top  1cm
-  const BOT_MM     = 18;   // @page margin-bottom 1.8cm
-  const FTR_H_MM   = 14;   // footer height 1.4cm
-
-  const A4_PX      = A4_H_MM  * MM_TO_PX;   // 1122.5px full page
-  const TOP_PX     = TOP_MM   * MM_TO_PX;   //   37.8px
-  const BOT_PX     = BOT_MM   * MM_TO_PX;   //   68.0px
-  const FTR_H_PX   = FTR_H_MM * MM_TO_PX;  //   52.9px
-
-  // Usable content height per page (between margins, above footer)
-  const usable = A4_PX - TOP_PX - BOT_PX;   // ~1016.7px
-
-  // Get the document element height (under print CSS — sidebar hidden)
-  const docEl = document.querySelector('.doc');
-  if (!docEl) return;
-  const contentH = docEl.scrollHeight;
-
-  const totalPages = Math.max(1, Math.ceil(contentH / usable));
-
-  // Inject footer container with relative positioning wrapper
-  // We wrap in a div that spans the full document height
-  const wrapper = document.createElement('div');
-  wrapper.id = 'pf-wrapper';
-  wrapper.style.cssText = 'position:absolute;top:0;left:0;right:0;pointer-events:none;';
-
-  for (let p = 1; p <= totalPages; p++) {
-    // Bottom of page p = p * A4_PX - BOT_PX
-    // Footer sits just above bottom margin
-    const topPos = (p * A4_PX) - BOT_PX - TOP_PX + (TOP_PX - FTR_H_PX);
-
-    const div = document.createElement('div');
-    div.className = 'print-footer';
-    div.style.top = topPos + 'px';
-    div.innerHTML =
-      '<div class="pf-left" style="text-align:right;flex:1">شركة متقنون تك للتجارة</div>' +
-      '<div class="pf-mid" style="text-align:center;flex:1">صفحة ' + p + ' من ' + totalPages + '</div>' +
-      '<div class="pf-right" style="text-align:left;direction:ltr;flex:1">+966 50 248 0924</div>';
-    wrapper.appendChild(div);
-  }
-
-  container.appendChild(wrapper);
-}
-
-function removePrintFooters() {
-  const w = document.getElementById('pf-wrapper');
-  if (w) w.remove();
-}
-
-window.addEventListener('beforeprint', buildPrintFooters);
-window.addEventListener('afterprint',  removePrintFooters);
+// Print footer handled by CSS @page margin boxes + position:fixed orange bar
 
 // Mobile catalog toggle
 function toggleCatalog() {
