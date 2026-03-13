@@ -295,8 +295,6 @@ table.qt td:last-child{border-left:none;}
 ═══════════════════════════════════════════════ */
 @media print {
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-  /* Force A4 via @page — let browser handle content width within margins */
-  html{ }
   body{ background:white !important; font-size:10pt; position:relative; }
   .topnav, .sidebar, .catalog-toggle, .doc-toolbar,
   .btn, .add-btn2, .no-print, .vat-lbl, .overlay, #toast { display:none !important; }
@@ -330,16 +328,16 @@ table.qt td:last-child{border-left:none;}
     padding:.5rem 0 !important; background:white !important;
     page-break-inside:avoid;
   }
-  .totals-section.break-before{ page-break-before:always; }
   .totals-card{ border:1px solid var(--border) !important; }
   .tot-r.grand-row{ background:var(--primary) !important; color:white !important; }
 
-  /* Footer: notes/terms always start on a fresh page to avoid footer overlap */
+  /* Footer: notes/terms — no forced break, let browser flow naturally */
   .doc-ftr{
-    background:white !important; border-top:none !important;
+    background:white !important; border-top:1px solid var(--border) !important;
     padding:.5rem 0 !important;
-    page-break-before:always;
   }
+  /* Each notes block avoids splitting internally */
+  .notes-area{ page-break-inside:avoid; }
   /* Hide textareas in print, show mirror divs instead */
   .notes-area textarea{ display:none !important; }
   .print-mirror{
@@ -806,7 +804,6 @@ function renderQuote(){
     </tr>`;
   }).join('');
   recalc();
-  smartBreakTotals();
 }
 
 function syncDiscount(v){
@@ -842,45 +839,9 @@ function recalc(){
   document.getElementById('vatRow').style.display=vat?'flex':'none';
 }
 
-// ── Smart page-break for totals section ──────────────────────────────────
-// After each render, check if the totals card would fit in the remaining
-// space on the current page. If not, add a class that triggers page-break-before.
-// Uses print-equivalent A4 content width (210mm - 2×1cm margin = 190mm)
-// and height (297mm - 1cm top - 1.7cm bottom = 270mm) at 96dpi.
-function smartBreakTotals() {
-  const totals = document.querySelector('.totals-section');
-  const tblWrap = document.querySelector('.tbl-wrap');
-  if (!totals || !tblWrap) return;
-
-  // Remove previous break class
-  totals.classList.remove('break-before');
-
-  const MM = 3.7795275591;
-  const pageH = 270 * MM; // usable height per page
-
-  // Measure: where does the table end (= where totals start)?
-  // Use the bottom of the table wrapper relative to the doc
-  const doc = document.querySelector('.doc');
-  if (!doc) return;
-  const docTop = doc.getBoundingClientRect().top;
-  const tblBottom = tblWrap.getBoundingClientRect().bottom - docTop;
-  const totalsH = totals.scrollHeight;
-
-  // Position on current page
-  const posOnPage = tblBottom % pageH;
-  const remaining = pageH - posOnPage;
-
-  // If totals won't fit in remaining space, push to next page
-  if (totalsH > remaining) {
-    totals.classList.add('break-before');
-  }
-}
-
 function doPrint(){
   if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}
-  // Sync mirror divs with textarea values right before printing
   syncPrintMirrors();
-  smartBreakTotals(); // re-check in case items changed since last render
   window.print();
 }
 
@@ -917,45 +878,12 @@ function buildPageNumbers() {
   const mid = document.getElementById('pf-page-info');
   if (!mid) return;
   const docEl = document.querySelector('.doc');
-  const ftr = document.querySelector('.doc-ftr');
-  const totals = document.querySelector('.totals-section');
   if (!docEl) return;
 
   const MM = 3.7795275591;
-  const usable = 270 * MM; // (297-10-17)mm per page
-
-  // Count forced page breaks:
-  // - .totals-section.break-before = forced break before totals
-  // - .doc-ftr always has page-break-before:always
-  // Strategy: count pages for each section between forced breaks
-
-  if (ftr) {
-    const tblEnd = totals ? totals.offsetTop : ftr.offsetTop;
-    const totalsH = totals ? totals.scrollHeight : 0;
-    const hasTotalsBreak = totals && totals.classList.contains('break-before');
-    const footerH = ftr.scrollHeight;
-
-    let total = 0;
-
-    if (hasTotalsBreak) {
-      // 3 sections: table | totals | notes
-      const tblPages = Math.max(1, Math.ceil(tblEnd / usable));
-      const totPages = Math.max(1, Math.ceil(totalsH / usable));
-      const ftrPages = Math.max(1, Math.ceil(footerH / usable));
-      total = tblPages + totPages + ftrPages;
-    } else {
-      // 2 sections: table+totals | notes
-      const preFooterH = ftr.offsetTop;
-      const prePages = Math.max(1, Math.ceil(preFooterH / usable));
-      const ftrPages = Math.max(1, Math.ceil(footerH / usable));
-      total = prePages + ftrPages;
-    }
-
-    mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
-  } else {
-    const total = Math.max(1, Math.ceil(docEl.scrollHeight / usable));
-    mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
-  }
+  const usable = 270 * MM; // (297mm - 1cm top - 1.7cm bottom)
+  const total = Math.max(1, Math.ceil(docEl.scrollHeight / usable));
+  mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
 }
 
 function clearPageNumbers() {
