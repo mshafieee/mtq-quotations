@@ -471,7 +471,7 @@ table.qt td:last-child{border-left:none;}
       <div class="totals-card">
         <div class="tot-r">
           <span class="tl">المجموع / Subtotal</span>
-          <span class="tv" id="subTotal">٠ ر.س</span>
+          <span class="tv" id="subTotal">0 ر.س</span>
         </div>
         <div class="discount-row">
           <span class="tl">خصم / Discount % <span id="discountLabel" style="color:var(--red);font-size:.72rem;"></span></span>
@@ -484,15 +484,15 @@ table.qt td:last-child{border-left:none;}
         </div>
         <div class="tot-r">
           <span class="tl">بعد الخصم / After Discount</span>
-          <span class="tv" id="afterDiscount">٠ ر.س</span>
+          <span class="tv" id="afterDiscount">0 ر.س</span>
         </div>
         <div class="tot-r" id="vatRow" style="display:none">
           <span class="tl">ضريبة 15% / VAT</span>
-          <span class="tv" id="vatAmt">٠ ر.س</span>
+          <span class="tv" id="vatAmt">0 ر.س</span>
         </div>
         <div class="tot-r grand-row">
           <span class="tl">الإجمالي الكلي / Grand Total</span>
-          <span class="tv" id="grandTotal">٠ ر.س</span>
+          <span class="tv" id="grandTotal">0 ر.س</span>
         </div>
       </div>
     </div>
@@ -685,7 +685,7 @@ function renderCat(){
       <div class="cat-info">
         <span class="cat-code">${p.code}</span>
         <div class="cat-name">${dn}</div>
-        <div class="cat-price">${p.price>0?(()=>{const r=Math.round(p.price*100)/100;const dec=(r%1)!==0;return r.toLocaleString('ar-SA',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';})():'—'}</div>
+        <div class="cat-price">${p.price>0?(()=>{const r=Math.round(p.price*100)/100;const dec=(r%1)!==0;return r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';})():'—'}</div>
       </div>
       <button class="add-btn2 ${inQ?'done':''}">${inQ?'✓':'+'}</button>
     </div>`;
@@ -715,7 +715,7 @@ function updateRowTotal(i){
     const t=items[i].unitPrice*items[i].qty;
     const r=Math.round(t*100)/100;
     const dec=(r%1)!==0;
-    tds[6].textContent=r.toLocaleString('ar-SA',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';
+    tds[6].textContent=r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';
   }
 }
 function clearAll(){if(!items.length)return;items=[];renderQuote();renderCat();}
@@ -740,7 +740,7 @@ function renderQuote(){
         onchange="updatePrice(${i},this.value)" oninput="updatePrice(${i},this.value)" title="انقر لتعديل السعر"></td>
       <td><input class="editable qty-f" type="number" min="1" step="1" value="${it.qty}"
         onchange="updateQty(${i},this.value)" oninput="updateQty(${i},this.value)"></td>
-      <td class="row-total">${(()=>{const r=Math.round(t*100)/100;const dec=(r%1)!==0;return r.toLocaleString('ar-SA',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2});})()}  ر.س</td>
+      <td class="row-total">${(()=>{const r=Math.round(t*100)/100;const dec=(r%1)!==0;return r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2});})()}  ر.س</td>
       <td class="no-print"><button class="btn btn-del" onclick="removeItem(${i})">✕</button></td>
     </tr>`;
   }).join('');
@@ -763,7 +763,7 @@ function recalc(){
   const fmt=v=>{
     const rounded=Math.round(v*100)/100;
     const hasDecimals=(rounded%1)!==0;
-    return rounded.toLocaleString('ar-SA',{
+    return rounded.toLocaleString('en-US',{
       minimumFractionDigits: hasDecimals ? (((rounded*10)%1!==0)?2:1) : 0,
       maximumFractionDigits: 2
     })+' ر.س';
