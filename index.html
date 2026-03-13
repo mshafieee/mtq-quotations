@@ -745,6 +745,12 @@ async function loadSheet(){
     code:r[codeCol]?.toString().trim()||'',
     desc:r[descCol]?.toString().trim()||'',
     price:priceCol>=0?(parseFloat(r[priceCol]?.toString().replace(/[,،\s]/g,'').replace(/[^\d.]/g,''))||0):0,
+    installCost: (()=>{
+      // Installation cost = next numeric column after price (column D = سعر التركيب)
+      const ic = priceCol >= 0 ? priceCol + 1 : -1;
+      if(ic < 0 || ic >= (r.length||0)) return 0;
+      return parseFloat(r[ic]?.toString().replace(/[,،\s]/g,'').replace(/[^\d.]/g,'')) || 0;
+    })(),
   })).filter(p=>p.code.length>0);
   filtered=[...products];
 }
@@ -784,16 +790,29 @@ function filterCat(){
 }
 
 function addItem(code){
+  if(code==='INS')return; // INS is auto-managed
   if(items.some(q=>q.code===code)){toast('⚠️ المنتج موجود في العرض');return;}
   const p=products.find(pr=>pr.code===code);
   if(!p)return;
-  items.push({...p,qty:1,unitPrice:p.price});
+  items.push({...p,qty:1,unitPrice:p.price,installCost:p.installCost||0});
+  syncInsRow();
   renderQuote();renderCat();
   toast('✅ تمت إضافة '+p.code);
 }
-function removeItem(i){items.splice(i,1);renderQuote();renderCat();}
+function removeItem(i){
+  if(items[i]?.code==='INS')return; // can't remove auto INS row
+  items.splice(i,1);
+  syncInsRow();
+  renderQuote();renderCat();
+}
 function updatePrice(i,v){items[i].unitPrice=Math.max(0,parseFloat(v)||0);updateRowTotal(i);recalc();}
-function updateQty(i,v){items[i].qty=Math.max(0.01,parseFloat(v)||1);updateRowTotal(i);recalc();}
+function updateQty(i,v){
+  items[i].qty=Math.max(0.01,parseFloat(v)||1);
+  updateRowTotal(i);
+  // If a non-INS item qty changed, recalc install total
+  if(items[i].code!=='INS'){ syncInsRow(); renderQuote(); }
+  recalc();
+}
 function updateRowTotal(i){
   const rows=document.querySelectorAll('#quoteBody tr');
   const tds=rows[i]?.querySelectorAll('td');
@@ -804,7 +823,48 @@ function updateRowTotal(i){
     tds[6].textContent=r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';
   }
 }
+// Allow user to override the auto-calculated installation price
+function updateInsPrice(i,v){
+  items[i].unitPrice=Math.max(0,parseFloat(v)||0);
+  items[i]._manualPrice=true; // flag: user overrode the auto price
+  updateRowTotal(i);recalc();
+}
 function clearAll(){if(!items.length)return;items=[];renderQuote();renderCat();}
+
+// ── Auto-managed INS (Installation) row ─────────────────────────────────
+// Calculates total installation cost from all non-INS items:
+//   sum of (item.installCost × item.qty) for each item
+// Always keeps INS as the last row. Removes it if total is 0.
+function syncInsRow(){
+  // Calculate total install cost from non-INS items
+  const totalInstall = items
+    .filter(it => it.code !== 'INS')
+    .reduce((sum, it) => sum + (it.installCost || 0) * it.qty, 0);
+
+  // Check if user manually set the INS price
+  const existing = items.find(it => it.code === 'INS');
+  const wasManual = existing?._manualPrice;
+  const manualPrice = existing?.unitPrice;
+
+  // Remove existing INS row
+  const insIdx = items.findIndex(it => it.code === 'INS');
+  if(insIdx >= 0) items.splice(insIdx, 1);
+
+  // Add INS row at the end if there's any install cost OR if user had manual price
+  if((totalInstall > 0 || wasManual) && items.length > 0){
+    const finalPrice = wasManual ? manualPrice : totalInstall;
+    items.push({
+      code: 'INS',
+      desc: 'أعمال التركيب والبرمجة | Installation & Programming',
+      price: finalPrice,
+      unitPrice: finalPrice,
+      qty: 1,
+      installCost: 0,
+      _isAuto: true,
+      _manualPrice: wasManual || false,
+    });
+  }
+}
 
 function renderQuote(){
   const tb=document.getElementById('quoteBody');
@@ -814,20 +874,30 @@ function renderQuote(){
     recalc();return;
   }
   tb.innerHTML=items.map((it,i)=>{
+    const isIns = it.code === 'INS';
     const img=getImg(it.code);
-    const th=img?`<img src="${img}" onerror="this.style.display='none'">`:`<div class="td-pic-ph">📦</div>`;
+    const th=isIns?`<div class="td-pic-ph" style="background:var(--orangeBg,#fff8f4);border-color:var(--orange)">🔧</div>`
+      :img?`<img src="${img}" onerror="this.style.display='none'">`:`<div class="td-pic-ph">📦</div>`;
     const t=it.unitPrice*it.qty;
-    return `<tr>
+    const rowStyle = isIns ? 'background:#fff8f4 !important;border-top:2px solid var(--orange)' : '';
+    return `<tr style="${rowStyle}">
       <td style="font-weight:700;color:var(--muted);font-size:.78rem">${i+1}</td>
       <td class="td-pic">${th}</td>
-      <td><span class="code-tag">${it.code}</span></td>
+      <td><span class="code-tag" ${isIns?'style="background:#ffe8d6;border-color:var(--orange);color:var(--orange)"':''}>${it.code}</span></td>
       <td class="td-desc"><div class="desc-text">${it.desc}</div></td>
-      <td><input class="editable price-f" type="number" min="0" step="0.01" value="${it.unitPrice}"
-        onchange="updatePrice(${i},this.value)" oninput="updatePrice(${i},this.value)" title="انقر لتعديل السعر"></td>
-      <td><input class="editable qty-f" type="number" min="1" step="1" value="${it.qty}"
-        onchange="updateQty(${i},this.value)" oninput="updateQty(${i},this.value)"></td>
+      <td>${isIns
+        ?`<input class="editable price-f" type="number" min="0" step="0.01" value="${it.unitPrice}"
+          onchange="updateInsPrice(${i},this.value)" oninput="updateInsPrice(${i},this.value)" title="سعر التركيب — يتم حسابه تلقائياً">`
+        :`<input class="editable price-f" type="number" min="0" step="0.01" value="${it.unitPrice}"
+          onchange="updatePrice(${i},this.value)" oninput="updatePrice(${i},this.value)" title="انقر لتعديل السعر">`
+      }</td>
+      <td>${isIns
+        ?`<span style="font-weight:700;color:var(--muted);font-size:.81rem;display:block;text-align:center">1</span>`
+        :`<input class="editable qty-f" type="number" min="1" step="1" value="${it.qty}"
+          onchange="updateQty(${i},this.value)" oninput="updateQty(${i},this.value)">`
+      }</td>
       <td class="row-total">${(()=>{const r=Math.round(t*100)/100;const dec=(r%1)!==0;return r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2});})()}  ر.س</td>
-      <td class="no-print"><button class="btn btn-del" onclick="removeItem(${i})">✕</button></td>
+      <td class="no-print">${isIns?'<span style="font-size:.65rem;color:var(--orange);font-weight:700">تلقائي</span>':`<button class="btn btn-del" onclick="removeItem(${i})">✕</button>`}</td>
     </tr>`;
   }).join('');
   recalc();
@@ -918,7 +988,7 @@ function getQuoteState() {
     clientCo: document.getElementById('clientCo').value,
     project: document.getElementById('project').value,
     salesRep: document.getElementById('salesRep').value,
-    items: items.map(it => ({ code: it.code, desc: it.desc, price: it.price, unitPrice: it.unitPrice, qty: it.qty })),
+    items: items.map(it => ({ code: it.code, desc: it.desc, price: it.price, unitPrice: it.unitPrice, qty: it.qty, installCost: it.installCost||0, _isAuto: it._isAuto||false, _manualPrice: it._manualPrice||false })),
     discountPercent: parseFloat(document.getElementById('discountPercent').value) || 0,
     vatEnabled: document.getElementById('vatToggle').checked,
     techNotes: document.getElementById('techNotes').value,
@@ -947,6 +1017,9 @@ function loadQuoteState(state) {
     price: it.price || it.unitPrice || 0,
     unitPrice: it.unitPrice || it.price || 0,
     qty: it.qty || 1,
+    installCost: it.installCost || 0,
+    _isAuto: it._isAuto || it.code === 'INS',
+    _manualPrice: it._manualPrice || false,
   }));
   renderQuote();
   renderCat();
