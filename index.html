@@ -295,11 +295,13 @@ table.qt td:last-child{border-left:none;}
 ═══════════════════════════════════════════════ */
 @media print {
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-  body{ background:white !important; font-size:10pt; position:relative; }
+  /* Force A4 dimensions — helps mobile browsers that ignore @page size */
+  html{ width:210mm !important; }
+  body{ background:white !important; font-size:10pt; position:relative; width:210mm !important; margin:0 auto !important; }
   .topnav, .sidebar, .catalog-toggle, .doc-toolbar,
   .btn, .add-btn2, .no-print, .vat-lbl, .overlay, #toast { display:none !important; }
-  .workspace{ display:block !important; padding:0; max-width:100%; }
-  .doc{ box-shadow:none; border:none; border-radius:0; overflow:visible !important; }
+  .workspace{ display:block !important; padding:0; max-width:210mm !important; width:210mm !important; }
+  .doc{ box-shadow:none; border:none; border-radius:0; overflow:visible !important; width:100% !important; }
 
   /* Header: light stays light – logo shows on white */
   .doc-hdr{ background:white !important; border-bottom:2px solid var(--orange) !important; padding:.6rem 1rem; }
@@ -327,8 +329,8 @@ table.qt td:last-child{border-left:none;}
   .totals-section{
     padding:.5rem 0 !important; background:white !important;
     page-break-inside:avoid;
-    page-break-before:auto;
   }
+  .totals-section.break-before{ page-break-before:always; }
   .totals-card{ border:1px solid var(--border) !important; }
   .tot-r.grand-row{ background:var(--primary) !important; color:white !important; }
 
@@ -804,6 +806,7 @@ function renderQuote(){
     </tr>`;
   }).join('');
   recalc();
+  smartBreakTotals();
 }
 
 function syncDiscount(v){
@@ -839,10 +842,45 @@ function recalc(){
   document.getElementById('vatRow').style.display=vat?'flex':'none';
 }
 
+// ── Smart page-break for totals section ──────────────────────────────────
+// After each render, check if the totals card would fit in the remaining
+// space on the current page. If not, add a class that triggers page-break-before.
+// Uses print-equivalent A4 content width (210mm - 2×1cm margin = 190mm)
+// and height (297mm - 1cm top - 1.7cm bottom = 270mm) at 96dpi.
+function smartBreakTotals() {
+  const totals = document.querySelector('.totals-section');
+  const tblWrap = document.querySelector('.tbl-wrap');
+  if (!totals || !tblWrap) return;
+
+  // Remove previous break class
+  totals.classList.remove('break-before');
+
+  const MM = 3.7795275591;
+  const pageH = 270 * MM; // usable height per page
+
+  // Measure: where does the table end (= where totals start)?
+  // Use the bottom of the table wrapper relative to the doc
+  const doc = document.querySelector('.doc');
+  if (!doc) return;
+  const docTop = doc.getBoundingClientRect().top;
+  const tblBottom = tblWrap.getBoundingClientRect().bottom - docTop;
+  const totalsH = totals.scrollHeight;
+
+  // Position on current page
+  const posOnPage = tblBottom % pageH;
+  const remaining = pageH - posOnPage;
+
+  // If totals won't fit in remaining space, push to next page
+  if (totalsH > remaining) {
+    totals.classList.add('break-before');
+  }
+}
+
 function doPrint(){
   if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}
   // Sync mirror divs with textarea values right before printing
   syncPrintMirrors();
+  smartBreakTotals(); // re-check in case items changed since last render
   window.print();
 }
 
@@ -880,20 +918,39 @@ function buildPageNumbers() {
   if (!mid) return;
   const docEl = document.querySelector('.doc');
   const ftr = document.querySelector('.doc-ftr');
+  const totals = document.querySelector('.totals-section');
   if (!docEl) return;
 
   const MM = 3.7795275591;
   const usable = 270 * MM; // (297-10-17)mm per page
 
-  // Content before doc-ftr (header, table, totals)
-  // Since doc-ftr has page-break-before:always, it starts a new page.
-  // So we count: pages for pre-footer content + pages for footer content
+  // Count forced page breaks:
+  // - .totals-section.break-before = forced break before totals
+  // - .doc-ftr always has page-break-before:always
+  // Strategy: count pages for each section between forced breaks
+
   if (ftr) {
-    const preFooterH = ftr.offsetTop;
+    const tblEnd = totals ? totals.offsetTop : ftr.offsetTop;
+    const totalsH = totals ? totals.scrollHeight : 0;
+    const hasTotalsBreak = totals && totals.classList.contains('break-before');
     const footerH = ftr.scrollHeight;
-    const prePages = Math.max(1, Math.ceil(preFooterH / usable));
-    const ftrPages = Math.max(1, Math.ceil(footerH / usable));
-    const total = prePages + ftrPages;
+
+    let total = 0;
+
+    if (hasTotalsBreak) {
+      // 3 sections: table | totals | notes
+      const tblPages = Math.max(1, Math.ceil(tblEnd / usable));
+      const totPages = Math.max(1, Math.ceil(totalsH / usable));
+      const ftrPages = Math.max(1, Math.ceil(footerH / usable));
+      total = tblPages + totPages + ftrPages;
+    } else {
+      // 2 sections: table+totals | notes
+      const preFooterH = ftr.offsetTop;
+      const prePages = Math.max(1, Math.ceil(preFooterH / usable));
+      const ftrPages = Math.max(1, Math.ceil(footerH / usable));
+      total = prePages + ftrPages;
+    }
+
     mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
   } else {
     const total = Math.max(1, Math.ceil(docEl.scrollHeight / usable));
