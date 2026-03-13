@@ -215,6 +215,7 @@ table.qt td:last-child{border-left:none;}
 .empty-s .ei{font-size:3rem;opacity:.2;margin-bottom:.65rem;}
 .empty-s p{font-size:.85rem;}
 .loading-s{text-align:center;padding:2rem;color:var(--muted);}
+.print-footer{ display:none; }
 .spin{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto .6rem;}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -292,7 +293,7 @@ table.qt td:last-child{border-left:none;}
 ═══════════════════════════════════════════════ */
 @media print {
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-  body{ background:white !important; font-size:10pt; }
+  body{ background:white !important; font-size:10pt; counter-reset:page; }
   .topnav, .sidebar, .catalog-toggle, .doc-toolbar,
   .btn, .add-btn2, .no-print, .vat-lbl { display:none !important; }
   .workspace{ display:block !important; padding:0; max-width:100%; }
@@ -346,7 +347,30 @@ table.qt td:last-child{border-left:none;}
   .meta-block input{ border:none !important; background:transparent !important; color:var(--text) !important; }
   .discount-row input{ border:none !important; background:transparent !important; }
 
-  @page{ margin:1cm; size:A4 portrait; }
+  @page{ margin:1cm; margin-bottom:1.8cm; size:A4 portrait; }
+
+  /* Print footer: fixed at bottom of every page */
+  .print-footer{
+    display:flex !important;
+    position:fixed;
+    bottom:0; left:0; right:0;
+    height:1.4cm;
+    background:#e55a00 !important;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color:white !important;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 1cm;
+    font-family:'Cairo',sans-serif;
+    font-size:8pt;
+    font-weight:600;
+    z-index:9999;
+  }
+  .print-footer .pf-left  { text-align:right; flex:1; }
+  .print-footer .pf-mid   { text-align:center; flex:1; }
+  .print-footer .pf-right { text-align:left; direction:ltr; flex:1; }
+  .pf-pages::before { content: "صفحة " counter(page) " من " counter(pages); }
 }
 </style>
 </head>
@@ -537,6 +561,13 @@ table.qt td:last-child{border-left:none;}
 </div>
 
 <div id="toast"></div>
+
+<!-- Print footer – hidden on screen, shown on every printed page -->
+<div class="print-footer">
+  <div class="pf-left">شركة متقنون تك للتجارة</div>
+  <div class="pf-mid pf-pages"></div>
+  <div class="pf-right">+966 50 248 0924</div>
+</div>
 
 <script>
 let products=[],filtered=[],items=[],imgMap={},rawRows=[];
@@ -784,6 +815,14 @@ function doPrint(){if(!items.length){toast('⚠️ أضف منتجات أولا�
 
 let tt;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
+
+// Inject page numbers into print footer
+window.addEventListener('beforeprint', function() {
+  // CSS counters handle page numbers natively in most browsers
+  // Fallback: leave span empty, CSS @page handles it
+  const span = document.querySelector('.print-footer .page-num');
+  if (span) span.textContent = '';
+});
 
 // Mobile catalog toggle
 function toggleCatalog() {
