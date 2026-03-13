@@ -866,6 +866,46 @@ function restoreTextareas() {
   _savedTextareas = [];
 }
 
+// ── Smart page-break for notes/terms section ────────────────────────────
+// If .doc-ftr starts past the midpoint of the current page, OR if the
+// remaining space on the current page can't fit the notes content,
+// push the entire section to the next page.
+function smartBreakNotes() {
+  const ftr = document.querySelector('.doc-ftr');
+  if (!ftr) return;
+
+  // Remove any previous forced break
+  ftr.style.pageBreakBefore = '';
+
+  const MM = 3.7795275591;
+  const pageH = 270 * MM;           // usable height per page (297-10-17)mm
+  const footerBar = 0.9 * 10 * MM;  // 9mm fixed footer bar
+
+  // Where does .doc-ftr start relative to document top?
+  const ftrTop = ftr.offsetTop;
+  // How tall is the notes section?
+  const ftrH = ftr.scrollHeight;
+
+  // Which page is the notes section starting on? (0-indexed)
+  const pageIndex = Math.floor(ftrTop / pageH);
+  // How far down the current page does it start?
+  const posOnPage = ftrTop - (pageIndex * pageH);
+  // How much space remains on this page (minus footer bar clearance)?
+  const remaining = pageH - posOnPage - footerBar;
+
+  // Push to next page if:
+  // 1) Notes start past the midpoint of the current page, OR
+  // 2) Notes content is taller than the remaining space
+  if (posOnPage > pageH / 2 || ftrH > remaining) {
+    ftr.style.pageBreakBefore = 'always';
+  }
+}
+
+function clearSmartBreak() {
+  const ftr = document.querySelector('.doc-ftr');
+  if (ftr) ftr.style.pageBreakBefore = '';
+}
+
 function buildPageNumbers() {
   const mid = document.getElementById('pf-page-info');
   if (!mid) return;
@@ -888,8 +928,8 @@ function clearPageNumbers() {
   if (mid) mid.textContent = '';
 }
 
-window.addEventListener('beforeprint', () => { expandTextareas(); buildPageNumbers(); });
-window.addEventListener('afterprint',  () => { restoreTextareas(); clearPageNumbers(); });
+window.addEventListener('beforeprint', () => { expandTextareas(); smartBreakNotes(); buildPageNumbers(); });
+window.addEventListener('afterprint',  () => { restoreTextareas(); clearSmartBreak(); clearPageNumbers(); });
 
 // Mobile catalog toggle
 function toggleCatalog() {
