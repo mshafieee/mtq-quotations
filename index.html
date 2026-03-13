@@ -217,6 +217,7 @@ table.qt td:last-child{border-left:none;}
 .loading-s{text-align:center;padding:2rem;color:var(--muted);}
 .print-footer{ display:none; }
 #pf-numbers{ display:none; }
+.print-mirror{ display:none; } /* hidden on screen, shown in print */
 .spin{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto .6rem;}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -331,14 +332,22 @@ table.qt td:last-child{border-left:none;}
   .totals-card{ border:1px solid var(--border) !important; }
   .tot-r.grand-row{ background:var(--primary) !important; color:white !important; }
 
-  /* Footer: textareas expand, no borders */
-  .doc-ftr{ background:white !important; border-top:1px solid var(--border) !important; padding:.5rem 0 !important; }
-  .notes-area textarea{
-    overflow:visible !important; height:auto !important; max-height:none !important;
-    min-height:0 !important; resize:none !important;
-    border:none !important; background:transparent !important;
-    padding:0 !important; white-space:pre-wrap !important; word-break:break-word !important;
+  /* Footer: notes/terms always start on a fresh page to avoid footer overlap */
+  .doc-ftr{
+    background:white !important; border-top:none !important;
+    padding:.5rem 0 !important;
+    page-break-before:always;
+  }
+  /* Hide textareas in print, show mirror divs instead */
+  .notes-area textarea{ display:none !important; }
+  .print-mirror{
+    display:block !important;
+    white-space:pre-wrap !important;
+    word-break:break-word !important;
+    font-family:'Cairo',sans-serif !important;
     font-size:8pt !important;
+    line-height:1.65 !important;
+    direction:rtl !important;
   }
   .notes-area label{ color:var(--muted) !important; }
   .validity-inp{ border:none !important; background:transparent !important; font-size:8pt !important; }
@@ -622,6 +631,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     "◊ نطاق العرض: توريد وتركيب.";
 
   cfg.apiKey?loadAll():openSettings();
+  // Sync print mirrors after defaults are set
+  setTimeout(syncPrintMirrors, 100);
 });
 
 function openSettings(){
@@ -830,116 +841,49 @@ function recalc(){
 
 function doPrint(){
   if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}
-  // Manually run print prep — mobile browsers often skip beforeprint
-  _printPrepDone = true;
-  expandTextareas();
-  smartBreakNotes();
-  buildPageNumbers();
-  // Small delay lets the DOM reflow before print dialog opens
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      window.print();
-      // Restore after print (afterprint may not fire on mobile either)
-      setTimeout(() => {
-        _printPrepDone = false;
-        restoreTextareas();
-        clearSmartBreak();
-        clearPageNumbers();
-      }, 1000);
-    });
+  // Sync mirror divs with textarea values right before printing
+  syncPrintMirrors();
+  window.print();
+}
+
+// ── Print mirrors: hidden divs that mirror textarea content ─────────────
+// Instead of swapping textareas in/out (breaks mobile), we keep hidden
+// mirror divs always present. CSS hides textareas and shows mirrors in print.
+function syncPrintMirrors() {
+  document.querySelectorAll('.doc-ftr textarea').forEach(ta => {
+    let mirror = ta.parentNode.querySelector('.print-mirror');
+    if (!mirror) {
+      mirror = document.createElement('div');
+      mirror.className = 'print-mirror';
+      ta.parentNode.appendChild(mirror);
+    }
+    mirror.textContent = ta.value;
   });
 }
+
+// Keep mirrors in sync on every input
+document.addEventListener('input', (e) => {
+  if (e.target.tagName === 'TEXTAREA' && e.target.closest('.doc-ftr')) {
+    const mirror = e.target.parentNode.querySelector('.print-mirror');
+    if (mirror) mirror.textContent = e.target.value;
+  }
+});
+
+// Initial sync also handled in main DOMContentLoaded above
 
 let tt;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
 
 // ── Print page counter ──────────────────────────────────────────────────
-// position:fixed footer repeats on every page. We stamp the total page
-// count into the center div. Note: the same text appears on all pages
-// because position:fixed repeats identically. True per-page numbering
-// is not possible with CSS/JS alone in Chrome without absolute position hacks.
-
-// ── Print: expand textareas to show full content ────────────────────────
-// Textareas clip at their rows height in print. We swap each textarea
-// with a <div> that auto-sizes to fit all text, then restore after print.
-let _savedTextareas = [];
-
-function expandTextareas() {
-  _savedTextareas = [];
-  document.querySelectorAll('.doc-ftr textarea').forEach(ta => {
-    const div = document.createElement('div');
-    div.className = 'print-textarea-replacement';
-    div.style.cssText = 'white-space:pre-wrap;word-break:break-word;font-family:Cairo,sans-serif;font-size:8pt;line-height:1.65;direction:rtl;';
-    div.textContent = ta.value;
-    _savedTextareas.push({ ta, parent: ta.parentNode, next: ta.nextSibling });
-    ta.parentNode.replaceChild(div, ta);
-  });
-}
-
-function restoreTextareas() {
-  _savedTextareas.forEach(({ ta, parent, next }) => {
-    const div = next ? next.previousSibling : parent.lastChild;
-    if (div && div.classList.contains('print-textarea-replacement')) {
-      parent.replaceChild(ta, div);
-    }
-  });
-  _savedTextareas = [];
-}
-
-// ── Smart page-break for notes/terms section ────────────────────────────
-// If .doc-ftr starts past the midpoint of the current page, OR if the
-// remaining space on the current page can't fit the notes content,
-// push the entire section to the next page.
-function smartBreakNotes() {
-  const ftr = document.querySelector('.doc-ftr');
-  if (!ftr) return;
-
-  // Remove any previous forced break
-  ftr.style.pageBreakBefore = '';
-
-  const MM = 3.7795275591;
-  const pageH = 270 * MM;           // usable height per page (297-10-17)mm
-  const footerBar = 0.9 * 10 * MM;  // 9mm fixed footer bar
-
-  // Where does .doc-ftr start relative to document top?
-  const ftrTop = ftr.offsetTop;
-  // How tall is the notes section?
-  const ftrH = ftr.scrollHeight;
-
-  // Which page is the notes section starting on? (0-indexed)
-  const pageIndex = Math.floor(ftrTop / pageH);
-  // How far down the current page does it start?
-  const posOnPage = ftrTop - (pageIndex * pageH);
-  // How much space remains on this page (minus footer bar clearance)?
-  const remaining = pageH - posOnPage - footerBar;
-
-  // Push to next page if:
-  // 1) Notes start past the midpoint of the current page, OR
-  // 2) Notes content is taller than the remaining space
-  if (posOnPage > pageH / 2 || ftrH > remaining) {
-    ftr.style.pageBreakBefore = 'always';
-  }
-}
-
-function clearSmartBreak() {
-  const ftr = document.querySelector('.doc-ftr');
-  if (ftr) ftr.style.pageBreakBefore = '';
-}
-
 function buildPageNumbers() {
   const mid = document.getElementById('pf-page-info');
   if (!mid) return;
-  
   const docEl = document.querySelector('.doc');
   if (!docEl) return;
-  
-  // Measure content vs usable page height
-  // @page margin:1cm top, 1.7cm bottom → usable = 297-10-17 = 270mm
   const MM = 3.7795275591;
   const usable = 270 * MM;
   const docH = docEl.scrollHeight;
   const total = Math.max(1, Math.ceil(docH / usable));
-  
   mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
 }
 
@@ -948,16 +892,8 @@ function clearPageNumbers() {
   if (mid) mid.textContent = '';
 }
 
-let _printPrepDone = false;
-
-window.addEventListener('beforeprint', () => {
-  if (_printPrepDone) return; // already handled by doPrint()
-  expandTextareas(); smartBreakNotes(); buildPageNumbers();
-});
-window.addEventListener('afterprint',  () => {
-  _printPrepDone = false;
-  restoreTextareas(); clearSmartBreak(); clearPageNumbers();
-});
+window.addEventListener('beforeprint', buildPageNumbers);
+window.addEventListener('afterprint',  clearPageNumbers);
 
 // Mobile catalog toggle
 function toggleCatalog() {
