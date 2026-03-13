@@ -405,7 +405,6 @@ table.qt td:last-child{border-left:none;}
   <div class="nav-brand">نظام عروض الأسعار</div>
   <div class="nav-btns">
     <button class="btn btn-ghost" onclick="openLoadQuote()">📂 تحميل عرض</button>
-    <button class="btn btn-outline" onclick="saveQuoteToDrive()">💾 حفظ</button>
     <button class="btn btn-outline" onclick="openSettings()">⚙️ الإعدادات</button>
     <button class="btn btn-orange" onclick="doPrint()">🖨️ طباعة / PDF</button>
   </div>
@@ -561,10 +560,6 @@ table.qt td:last-child{border-left:none;}
         <label>الشروط والأحكام / Terms &amp; Conditions</label>
         <textarea id="terms" rows="5" placeholder="شروط الدفع، مدة التسليم، الضمان، سياسة الإرجاع..."></textarea>
       </div>
-      <div class="notes-area">
-        <label>صلاحية العرض / Validity</label>
-        <input class="validity-inp" id="validity" placeholder="مثال: صالح لمدة 30 يوماً من تاريخه">
-      </div>
     </div>
   </main>
 </div>
@@ -638,9 +633,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   const n=(parseInt(localStorage.getItem('qnum')||'0')+1);
   localStorage.setItem('qnum',n);
   document.getElementById('quoteNo').value='Q-'+new Date().getFullYear()+'-'+String(n).padStart(3,'0');
-
-  // Set default validity text
-  document.getElementById('validity').value = "هذا العرض صالح لمدة 10 أيام من تاريخه";
 
   // Set default notes and terms (shortened versions)
   document.getElementById('techNotes').value = 
@@ -874,12 +866,14 @@ function recalc(){
   document.getElementById('vatRow').style.display=vat?'flex':'none';
 }
 
-function doPrint(){
+async function doPrint(){
   if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}
+  // Save first, then print
+  if(cfg.appsScriptUrl){
+    await saveQuoteToDrive();
+  }
   syncPrintMirrors();
   window.print();
-  // Auto-save to Drive after printing (runs in background, non-blocking)
-  saveQuoteToDrive();
 }
 
 // ── Print mirrors: hidden divs that mirror textarea content ─────────────
@@ -929,7 +923,6 @@ function getQuoteState() {
     vatEnabled: document.getElementById('vatToggle').checked,
     techNotes: document.getElementById('techNotes').value,
     terms: document.getElementById('terms').value,
-    validity: document.getElementById('validity').value,
     savedAt: new Date().toISOString(),
   };
 }
@@ -946,7 +939,6 @@ function loadQuoteState(state) {
   document.getElementById('vatToggle').checked = state.vatEnabled !== false;
   document.getElementById('techNotes').value = state.techNotes || '';
   document.getElementById('terms').value = state.terms || '';
-  document.getElementById('validity').value = state.validity || '';
 
   // Restore items
   items = (state.items || []).map(it => ({
