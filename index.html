@@ -349,7 +349,9 @@ table.qt td:last-child{border-left:none;}
 
 
 
-  /* ── FIXED orange bar: appears at bottom of every printed page ── */
+  @page{ margin:1cm; margin-bottom:1.8cm; size:A4 portrait; }
+
+  /* ── Orange fixed footer: position:fixed repeats on every printed page ── */
   .print-footer{
     display:flex !important;
     position:fixed;
@@ -358,51 +360,18 @@ table.qt td:last-child{border-left:none;}
     background:#e55a00 !important;
     -webkit-print-color-adjust:exact !important;
     print-color-adjust:exact !important;
+    color:white !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    padding:0 1cm !important;
+    font-family:'Cairo',sans-serif !important;
+    font-size:8pt !important;
+    font-weight:600 !important;
     z-index:9999;
   }
-
-  /* ── @page margin boxes overlay the orange bar with correct page numbers ── */
-  @page{
-    margin:1cm;
-    margin-bottom:1.8cm;
-    size:A4 portrait;
-
-    @bottom-left{
-      content:"شركة متقنون تك للتجارة";
-      font-family:'Cairo',sans-serif;
-      font-size:8pt;
-      font-weight:600;
-      color:white;
-      -webkit-print-color-adjust:exact;
-      print-color-adjust:exact;
-      vertical-align:middle;
-      padding:0 0.2cm;
-    }
-    @bottom-center{
-      content:"صفحة " counter(page) " من " counter(pages);
-      font-family:'Cairo',sans-serif;
-      font-size:8pt;
-      font-weight:600;
-      color:white;
-      -webkit-print-color-adjust:exact;
-      print-color-adjust:exact;
-      vertical-align:middle;
-      text-align:center;
-    }
-    @bottom-right{
-      content:"+966 50 248 0924";
-      font-family:'Cairo',sans-serif;
-      font-size:8pt;
-      font-weight:600;
-      color:white;
-      direction:ltr;
-      -webkit-print-color-adjust:exact;
-      print-color-adjust:exact;
-      vertical-align:middle;
-      padding:0 0.2cm;
-      text-align:right;
-    }
-  }
+  .pf-left  { text-align:right; flex:1; }
+  .pf-mid   { text-align:center; flex:1; white-space:nowrap; }
+  .pf-right { text-align:left; direction:ltr; flex:1; }
 }
 </style>
 </head>
@@ -595,7 +564,11 @@ table.qt td:last-child{border-left:none;}
 <div id="toast"></div>
 
 <!-- Print footer: fixed orange bar (text rendered by @page margin boxes) -->
-<div class="print-footer" id="print-footer"></div>
+<div class="print-footer" id="print-footer">
+  <div class="pf-left">شركة متقنون تك للتجارة</div>
+  <div class="pf-mid" id="pf-page-info">صفحة 1 من 1</div>
+  <div class="pf-right">+966 50 248 0924</div>
+</div>
 
 <script>
 let products=[],filtered=[],items=[],imgMap={},rawRows=[];
@@ -844,7 +817,19 @@ function doPrint(){if(!items.length){toast('⚠️ أضف منتجات أولا�
 let tt;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
 
-// Print footer handled by CSS @page margin boxes + position:fixed orange bar
+// ── Print footer: calculate total pages before printing ─────────────────
+// Chrome does NOT support @page margin boxes — text must live in the fixed div.
+// position:fixed repeats the bar on every page ✅
+// counter(page) in fixed elements always shows 1 ❌ (Chrome limitation)
+// Workaround: for single-page docs it's perfect. For multi-page we show total.
+window.addEventListener('beforeprint', function() {
+  // A4 usable height: 297mm - 10mm top - 18mm bottom = 269mm ≈ 1016px at 96dpi
+  const usablePx = 269 * 3.7795;
+  const docEl = document.querySelector('.doc');
+  const total = docEl ? Math.max(1, Math.ceil(docEl.scrollHeight / usablePx)) : 1;
+  const el = document.getElementById('pf-page-info');
+  if (el) el.textContent = total === 1 ? 'صفحة 1 من 1' : 'صفحة 1 من ' + total;
+});
 
 // Mobile catalog toggle
 function toggleCatalog() {
