@@ -683,7 +683,7 @@ function renderCat(){
       <div class="cat-info">
         <span class="cat-code">${p.code}</span>
         <div class="cat-name">${dn}</div>
-        <div class="cat-price">${p.price>0?p.price.toLocaleString('ar-SA')+' ر.س':'—'}</div>
+        <div class="cat-price">${p.price>0?p.price.toLocaleString('en-US')+' ر.س':'—'}</div>
       </div>
       <button class="add-btn2 ${inQ?'done':''}">${inQ?'✓':'+'}</button>
     </div>`;
@@ -706,10 +706,8 @@ function addItem(code){
 function removeItem(i){items.splice(i,1);renderQuote();renderCat();}
 function updatePrice(i,v){items[i].unitPrice=Math.max(0,parseFloat(v)||0);updateRowTotal(i);recalc();}
 function updateQty(i,v){items[i].qty=Math.max(0.01,parseFloat(v)||1);updateRowTotal(i);recalc();}
-function updateRowTotal(i){
-  const rows=document.querySelectorAll('#quoteBody tr');
-  const tds=rows[i]?.querySelectorAll('td');
-  if(tds&&tds[6]){const t=items[i].unitPrice*items[i].qty;tds[6].textContent=t.toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2})+' ر.س';}
+function formatCurrency(v) {
+  return v.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ر.س';
 }
 function clearAll(){if(!items.length)return;items=[];renderQuote();renderCat();}
 
@@ -733,7 +731,7 @@ function renderQuote(){
         onchange="updatePrice(${i},this.value)" oninput="updatePrice(${i},this.value)" title="انقر لتعديل السعر"></td>
       <td><input class="editable qty-f" type="number" min="1" step="1" value="${it.qty}"
         onchange="updateQty(${i},this.value)" oninput="updateQty(${i},this.value)"></td>
-      <td class="row-total">${t.toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2})} ر.س</td>
+      <td class="row-total">${formatCurrency(t)}</td>
       <td class="no-print"><button class="btn btn-del" onclick="removeItem(${i})">✕</button></td>
     </tr>`;
   }).join('');
@@ -748,11 +746,10 @@ function recalc(){
   const vat=document.getElementById('vatToggle').checked;
   const vatAmt=vat?afterDiscount*0.15:0;
   const grand=afterDiscount+vatAmt;
-  const fmt=v=>v.toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2})+' ر.س';
-  document.getElementById('subTotal').textContent=fmt(sub);
-  document.getElementById('afterDiscount').textContent=fmt(afterDiscount);
-  document.getElementById('vatAmt').textContent=fmt(vatAmt);
-  document.getElementById('grandTotal').textContent=fmt(grand);
+  document.getElementById('subTotal').textContent=formatCurrency(sub);
+  document.getElementById('afterDiscount').textContent=formatCurrency(afterDiscount);
+  document.getElementById('vatAmt').textContent=formatCurrency(vatAmt);
+  document.getElementById('grandTotal').textContent=formatCurrency(grand);
   document.getElementById('vatRow').style.display=vat?'flex':'none';
 }
 
