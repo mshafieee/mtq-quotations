@@ -377,16 +377,15 @@ table.qt td:last-child{border-left:none;}
   .pf-mid   { text-align:center; flex:1; white-space:nowrap; }
   .pf-right { text-align:left; direction:ltr; flex:1; }
 
-  /* Per-page number labels: zero-height overlays — don't affect layout */
+  /* Per-page number labels: transform-only positioning — ZERO impact on layout/height */
   .pf-num {
     position: absolute;
     left: 0; right: 0;
     height: 0;
     overflow: visible;
     display: flex;
-    align-items: flex-end;
     justify-content: center;
-    padding-bottom: 0.25cm;
+    align-items: flex-start;
     font-family: 'Cairo', sans-serif;
     font-size: 8pt;
     font-weight: 600;
@@ -859,33 +858,35 @@ function buildPageNumbers() {
   if (!container) return;
   container.innerHTML = '';
 
-  // A4 dimensions at 96 dpi
-  const MM      = 3.7795275591;   // px per mm
-  const A4_H    = 297 * MM;       // 1122.5px  full page height
-  const TOP_M   = 10  * MM;       // 37.8px    top margin
-  const BOT_M   = 17  * MM;       // 64.3px    bottom margin (1.7cm @page)
-  const FTR_H   = 9   * MM;       // 34.0px    footer height (0.9cm)
+  const MM     = 3.7795275591;
+  const A4_H   = 297 * MM;   // 1122.5px — full A4 page
+  const TOP_M  = 10  * MM;   //   37.8px — @page margin-top 1cm
+  const BOT_M  = 17  * MM;   //   64.3px — @page margin-bottom 1.7cm
+  const FTR_H  = 9   * MM;   //   34.0px — footer height 0.9cm
 
-  // Usable content height per page
-  const usable  = A4_H - TOP_M - BOT_M;  // ~1020px
+  // Content area per page (excludes both margins)
+  const usable = A4_H - TOP_M - BOT_M;  // ~1020px
 
-  // Measure document height
-  const docEl   = document.querySelector('.doc');
+  const docEl  = document.querySelector('.doc');
   if (!docEl) return;
-  const docH    = docEl.scrollHeight;
-  const total   = Math.max(1, Math.ceil(docH / usable));
+  const total  = Math.max(1, Math.ceil(docEl.scrollHeight / usable));
+
+  // KEY INSIGHT: position each label at the CONTENT/MARGIN boundary (p * usable),
+  // then use CSS transform to shift it DOWN visually into the footer zone.
+  // transform has ZERO effect on layout — no extra page is created.
+  //
+  // Distance from content boundary to center of footer bar:
+  //   BOT_M starts at content boundary, footer bar sits (BOT_M - FTR_H) below it.
+  //   Center of footer = (BOT_M - FTR_H) + FTR_H/2 = BOT_M - FTR_H/2 ≈ 47px
+  const shift = BOT_M - FTR_H / 2;  // ~47px down from content boundary
 
   for (let p = 1; p <= total; p++) {
     const div = document.createElement('div');
     div.className = 'pf-num';
-
-    // Position: bottom of page p, aligned with the fixed footer bar
-    // Page p ends at: p * A4_H (in screen px)
-    // Footer bar top = page bottom - bottom_margin - footer_height + tiny offset
-    // Place the div so its bottom aligns with the bottom of the footer bar
-    const topPx = (p * A4_H) - BOT_M - TOP_M + TOP_M - FTR_H;
-    div.style.top  = topPx + 'px';
-
+    // Place at content bottom of page p — no layout impact
+    div.style.top = (p * usable) + 'px';
+    // Visually shift into the footer bar — transform doesn't affect scrollHeight
+    div.style.transform = 'translateY(' + shift + 'px)';
     div.textContent = 'صفحة ' + p + ' من ' + total;
     container.appendChild(div);
   }
