@@ -332,7 +332,7 @@ table.qt td:last-child{border-left:none;}
   .tot-r.grand-row{ background:var(--primary) !important; color:white !important; }
 
   /* Footer: textareas expand, no borders */
-  .doc-ftr{ background:white !important; border-top:1px solid var(--border) !important; padding:.5rem 0 !important; page-break-inside:avoid; }
+  .doc-ftr{ background:white !important; border-top:1px solid var(--border) !important; padding:.5rem 0 !important; }
   .notes-area textarea{
     overflow:visible !important; height:auto !important; max-height:none !important;
     min-height:0 !important; resize:none !important;
@@ -839,6 +839,33 @@ function toast(m){const el=document.getElementById('toast');el.textContent=m;el.
 // because position:fixed repeats identically. True per-page numbering
 // is not possible with CSS/JS alone in Chrome without absolute position hacks.
 
+// ── Print: expand textareas to show full content ────────────────────────
+// Textareas clip at their rows height in print. We swap each textarea
+// with a <div> that auto-sizes to fit all text, then restore after print.
+let _savedTextareas = [];
+
+function expandTextareas() {
+  _savedTextareas = [];
+  document.querySelectorAll('.doc-ftr textarea').forEach(ta => {
+    const div = document.createElement('div');
+    div.className = 'print-textarea-replacement';
+    div.style.cssText = 'white-space:pre-wrap;word-break:break-word;font-family:Cairo,sans-serif;font-size:8pt;line-height:1.65;direction:rtl;';
+    div.textContent = ta.value;
+    _savedTextareas.push({ ta, parent: ta.parentNode, next: ta.nextSibling });
+    ta.parentNode.replaceChild(div, ta);
+  });
+}
+
+function restoreTextareas() {
+  _savedTextareas.forEach(({ ta, parent, next }) => {
+    const div = next ? next.previousSibling : parent.lastChild;
+    if (div && div.classList.contains('print-textarea-replacement')) {
+      parent.replaceChild(ta, div);
+    }
+  });
+  _savedTextareas = [];
+}
+
 function buildPageNumbers() {
   const mid = document.getElementById('pf-page-info');
   if (!mid) return;
@@ -861,8 +888,8 @@ function clearPageNumbers() {
   if (mid) mid.textContent = '';
 }
 
-window.addEventListener('beforeprint', buildPageNumbers);
-window.addEventListener('afterprint',  clearPageNumbers);
+window.addEventListener('beforeprint', () => { expandTextareas(); buildPageNumbers(); });
+window.addEventListener('afterprint',  () => { restoreTextareas(); clearPageNumbers(); });
 
 // Mobile catalog toggle
 function toggleCatalog() {
