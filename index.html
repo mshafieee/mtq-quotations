@@ -878,6 +878,8 @@ function doPrint(){
   if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}
   syncPrintMirrors();
   window.print();
+  // Auto-save to Drive after printing (runs in background, non-blocking)
+  saveQuoteToDrive();
 }
 
 // ── Print mirrors: hidden divs that mirror textarea content ─────────────
