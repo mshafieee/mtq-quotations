@@ -828,7 +828,27 @@ function recalc(){
   document.getElementById('vatRow').style.display=vat?'flex':'none';
 }
 
-function doPrint(){if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}window.print();}
+function doPrint(){
+  if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}
+  // Manually run print prep — mobile browsers often skip beforeprint
+  _printPrepDone = true;
+  expandTextareas();
+  smartBreakNotes();
+  buildPageNumbers();
+  // Small delay lets the DOM reflow before print dialog opens
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.print();
+      // Restore after print (afterprint may not fire on mobile either)
+      setTimeout(() => {
+        _printPrepDone = false;
+        restoreTextareas();
+        clearSmartBreak();
+        clearPageNumbers();
+      }, 1000);
+    });
+  });
+}
 
 let tt;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
@@ -928,8 +948,16 @@ function clearPageNumbers() {
   if (mid) mid.textContent = '';
 }
 
-window.addEventListener('beforeprint', () => { expandTextareas(); smartBreakNotes(); buildPageNumbers(); });
-window.addEventListener('afterprint',  () => { restoreTextareas(); clearSmartBreak(); clearPageNumbers(); });
+let _printPrepDone = false;
+
+window.addEventListener('beforeprint', () => {
+  if (_printPrepDone) return; // already handled by doPrint()
+  expandTextareas(); smartBreakNotes(); buildPageNumbers();
+});
+window.addEventListener('afterprint',  () => {
+  _printPrepDone = false;
+  restoreTextareas(); clearSmartBreak(); clearPageNumbers();
+});
 
 // Mobile catalog toggle
 function toggleCatalog() {
