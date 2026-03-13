@@ -790,7 +790,7 @@ function filterCat(){
 }
 
 function addItem(code){
-  if(code==='INS')return; // INS is auto-managed
+  if(code==='INS'){ _insDeleted=false; syncInsRow(); renderQuote(); renderCat(); toast('✅ تمت إعادة التركيب التلقائي'); return; }
   if(items.some(q=>q.code===code)){toast('⚠️ المنتج موجود في العرض');return;}
   const p=products.find(pr=>pr.code===code);
   if(!p)return;
@@ -799,8 +799,9 @@ function addItem(code){
   renderQuote();renderCat();
   toast('✅ تمت إضافة '+p.code);
 }
+let _insDeleted = false; // user explicitly deleted INS — don't auto re-add
 function removeItem(i){
-  if(items[i]?.code==='INS')return; // can't remove auto INS row
+  if(items[i]?.code==='INS') _insDeleted = true;
   items.splice(i,1);
   syncInsRow();
   renderQuote();renderCat();
@@ -829,13 +830,16 @@ function updateInsPrice(i,v){
   items[i]._manualPrice=true; // flag: user overrode the auto price
   updateRowTotal(i);recalc();
 }
-function clearAll(){if(!items.length)return;items=[];renderQuote();renderCat();}
+function clearAll(){if(!items.length)return;items=[];_insDeleted=false;renderQuote();renderCat();}
 
 // ── Auto-managed INS (Installation) row ─────────────────────────────────
 // Calculates total installation cost from all non-INS items:
 //   sum of (item.installCost × item.qty) for each item
 // Always keeps INS as the last row. Removes it if total is 0.
 function syncInsRow(){
+  // If user explicitly deleted INS, don't auto re-add
+  if(_insDeleted) return;
+
   // Calculate total install cost from non-INS items
   const totalInstall = items
     .filter(it => it.code !== 'INS')
@@ -876,8 +880,7 @@ function renderQuote(){
   tb.innerHTML=items.map((it,i)=>{
     const isIns = it.code === 'INS';
     const img=getImg(it.code);
-    const th=isIns?`<div class="td-pic-ph" style="background:var(--orangeBg,#fff8f4);border-color:var(--orange)">🔧</div>`
-      :img?`<img src="${img}" onerror="this.style.display='none'">`:`<div class="td-pic-ph">📦</div>`;
+    const th=img?`<img src="${img}" onerror="this.style.display='none'">`:`<div class="td-pic-ph">${isIns?'🔧':'📦'}</div>`;
     const t=it.unitPrice*it.qty;
     const rowStyle = isIns ? 'background:#fff8f4 !important;border-top:2px solid var(--orange)' : '';
     return `<tr style="${rowStyle}">
@@ -897,7 +900,7 @@ function renderQuote(){
           onchange="updateQty(${i},this.value)" oninput="updateQty(${i},this.value)">`
       }</td>
       <td class="row-total">${(()=>{const r=Math.round(t*100)/100;const dec=(r%1)!==0;return r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2});})()}  ر.س</td>
-      <td class="no-print">${isIns?'<span style="font-size:.65rem;color:var(--orange);font-weight:700">تلقائي</span>':`<button class="btn btn-del" onclick="removeItem(${i})">✕</button>`}</td>
+      <td class="no-print"><button class="btn btn-del" onclick="removeItem(${i})">✕</button></td>
     </tr>`;
   }).join('');
   recalc();
