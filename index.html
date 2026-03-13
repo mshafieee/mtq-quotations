@@ -404,6 +404,8 @@ table.qt td:last-child{border-left:none;}
 <nav class="topnav">
   <div class="nav-brand">نظام عروض الأسعار</div>
   <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="openLoadQuote()">📂 تحميل عرض</button>
+    <button class="btn btn-outline" onclick="saveQuoteToDrive()">💾 حفظ</button>
     <button class="btn btn-outline" onclick="openSettings()">⚙️ الإعدادات</button>
     <button class="btn btn-orange" onclick="doPrint()">🖨️ طباعة / PDF</button>
   </div>
@@ -449,7 +451,10 @@ table.qt td:last-child{border-left:none;}
       <div class="doc-meta-blocks">
         <div class="meta-block">
           <label>رقم العرض / Quote No.</label>
-          <input id="quoteNo" placeholder="Q-2025-001">
+          <div style="display:flex;align-items:center;gap:.3rem;">
+            <input id="quoteNo" placeholder="Q-2025-001" style="flex:1;">
+            <button class="btn btn-ghost btn-sm no-print" onclick="newQuoteNumber()" title="رقم جديد" style="padding:.15rem .4rem;font-size:.65rem;white-space:nowrap;">🔄</button>
+          </div>
         </div>
         <div class="meta-block">
           <label>التاريخ / Date</label>
@@ -577,6 +582,10 @@ table.qt td:last-child{border-left:none;}
     <input id="sheetNameIn">
     <label>معرّف مجلد Drive (الصور)</label>
     <input id="folderIdIn">
+    <label>معرّف مجلد Drive (عروض الأسعار المحفوظة)</label>
+    <input id="quotesFolderIn">
+    <label>رابط Apps Script (لحفظ العروض)</label>
+    <input id="appsScriptUrlIn" placeholder="https://script.google.com/macros/s/...../exec" style="direction:ltr;font-size:.78rem;">
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeSettings()">إلغاء</button>
       <button class="btn btn-orange" onclick="saveSettings()">💾 حفظ وتحميل</button>
@@ -585,6 +594,23 @@ table.qt td:last-child{border-left:none;}
 </div>
 
 <div id="toast"></div>
+
+<!-- Load Quote Modal -->
+<div class="overlay" id="loadOverlay">
+  <div class="modal">
+    <h2>📂 تحميل عرض سعر محفوظ</h2>
+    <p class="sub">أدخل رقم العرض للبحث عنه في Google Drive</p>
+    <label>رقم العرض / Quote No.</label>
+    <div style="display:flex;gap:.5rem;margin-bottom:.85rem;">
+      <input id="loadQuoteId" placeholder="Q-2026-028" style="flex:1;padding:.48rem .78rem;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:.86rem;direction:ltr;">
+      <button class="btn btn-orange" onclick="searchQuoteInDrive()">🔍 بحث</button>
+    </div>
+    <div id="loadResults" style="max-height:250px;overflow-y:auto;margin-bottom:.65rem;"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeLoadQuote()">إلغاء</button>
+    </div>
+  </div>
+</div>
 
 <!-- Print footer: fixed orange bar (text rendered by @page margin boxes) -->
 <!-- Fixed orange bar with static text on left/right -->
@@ -603,6 +629,8 @@ let cfg={
   sheetId:localStorage.getItem('gsheet_id')||'1XEUFJylw6NKiFDuJPMhtoVHtEQHEKkgszUq8_vPRKfo',
   sheetName:localStorage.getItem('gsheet_name')||'المنتجات',
   folderId:localStorage.getItem('gdrive_folder')||'1B2VMxRZ8rQfU76c4jIhrXhFr56V9M3MS',
+  quotesFolderId:localStorage.getItem('gquotes_folder')||'14qmFQmExI9gkEt5kHGBh-ySeU249m2r5',
+  appsScriptUrl:localStorage.getItem('gapps_script_url')||'',
 };
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -641,6 +669,8 @@ function openSettings(){
   document.getElementById('sheetIdIn').value=cfg.sheetId;
   document.getElementById('sheetNameIn').value=cfg.sheetName;
   document.getElementById('folderIdIn').value=cfg.folderId;
+  document.getElementById('quotesFolderIn').value=cfg.quotesFolderId;
+  document.getElementById('appsScriptUrlIn').value=cfg.appsScriptUrl;
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open');}
@@ -649,10 +679,14 @@ function saveSettings(){
   cfg.sheetId=document.getElementById('sheetIdIn').value.trim();
   cfg.sheetName=document.getElementById('sheetNameIn').value.trim();
   cfg.folderId=document.getElementById('folderIdIn').value.trim();
+  cfg.quotesFolderId=document.getElementById('quotesFolderIn').value.trim();
+  cfg.appsScriptUrl=document.getElementById('appsScriptUrlIn').value.trim();
   localStorage.setItem('gapi_key',cfg.apiKey);
   localStorage.setItem('gsheet_id',cfg.sheetId);
   localStorage.setItem('gsheet_name',cfg.sheetName);
   localStorage.setItem('gdrive_folder',cfg.folderId);
+  localStorage.setItem('gquotes_folder',cfg.quotesFolderId);
+  localStorage.setItem('gapps_script_url',cfg.appsScriptUrl);
   closeSettings();loadAll();
 }
 
@@ -873,6 +907,173 @@ document.addEventListener('input', (e) => {
 
 let tt;
 function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
+
+// ══════════════════════════════════════════════════════════════════════════
+// SAVE / LOAD QUOTATIONS TO GOOGLE DRIVE
+// ══════════════════════════════════════════════════════════════════════════
+
+// Collect the full quotation state into a JSON object
+function getQuoteState() {
+  return {
+    version: 1,
+    quoteNo: document.getElementById('quoteNo').value,
+    quoteDate: document.getElementById('quoteDate').value,
+    clientName: document.getElementById('clientName').value,
+    clientCo: document.getElementById('clientCo').value,
+    project: document.getElementById('project').value,
+    salesRep: document.getElementById('salesRep').value,
+    items: items.map(it => ({ code: it.code, desc: it.desc, price: it.price, unitPrice: it.unitPrice, qty: it.qty })),
+    discountPercent: parseFloat(document.getElementById('discountPercent').value) || 0,
+    vatEnabled: document.getElementById('vatToggle').checked,
+    techNotes: document.getElementById('techNotes').value,
+    terms: document.getElementById('terms').value,
+    validity: document.getElementById('validity').value,
+    savedAt: new Date().toISOString(),
+  };
+}
+
+// Restore a quotation from a state object
+function loadQuoteState(state) {
+  document.getElementById('quoteNo').value = state.quoteNo || '';
+  document.getElementById('quoteDate').value = state.quoteDate || '';
+  document.getElementById('clientName').value = state.clientName || '';
+  document.getElementById('clientCo').value = state.clientCo || '';
+  document.getElementById('project').value = state.project || '';
+  document.getElementById('salesRep').value = state.salesRep || '';
+  document.getElementById('discountPercent').value = state.discountPercent || 0;
+  document.getElementById('vatToggle').checked = state.vatEnabled !== false;
+  document.getElementById('techNotes').value = state.techNotes || '';
+  document.getElementById('terms').value = state.terms || '';
+  document.getElementById('validity').value = state.validity || '';
+
+  // Restore items
+  items = (state.items || []).map(it => ({
+    code: it.code,
+    desc: it.desc,
+    price: it.price || it.unitPrice || 0,
+    unitPrice: it.unitPrice || it.price || 0,
+    qty: it.qty || 1,
+  }));
+  renderQuote();
+  renderCat();
+  syncPrintMirrors();
+}
+
+// ── SAVE to Google Drive ────────────────────────────────────────────────
+async function saveQuoteToDrive() {
+  if (!cfg.appsScriptUrl) { toast('⚠️ أدخل رابط Apps Script في الإعدادات'); openSettings(); return; }
+  if (!items.length) { toast('⚠️ أضف منتجات أولاً'); return; }
+
+  const quoteNo = document.getElementById('quoteNo').value.trim();
+  if (!quoteNo) { toast('⚠️ أدخل رقم العرض'); return; }
+
+  const state = getQuoteState();
+  const fileName = quoteNo + '.json';
+
+  toast('⏳ جاري الحفظ...');
+
+  try {
+    const res = await fetch(cfg.appsScriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // Apps Script requires text/plain for CORS
+      body: JSON.stringify({
+        fileName: fileName,
+        state: state,
+        folderId: cfg.quotesFolderId,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      toast('✅ تم حفظ العرض: ' + quoteNo + (data.action === 'updated' ? ' (تحديث)' : ' (جديد)'));
+    } else {
+      throw new Error(data.error || 'Unknown error');
+    }
+  } catch (e) {
+    console.error('Save error:', e);
+    toast('❌ خطأ في الحفظ: ' + e.message);
+  }
+}
+
+// ── LOAD modal ──────────────────────────────────────────────────────────
+function openLoadQuote() {
+  document.getElementById('loadQuoteId').value = '';
+  document.getElementById('loadResults').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.8rem;padding:1rem">أدخل رقم العرض ثم اضغط بحث</div>';
+  document.getElementById('loadOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('loadQuoteId').focus(), 200);
+}
+function closeLoadQuote() {
+  document.getElementById('loadOverlay').classList.remove('open');
+}
+
+// Search for quotation files in Drive
+async function searchQuoteInDrive() {
+  const q = document.getElementById('loadQuoteId').value.trim();
+  const resultsEl = document.getElementById('loadResults');
+  if (!q) { toast('⚠️ أدخل رقم العرض'); return; }
+  if (!cfg.apiKey) { toast('⚠️ أدخل مفتاح API أولاً'); return; }
+
+  resultsEl.innerHTML = '<div style="text-align:center;padding:1rem"><div class="spin"></div><p style="font-size:.78rem;color:var(--muted)">جاري البحث...</p></div>';
+
+  try {
+    // Search by filename containing the query
+    const searchUrl = `https://www.googleapis.com/drive/v3/files?q=name+contains+'${encodeURIComponent(q)}'+and+'${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=20&key=${cfg.apiKey}`;
+    const res = await fetch(searchUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const files = (data.files || []).filter(f => f.name.endsWith('.json'));
+
+    if (!files.length) {
+      resultsEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:.82rem;padding:1rem">لم يتم العثور على عروض مطابقة</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = files.map(f => {
+      const name = f.name.replace('.json', '');
+      const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('ar-SA') : '';
+      return `<div class="cat-row" style="margin-bottom:.3rem;cursor:pointer" onclick="loadQuoteFromDrive('${f.id}','${name}')">
+        <div class="cat-ph" style="width:40px;height:40px;font-size:.9rem">📄</div>
+        <div class="cat-info">
+          <span class="cat-code">${name}</span>
+          <div class="cat-price">${date}</div>
+        </div>
+        <button class="add-btn2" style="background:var(--orange)">↓</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    console.error('Search error:', e);
+    resultsEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:.82rem;padding:1rem">❌ خطأ: ' + e.message + '</div>';
+  }
+}
+
+// Load a specific quotation file from Drive
+async function loadQuoteFromDrive(fileId, name) {
+  toast('⏳ جاري تحميل العرض...');
+  try {
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${cfg.apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const state = await res.json();
+
+    loadQuoteState(state);
+    closeLoadQuote();
+    toast('✅ تم تحميل العرض: ' + name);
+  } catch (e) {
+    console.error('Load error:', e);
+    toast('❌ خطأ في التحميل: ' + e.message);
+  }
+}
+
+// ── Generate next quote number (for "Save as New" after editing a loaded quote) ──
+function newQuoteNumber() {
+  const n = (parseInt(localStorage.getItem('qnum') || '0') + 1);
+  localStorage.setItem('qnum', n);
+  const num = 'Q-' + new Date().getFullYear() + '-' + String(n).padStart(3, '0');
+  document.getElementById('quoteNo').value = num;
+  document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
+  toast('🔄 رقم عرض جديد: ' + num);
+}
 
 // ── Print page counter ──────────────────────────────────────────────────
 function buildPageNumbers() {
