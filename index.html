@@ -216,7 +216,6 @@ table.qt td:last-child{border-left:none;}
 .empty-s p{font-size:.85rem;}
 .loading-s{text-align:center;padding:2rem;color:var(--muted);}
 .print-footer{ display:none; }
-#pf-numbers{ display:none; }
 .print-mirror{ display:none; } /* hidden on screen, shown in print */
 .spin{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto .6rem;}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -382,20 +381,7 @@ table.qt td:last-child{border-left:none;}
     z-index:9999;
   }
   .pf-left  { text-align:right; flex:1; }
-  .pf-mid   { text-align:center; flex:1; white-space:nowrap; }
   .pf-right { text-align:left; direction:ltr; flex:1; }
-
-  /* Page numbers via CSS counters in the fixed footer center */
-  .pf-mid {
-    text-align:center; flex:1; white-space:nowrap;
-    font-family:'Cairo',sans-serif;
-    font-size:8pt;
-    font-weight:600;
-    color:white;
-  }
-  
-  /* Hide the JS-injected page numbers container */
-  #pf-numbers { display:none !important; }
 }
 </style>
 </head>
@@ -569,6 +555,8 @@ table.qt td:last-child{border-left:none;}
   <div class="modal">
     <h2>⚙️ إعدادات الاتصال</h2>
     <p class="sub">أدخل مفتاح Google API للاتصال بجداول البيانات ومجلد Drive.</p>
+    <label>رقم المستخدم / User ID (مثال: 92)</label>
+    <input id="userIdIn" placeholder="92" style="direction:ltr;font-size:1rem;font-weight:800;letter-spacing:2px;">
     <label>مفتاح Google API</label>
     <input id="apiKeyIn" placeholder="AIza...">
     <label>معرّف جدول البيانات (Spreadsheet ID)</label>
@@ -611,11 +599,8 @@ table.qt td:last-child{border-left:none;}
 <!-- Fixed orange bar with static text on left/right -->
 <div class="print-footer" id="print-footer">
   <div class="pf-left">شركة متقنون تك للتجارة</div>
-  <div class="pf-mid" id="pf-page-info"></div>
   <div class="pf-right">+966 50 248 0924</div>
 </div>
-<!-- Page number labels: one per page, absolutely positioned, injected by JS -->
-<div id="pf-numbers"></div>
 
 <script>
 let products=[],filtered=[],items=[],imgMap={},rawRows=[];
@@ -626,14 +611,14 @@ let cfg={
   folderId:localStorage.getItem('gdrive_folder')||'1B2VMxRZ8rQfU76c4jIhrXhFr56V9M3MS',
   quotesFolderId:localStorage.getItem('gquotes_folder')||'14qmFQmExI9gkEt5kHGBh-ySeU249m2r5',
   appsScriptUrl:localStorage.getItem('gapps_script_url')||'',
+  userId:localStorage.getItem('guser_id')||'00',
 };
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('quoteDate').value=new Date().toISOString().split('T')[0];
-  const n=(parseInt(localStorage.getItem('qnum')||'0')+1);
-  localStorage.setItem('qnum',n);
-  document.getElementById('quoteNo').value='Q-'+new Date().getFullYear()+'-'+String(n).padStart(3,'0');
-
+  // Quote number will be set after fetching counter from Drive
+  document.getElementById('quoteNo').value='جاري التحميل...';
+  
   // Set default notes and terms (shortened versions)
   document.getElementById('techNotes').value = 
     "◊ تعتمد على تقنيات لا سلكي عالية الكفاءة (غير مرتبطة بالواي فاي) لضمان استمرار العمل.\n" +
@@ -657,6 +642,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function openSettings(){
+  document.getElementById('userIdIn').value=cfg.userId;
   document.getElementById('apiKeyIn').value=cfg.apiKey;
   document.getElementById('sheetIdIn').value=cfg.sheetId;
   document.getElementById('sheetNameIn').value=cfg.sheetName;
@@ -667,12 +653,14 @@ function openSettings(){
 }
 function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open');}
 function saveSettings(){
+  cfg.userId=document.getElementById('userIdIn').value.trim()||'00';
   cfg.apiKey=document.getElementById('apiKeyIn').value.trim();
   cfg.sheetId=document.getElementById('sheetIdIn').value.trim();
   cfg.sheetName=document.getElementById('sheetNameIn').value.trim();
   cfg.folderId=document.getElementById('folderIdIn').value.trim();
   cfg.quotesFolderId=document.getElementById('quotesFolderIn').value.trim();
   cfg.appsScriptUrl=document.getElementById('appsScriptUrlIn').value.trim();
+  localStorage.setItem('guser_id',cfg.userId);
   localStorage.setItem('gapi_key',cfg.apiKey);
   localStorage.setItem('gsheet_id',cfg.sheetId);
   localStorage.setItem('gsheet_name',cfg.sheetName);
@@ -688,6 +676,8 @@ async function loadAll(){
     await Promise.all([loadSheet(),loadImages()]);
     renderCat();
     toast(products.length?'✅ تم تحميل '+products.length+' منتج':'⚠️ لا توجد منتجات');
+    // Fetch next quote number from Drive
+    await fetchNextQuoteNumber();
   }catch(e){
     console.error(e);
     document.getElementById('catList').innerHTML='<div style="padding:1rem;text-align:center;color:var(--red);font-size:.79rem">⚠️ '+e.message+'<br><br><button class="btn btn-orange btn-sm" onclick="openSettings()">الإعدادات</button></div>';
@@ -1136,35 +1126,58 @@ async function loadQuoteFromDrive(fileId, name) {
 }
 
 // ── Generate next quote number (for "Save as New" after editing a loaded quote) ──
-function newQuoteNumber() {
-  const n = (parseInt(localStorage.getItem('qnum') || '0') + 1);
-  localStorage.setItem('qnum', n);
-  const num = 'Q-' + new Date().getFullYear() + '-' + String(n).padStart(3, '0');
-  document.getElementById('quoteNo').value = num;
+// ── Quote Number: Q-YYYY-{userID}{seq} ──────────────────────────────────
+// Scans Drive folder for existing quotes with this user's prefix
+// to find the next sequence number. Works across all browsers/devices.
+async function fetchNextQuoteNumber() {
+  const uid = cfg.userId || '00';
+  const year = new Date().getFullYear();
+  const prefix = 'Q-' + year + '-' + uid;
+
+  try {
+    if (!cfg.apiKey || !cfg.quotesFolderId) {
+      // No API — fall back to localStorage
+      const n = (parseInt(localStorage.getItem('qnum_' + uid) || '0') + 1);
+      localStorage.setItem('qnum_' + uid, n);
+      document.getElementById('quoteNo').value = prefix + String(n).padStart(3, '0');
+      return;
+    }
+
+    // Search Drive for files matching this user's prefix
+    const searchUrl = `https://www.googleapis.com/drive/v3/files?q=name+contains+'${encodeURIComponent(prefix)}'+and+'${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=files(name)&pageSize=1000&key=${cfg.apiKey}`;
+    const res = await fetch(searchUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const files = (data.files || []).map(f => f.name.replace('.json', ''));
+
+    // Find the highest sequence number for this user
+    let maxSeq = 0;
+    files.forEach(name => {
+      // Extract the sequence part after the user ID
+      // Q-2026-92001 → after "Q-2026-92" → "001" → 1
+      const after = name.replace(prefix, '');
+      const seq = parseInt(after) || 0;
+      if (seq > maxSeq) maxSeq = seq;
+    });
+
+    const next = maxSeq + 1;
+    // Also update localStorage as cache
+    localStorage.setItem('qnum_' + uid, next);
+    document.getElementById('quoteNo').value = prefix + String(next).padStart(3, '0');
+  } catch (e) {
+    console.warn('Could not fetch quote counter from Drive:', e);
+    // Fall back to localStorage
+    const n = (parseInt(localStorage.getItem('qnum_' + uid) || '0') + 1);
+    localStorage.setItem('qnum_' + uid, n);
+    document.getElementById('quoteNo').value = prefix + String(n).padStart(3, '0');
+  }
+}
+
+async function newQuoteNumber() {
+  await fetchNextQuoteNumber();
   document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
-  toast('🔄 رقم عرض جديد: ' + num);
+  toast('🔄 رقم عرض جديد: ' + document.getElementById('quoteNo').value);
 }
-
-// ── Print page counter ──────────────────────────────────────────────────
-function buildPageNumbers() {
-  const mid = document.getElementById('pf-page-info');
-  if (!mid) return;
-  const docEl = document.querySelector('.doc');
-  if (!docEl) return;
-
-  const MM = 3.7795275591;
-  const usable = 270 * MM; // (297mm - 1cm top - 1.7cm bottom)
-  const total = Math.max(1, Math.ceil(docEl.scrollHeight / usable));
-  mid.textContent = total === 1 ? 'صفحة واحدة' : 'عدد الصفحات: ' + total;
-}
-
-function clearPageNumbers() {
-  const mid = document.getElementById('pf-page-info');
-  if (mid) mid.textContent = '';
-}
-
-window.addEventListener('beforeprint', buildPageNumbers);
-window.addEventListener('afterprint',  clearPageNumbers);
 
 // Mobile catalog toggle
 function toggleCatalog() {
