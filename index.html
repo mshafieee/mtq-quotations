@@ -165,7 +165,9 @@ table.qt td:last-child{border-left:none;}
 .editable:focus{outline:none;border-color:var(--orange);background:white;box-shadow:0 0 0 2px rgba(229,90,0,.1);}
 .price-f{color:var(--primary);}
 .qty-f{color:#1a6b6b;}
-.qty-f::-webkit-outer-spin-button,.qty-f::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.qty-f::-webkit-outer-spin-button,.qty-f::-webkit-inner-spin-button,
+.price-f::-webkit-outer-spin-button,.price-f::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.price-f{-moz-appearance:textfield;appearance:textfield;}
 .row-total{font-weight:800;color:var(--primary);font-size:.86rem;}
 
 /* ══ TOTALS – below main table ══════════════════ */
@@ -1008,9 +1010,9 @@ function loadQuoteState(state) {
   items = (state.items || []).map(it => ({
     code: it.code,
     desc: it.desc,
-    price: it.price || it.unitPrice || 0,
-    unitPrice: it.unitPrice || it.price || 0,
-    qty: it.qty || 1,
+    price: it.price ?? it.unitPrice ?? 0,
+    unitPrice: it.unitPrice ?? it.price ?? 0,
+    qty: it.qty ?? 1,
     installCost: it.installCost || 0,
     _isAuto: it._isAuto || it.code === 'INS',
     _manualPrice: it._manualPrice || false,
