@@ -830,7 +830,7 @@ function updateRowTotal(i){
     const t=items[i].unitPrice*items[i].qty;
     const r=Math.round(t*100)/100;
     const origTotal=Math.round((items[i].price||0)*items[i].qty*100)/100;
-    const priceChanged=(items[i].price||0)!==(items[i].unitPrice||0)&&origTotal>0;
+    const priceChanged=(items[i].price>0)&&(items[i].unitPrice<items[i].price);
     const origFmt=priceChanged?origTotal.toLocaleString('en-US',{minimumFractionDigits:(origTotal%1!==0)?2:0,maximumFractionDigits:2})+' ر.س':'';
     const strikeHtml=origFmt?`<div style="text-decoration:line-through;color:var(--muted);font-size:.72rem;font-weight:500;line-height:1.3">${origFmt}</div>`:'';
     if(r===0){
@@ -922,7 +922,7 @@ function renderQuote(){
       <td class="row-total">${(()=>{
         const r=Math.round(t*100)/100;
         const origTotal=Math.round((it.price||0)*it.qty*100)/100;
-        const priceChanged=(it.price||0)!==(it.unitPrice||0)&&origTotal>0;
+        const priceChanged=(it.price>0)&&(it.unitPrice<it.price);
         const origFmt=priceChanged?origTotal.toLocaleString('en-US',{minimumFractionDigits:(origTotal%1!==0)?2:0,maximumFractionDigits:2})+' ر.س':'';
         const strikeHtml=origFmt?`<div style="text-decoration:line-through;color:var(--muted);font-size:.72rem;font-weight:500;line-height:1.3">${origFmt}</div>`:'';
         if(r===0)return strikeHtml+'<span style="color:#c0392b;font-weight:800">FREE</span>';
