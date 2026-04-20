@@ -164,6 +164,7 @@ table.qt td:last-child{border-left:none;}
 .editable:hover{border-color:var(--border2);background:white;}
 .editable:focus{outline:none;border-color:var(--orange);background:white;box-shadow:0 0 0 2px rgba(229,90,0,.1);}
 .price-f{color:var(--primary);}
+.free-tag{display:inline-block;font-weight:800;font-size:.82rem;color:#c0392b;cursor:pointer;letter-spacing:.04em;}
 .qty-f{color:#1a6b6b;}
 .qty-f::-webkit-outer-spin-button,.qty-f::-webkit-inner-spin-button,
 .price-f::-webkit-outer-spin-button,.price-f::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
@@ -813,8 +814,8 @@ function updateRowTotal(i){
   if(tds&&tds[6]){
     const t=items[i].unitPrice*items[i].qty;
     const r=Math.round(t*100)/100;
-    const dec=(r%1)!==0;
-    tds[6].textContent=r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';
+    if(r===0){tds[6].innerHTML='<span style="color:#c0392b;font-weight:800">FREE</span>';}
+    else{const dec=(r%1)!==0;tds[6].textContent=r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';}
   }
 }
 // Allow user to override the auto-calculated installation price
@@ -838,10 +839,11 @@ function syncInsRow(){
     .filter(it => it.code !== 'INS')
     .reduce((sum, it) => sum + (it.installCost || 0) * it.qty, 0);
 
-  // Check if user manually set the INS price
+  // Check if user manually set the INS price / qty
   const existing = items.find(it => it.code === 'INS');
   const wasManual = existing?._manualPrice;
   const manualPrice = existing?.unitPrice;
+  const savedQty = existing?.qty ?? 1;
 
   // Remove existing INS row
   const insIdx = items.findIndex(it => it.code === 'INS');
@@ -855,7 +857,7 @@ function syncInsRow(){
       desc: 'أعمال التركيب والبرمجة | Installation & Programming',
       price: finalPrice,
       unitPrice: finalPrice,
-      qty: 1,
+      qty: savedQty,
       installCost: 0,
       _isAuto: true,
       _manualPrice: wasManual || false,
@@ -881,18 +883,20 @@ function renderQuote(){
       <td class="td-pic">${th}</td>
       <td><span class="code-tag" ${isIns?'style="background:#ffe8d6;border-color:var(--orange);color:var(--orange)"':''}>${it.code}</span></td>
       <td class="td-desc"><div class="desc-text">${it.desc}</div></td>
-      <td>${isIns
-        ?`<input class="editable price-f" type="number" min="0" step="0.01" value="${it.unitPrice}"
-          onchange="updateInsPrice(${i},this.value)" oninput="updateInsPrice(${i},this.value)" title="سعر التركيب — يتم حسابه تلقائياً">`
-        :`<input class="editable price-f" type="number" min="0" step="0.01" value="${it.unitPrice}"
-          onchange="updatePrice(${i},this.value)" oninput="updatePrice(${i},this.value)" title="انقر لتعديل السعر">`
-      }</td>
-      <td>${isIns
-        ?`<span style="font-weight:700;color:var(--muted);font-size:.81rem;display:block;text-align:center">1</span>`
-        :`<input class="editable qty-f" type="number" min="1" step="1" value="${it.qty}"
-          onchange="updateQty(${i},this.value)" style="-moz-appearance:textfield">`
-      }</td>
-      <td class="row-total">${(()=>{const r=Math.round(t*100)/100;const dec=(r%1)!==0;return r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2});})()}  ر.س</td>
+      <td>${(()=>{
+        const isFree = it.unitPrice === 0;
+        const chFn = isIns ? `updateInsPrice(${i},this.value)` : `updatePrice(${i},this.value)`;
+        const inp = `<input class="editable price-f" type="number" min="0" step="0.01" value="${it.unitPrice}"
+          onchange="${chFn}" oninput="${chFn}" title="انقر لتعديل السعر"
+          ${isFree?'style="display:none"':''} id="price-inp-${i}">`;
+        const free = isFree
+          ? `<span class="free-tag" onclick="document.getElementById('price-inp-${i}').style.display='';this.style.display='none';document.getElementById('price-inp-${i}').focus()">FREE</span>`
+          : '';
+        return inp + free;
+      })()}</td>
+      <td><input class="editable qty-f" type="number" min="1" step="1" value="${it.qty}"
+          onchange="updateQty(${i},this.value)" style="-moz-appearance:textfield"></td>
+      <td class="row-total">${(()=>{const r=Math.round(t*100)/100;if(r===0)return '<span style="color:#c0392b;font-weight:800">FREE</span>';const dec=(r%1)!==0;return r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';})()}</td>
       <td class="no-print"><button class="btn btn-del" onclick="removeItem(${i})">✕</button></td>
     </tr>`;
   }).join('');
