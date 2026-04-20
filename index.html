@@ -586,14 +586,29 @@ table.qt td:last-child{border-left:none;}
 <div class="overlay" id="loadOverlay">
   <div class="modal">
     <h2>📂 تحميل عرض سعر محفوظ</h2>
-    <p class="sub">أدخل رقم العرض للبحث عنه في Google Drive</p>
-    <label>رقم العرض / Quote No.</label>
-    <div style="display:flex;gap:.5rem;margin-bottom:.85rem;">
+
+    <!-- ── Section 1: Search by exact quote number ── -->
+    <p class="sub">بحث برقم العرض / Search by Quote No.</p>
+    <div style="display:flex;gap:.5rem;margin-bottom:.5rem;">
       <input id="loadQuoteId" placeholder="Q-2026-028" style="flex:1;padding:.48rem .78rem;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:.86rem;direction:ltr;">
       <button class="btn btn-orange" onclick="searchQuoteInDrive()">🔍 بحث</button>
     </div>
-    <div id="loadResults" style="max-height:250px;overflow-y:auto;margin-bottom:.65rem;"></div>
-    <div class="modal-btns">
+    <div id="loadResults" style="max-height:200px;overflow-y:auto;margin-bottom:.85rem;"></div>
+
+    <!-- ── Section 2: Browse all quotes by user number ── -->
+    <div style="border-top:1.5px solid var(--border);padding-top:.85rem;">
+      <p class="sub" style="margin-bottom:.5rem">استعراض عروض مستخدم / Browse by User No.</p>
+      <div style="display:flex;gap:.5rem;margin-bottom:.5rem;align-items:center;">
+        <span style="font-size:.8rem;color:var(--muted);white-space:nowrap">رقم المستخدم (أول خانتين)</span>
+        <input id="browseUserId" placeholder="01" maxlength="2"
+          style="width:56px;padding:.48rem .6rem;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:.9rem;direction:ltr;text-align:center;font-weight:700;"
+          onkeydown="if(event.key==='Enter')listUserQuotes()">
+        <button class="btn btn-orange" onclick="listUserQuotes()">📋 عرض الكل</button>
+      </div>
+      <div id="browseResults" style="max-height:220px;overflow-y:auto;"></div>
+    </div>
+
+    <div class="modal-btns" style="margin-top:.75rem;">
       <button class="btn btn-ghost" onclick="closeLoadQuote()">إلغاء</button>
     </div>
   </div>
@@ -1067,11 +1082,63 @@ async function saveQuoteToDrive() {
 function openLoadQuote() {
   document.getElementById('loadQuoteId').value = '';
   document.getElementById('loadResults').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.8rem;padding:1rem">أدخل رقم العرض ثم اضغط بحث</div>';
+  document.getElementById('browseUserId').value = cfg.userId || '';
+  document.getElementById('browseResults').innerHTML = '';
   document.getElementById('loadOverlay').classList.add('open');
   setTimeout(() => document.getElementById('loadQuoteId').focus(), 200);
 }
 function closeLoadQuote() {
   document.getElementById('loadOverlay').classList.remove('open');
+}
+
+// List all quotations for a given user (matched by first 2 digits of seq part)
+async function listUserQuotes() {
+  const userId = document.getElementById('browseUserId').value.trim();
+  const resultsEl = document.getElementById('browseResults');
+  if (!userId) { toast('⚠️ أدخل رقم المستخدم'); return; }
+  if (!cfg.apiKey) { toast('⚠️ أدخل مفتاح API أولاً'); return; }
+
+  resultsEl.innerHTML = '<div style="text-align:center;padding:1rem"><div class="spin"></div><p style="font-size:.78rem;color:var(--muted)">جاري البحث...</p></div>';
+
+  try {
+    // Fetch all JSON files in the quotes folder (up to 200), newest first
+    const url = `https://www.googleapis.com/drive/v3/files?q='${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=200&key=${cfg.apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // Filter: .json files whose sequence part (after last '-') starts with the userId digits
+    const files = (data.files || []).filter(f => {
+      if (!f.name.endsWith('.json')) return false;
+      const base = f.name.replace('.json', '');   // e.g. Q-2026-028
+      const parts = base.split('-');
+      if (parts.length < 3) return false;
+      const seq = parts[parts.length - 1];         // e.g. "028"
+      return seq.startsWith(userId);
+    });
+
+    if (!files.length) {
+      resultsEl.innerHTML = `<div style="text-align:center;color:var(--red);font-size:.82rem;padding:.75rem">لم يتم العثور على عروض للمستخدم ${userId}</div>`;
+      return;
+    }
+
+    resultsEl.innerHTML = `<div style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem;text-align:center">${files.length} عرض سعر</div>` +
+      files.map(f => {
+        const name = f.name.replace('.json', '');
+        const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('ar-SA') : '';
+        return `<div class="cat-row" style="margin-bottom:.3rem;cursor:pointer" onclick="loadQuoteFromDrive('${f.id}','${name}')">
+          <div class="cat-ph" style="width:36px;height:36px;font-size:.85rem">📄</div>
+          <div class="cat-info">
+            <span class="cat-code">${name}</span>
+            <div class="cat-price">${date}</div>
+          </div>
+          <button class="add-btn2" style="background:var(--orange)" title="فتح">↓</button>
+        </div>`;
+      }).join('');
+  } catch (e) {
+    console.error('Browse error:', e);
+    resultsEl.innerHTML = `<div style="text-align:center;color:var(--red);font-size:.82rem;padding:.75rem">❌ خطأ: ${e.message}</div>`;
+  }
 }
 
 // Search for quotation files in Drive
