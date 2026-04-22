@@ -600,7 +600,7 @@ table.qt td:last-child{border-left:none;}
       <p class="sub" style="margin-bottom:.5rem">استعراض عروض مستخدم / Browse by User No.</p>
       <div style="display:flex;gap:.5rem;margin-bottom:.5rem;align-items:center;">
         <span style="font-size:.8rem;color:var(--muted);white-space:nowrap">رقم المستخدم (أول خانتين)</span>
-        <input id="browseUserId" placeholder="01" maxlength="2"
+        <input id="browseUserId" placeholder="01" maxlength="2" title="أدخل رقم المستخدم (مثل 01) أو * لعرض الكل"
           style="width:56px;padding:.48rem .6rem;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:.9rem;direction:ltr;text-align:center;font-weight:700;"
           onkeydown="if(event.key==='Enter')listUserQuotes()">
         <button class="btn btn-orange" onclick="listUserQuotes()">📋 عرض الكل</button>
@@ -1124,9 +1124,11 @@ async function listUserQuotes() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
-    // Filter: .json files whose sequence part (after last '-') starts with the userId digits
+    const showAll = userId === '*';
+    // Filter: all .json files (if *) or those whose seq part starts with the userId digits
     const files = (data.files || []).filter(f => {
       if (!f.name.endsWith('.json')) return false;
+      if (showAll) return true;
       const base = f.name.replace('.json', '');   // e.g. Q-2026-028
       const parts = base.split('-');
       if (parts.length < 3) return false;
@@ -1135,7 +1137,7 @@ async function listUserQuotes() {
     });
 
     if (!files.length) {
-      resultsEl.innerHTML = `<div style="text-align:center;color:var(--red);font-size:.82rem;padding:.75rem">لم يتم العثور على عروض للمستخدم ${userId}</div>`;
+      resultsEl.innerHTML = `<div style="text-align:center;color:var(--red);font-size:.82rem;padding:.75rem">${showAll ? 'لا توجد عروض محفوظة' : 'لم يتم العثور على عروض للمستخدم ' + userId}</div>`;
       return;
     }
 
