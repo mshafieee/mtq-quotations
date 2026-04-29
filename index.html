@@ -46,6 +46,14 @@ body{font-family:'Cairo',sans-serif;background:var(--page);color:var(--text);min
 .btn-del{background:#fde8e8;color:var(--red);border:1px solid #f5c6c6;padding:.22rem .5rem;font-size:.72rem;}
 .btn-del:hover{background:#fbd0d0;}
 .btn-sm{padding:.26rem .6rem;font-size:.73rem;}
+.btn-teal{background:linear-gradient(135deg,#0d7377,#14a085);color:white;}
+.btn-teal:hover{filter:brightness(1.08);}
+.btn-manager{background:linear-gradient(135deg,#6c3483,#9b59b6);color:white;}
+.btn-manager:hover{filter:brightness(1.08);}
+.status-badge{display:inline-block;font-size:.68rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;letter-spacing:.03em;}
+.status-pending{background:#fff3cd;color:#856404;border:1px solid #ffc107;}
+.status-approved{background:#d1f0e0;color:#1a7a4a;border:1px solid #2ecc71;}
+.status-draft{background:#f0f0f0;color:var(--muted);border:1px solid var(--border);}
 
 /* ══ MOBILE CATALOG TOGGLE ══════════════════════ */
 .catalog-toggle{display:none;}
@@ -394,9 +402,11 @@ table.qt td:last-child{border-left:none;}
 <nav class="topnav">
   <div class="nav-brand">نظام عروض الأسعار</div>
   <div class="nav-btns">
+    <span id="managerIndicator" class="btn btn-manager" style="display:none;cursor:default;opacity:.9">👔 مدير</span>
     <button class="btn btn-ghost" onclick="openLoadQuote()">📂 تحميل عرض</button>
     <button class="btn btn-outline" onclick="openSettings()">⚙️ الإعدادات</button>
-    <button class="btn btn-orange" onclick="doPrint()">🖨️ طباعة / PDF</button>
+    <button id="printBtn" class="btn btn-orange" onclick="doPrint()" style="display:none">🖨️ طباعة / PDF</button>
+    <button id="submitBtn" class="btn btn-teal" onclick="submitToManager()">📤 إرسال للمدير</button>
   </div>
 </nav>
 
@@ -571,6 +581,8 @@ table.qt td:last-child{border-left:none;}
     <input id="folderIdIn">
     <label>معرّف مجلد Drive (عروض الأسعار المحفوظة)</label>
     <input id="quotesFolderIn">
+    <label>معرّف مجلد Drive (العروض المعلقة — Pending)</label>
+    <input id="pendingFolderIn" placeholder="أنشئ مجلداً فرعياً في Drive والصق معرّفه هنا" style="direction:ltr;font-size:.78rem;">
     <label>رابط Apps Script (لحفظ العروض)</label>
     <input id="appsScriptUrlIn" placeholder="https://script.google.com/macros/s/...../exec" style="direction:ltr;font-size:.78rem;">
     <div class="modal-btns">
@@ -608,11 +620,23 @@ table.qt td:last-child{border-left:none;}
       <div id="browseResults" style="max-height:220px;overflow-y:auto;"></div>
     </div>
 
+    <!-- ── Section 3: Pending approvals (manager only) ── -->
+    <div id="pendingSection" style="border-top:1.5px solid var(--border);padding-top:.85rem;display:none;">
+      <p class="sub" style="margin-bottom:.5rem;color:#6c3483">👔 العروض المعلقة — بانتظار الموافقة</p>
+      <div style="display:flex;gap:.5rem;margin-bottom:.5rem;">
+        <button class="btn btn-manager btn-sm" onclick="loadPendingQuotes()" style="flex:1">🔄 تحديث القائمة</button>
+      </div>
+      <div id="pendingResults" style="max-height:240px;overflow-y:auto;">
+        <div style="text-align:center;color:var(--muted);font-size:.8rem;padding:.75rem">اضغط "تحديث القائمة" لعرض العروض المعلقة</div>
+      </div>
+    </div>
+
     <div class="modal-btns" style="margin-top:.75rem;">
       <button class="btn btn-ghost" onclick="closeLoadQuote()">إلغاء</button>
     </div>
   </div>
 </div>
+
 
 <!-- Print footer: fixed orange bar (text rendered by @page margin boxes) -->
 <!-- Fixed orange bar with static text on left/right -->
@@ -623,17 +647,48 @@ table.qt td:last-child{border-left:none;}
 
 <script>
 let products=[],filtered=[],items=[],imgMap={},rawRows=[];
+let currentQuoteStatus = 'draft'; // tracks status of currently loaded/active quote
+
+function isManager() { return cfg.userId === '43'; }
+
+function updatePrintAccess() {
+  const mgr = isManager();
+  const canPrint = mgr || currentQuoteStatus === 'approved';
+  document.getElementById('printBtn').style.display = canPrint ? '' : 'none';
+  document.getElementById('submitBtn').style.display = (!mgr && currentQuoteStatus !== 'approved') ? '' : 'none';
+  document.getElementById('managerIndicator').style.display = mgr ? '' : 'none';
+}
+
+function markModified() {
+  if (currentQuoteStatus === 'approved' && !isManager()) {
+    currentQuoteStatus = 'draft';
+    updatePrintAccess();
+    toast('⚠️ تم تعديل العرض — يحتاج موافقة المدير مجدداً');
+  }
+}
+
 let cfg={
   apiKey:localStorage.getItem('gapi_key')||'',
   sheetId:localStorage.getItem('gsheet_id')||'1XEUFJylw6NKiFDuJPMhtoVHtEQHEKkgszUq8_vPRKfo',
   sheetName:localStorage.getItem('gsheet_name')||'المنتجات',
   folderId:localStorage.getItem('gdrive_folder')||'1B2VMxRZ8rQfU76c4jIhrXhFr56V9M3MS',
   quotesFolderId:localStorage.getItem('gquotes_folder')||'14qmFQmExI9gkEt5kHGBh-ySeU249m2r5',
+  pendingFolderId:localStorage.getItem('gpending_folder')||'',
   appsScriptUrl:localStorage.getItem('gapps_script_url')||'',
   userId:localStorage.getItem('guser_id')||'00',
 };
 
 document.addEventListener('DOMContentLoaded',()=>{
+  updatePrintAccess();
+
+  // Any change to quote header fields or totals section revokes approval
+  ['clientName','clientCo','project','salesRep','quoteDate','discountPercent','vatToggle','techNotes','terms']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', markModified);
+      if (el && el.type === 'checkbox') el.addEventListener('change', markModified);
+    });
+
   document.getElementById('quoteDate').value=new Date().toISOString().split('T')[0];
   // Quote number will be set after fetching counter from Drive
   document.getElementById('quoteNo').value='جاري التحميل...';
@@ -667,17 +722,28 @@ function openSettings(){
   document.getElementById('sheetNameIn').value=cfg.sheetName;
   document.getElementById('folderIdIn').value=cfg.folderId;
   document.getElementById('quotesFolderIn').value=cfg.quotesFolderId;
+  document.getElementById('pendingFolderIn').value=cfg.pendingFolderId;
   document.getElementById('appsScriptUrlIn').value=cfg.appsScriptUrl;
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open');}
 function saveSettings(){
-  cfg.userId=document.getElementById('userIdIn').value.trim()||'00';
+  const newUserId = document.getElementById('userIdIn').value.trim() || '00';
+  if (newUserId === '43' && cfg.userId !== '43') {
+    const pw = prompt('هذا الرقم محجوز للمدير.\nأدخل كلمة مرور المدير للمتابعة:');
+    if (pw !== 'MTQ*2025') {
+      alert('❌ كلمة المرور غير صحيحة. لم يتم حفظ رقم المستخدم.');
+      document.getElementById('userIdIn').value = cfg.userId;
+      return;
+    }
+  }
+  cfg.userId = newUserId;
   cfg.apiKey=document.getElementById('apiKeyIn').value.trim();
   cfg.sheetId=document.getElementById('sheetIdIn').value.trim();
   cfg.sheetName=document.getElementById('sheetNameIn').value.trim();
   cfg.folderId=document.getElementById('folderIdIn').value.trim();
   cfg.quotesFolderId=document.getElementById('quotesFolderIn').value.trim();
+  cfg.pendingFolderId=document.getElementById('pendingFolderIn').value.trim();
   cfg.appsScriptUrl=document.getElementById('appsScriptUrlIn').value.trim();
   localStorage.setItem('guser_id',cfg.userId);
   localStorage.setItem('gapi_key',cfg.apiKey);
@@ -685,8 +751,11 @@ function saveSettings(){
   localStorage.setItem('gsheet_name',cfg.sheetName);
   localStorage.setItem('gdrive_folder',cfg.folderId);
   localStorage.setItem('gquotes_folder',cfg.quotesFolderId);
+  localStorage.setItem('gpending_folder',cfg.pendingFolderId);
   localStorage.setItem('gapps_script_url',cfg.appsScriptUrl);
-  closeSettings();loadAll();
+  closeSettings();
+  updatePrintAccess();
+  loadAll();
 }
 
 async function loadAll(){
@@ -799,13 +868,14 @@ function filterCat(){
 }
 
 function addItem(code){
-  if(code==='INS'){ _insDeleted=false; syncInsRow(); renderQuote(); renderCat(); toast('✅ تمت إعادة التركيب التلقائي'); return; }
+  if(code==='INS'){ _insDeleted=false; syncInsRow(); renderQuote(); renderCat(); toast('✅ تمت إعادة التركيب التلقائي'); markModified(); return; }
   if(items.some(q=>q.code===code)){toast('⚠️ المنتج موجود في العرض');return;}
   const p=products.find(pr=>pr.code===code);
   if(!p)return;
   items.push({...p,qty:1,unitPrice:p.price,installCost:p.installCost||0});
   syncInsRow();
   renderQuote();renderCat();
+  markModified();
   toast('✅ تمت إضافة '+p.code);
 }
 let _insDeleted = false; // user explicitly deleted INS — don't auto re-add
@@ -814,14 +884,16 @@ function removeItem(i){
   items.splice(i,1);
   syncInsRow();
   renderQuote();renderCat();
+  markModified();
 }
-function updatePrice(i,v){items[i].unitPrice=Math.max(0,parseFloat(v)||0);updateRowTotal(i);recalc();}
+function updatePrice(i,v){items[i].unitPrice=Math.max(0,parseFloat(v)||0);updateRowTotal(i);recalc();markModified();}
 function updateQty(i,v){
   items[i].qty=Math.max(0.01,parseFloat(v)||1);
   updateRowTotal(i);
   // If a non-INS item qty changed, recalc install total
   if(items[i].code!=='INS'){ syncInsRow(); renderQuote(); }
   recalc();
+  markModified();
 }
 function updateRowTotal(i){
   const rows=document.querySelectorAll('#quoteBody tr');
@@ -845,9 +917,9 @@ function updateRowTotal(i){
 function updateInsPrice(i,v){
   items[i].unitPrice=Math.max(0,parseFloat(v)||0);
   items[i]._manualPrice=true; // flag: user overrode the auto price
-  updateRowTotal(i);recalc();
+  updateRowTotal(i);recalc();markModified();
 }
-function clearAll(){if(!items.length)return;items=[];_insDeleted=false;renderQuote();renderCat();}
+function clearAll(){if(!items.length)return;items=[];_insDeleted=false;renderQuote();renderCat();markModified();}
 
 // ── Auto-managed INS (Installation) row ─────────────────────────────────
 // Calculates total installation cost from all non-INS items:
@@ -1025,6 +1097,7 @@ function getQuoteState() {
     vatEnabled: document.getElementById('vatToggle').checked,
     techNotes: document.getElementById('techNotes').value,
     terms: document.getElementById('terms').value,
+    status: currentQuoteStatus,
     savedAt: new Date().toISOString(),
   };
 }
@@ -1053,6 +1126,8 @@ function loadQuoteState(state) {
     _isAuto: it._isAuto || it.code === 'INS',
     _manualPrice: it._manualPrice || false,
   }));
+  currentQuoteStatus = state.status || 'draft';
+  updatePrintAccess();
   renderQuote();
   renderCat();
   syncPrintMirrors();
@@ -1095,17 +1170,174 @@ async function saveQuoteToDrive() {
   }
 }
 
+// ── Submit quotation to manager ──────────────────────────────────────────
+async function submitToManager() {
+  if (!items.length) { toast('⚠️ أضف منتجات أولاً'); return; }
+  const quoteNo = document.getElementById('quoteNo').value.trim();
+  if (!quoteNo) { toast('⚠️ أدخل رقم العرض أولاً'); return; }
+  if (!cfg.appsScriptUrl) { toast('⚠️ أدخل رابط Apps Script في الإعدادات'); openSettings(); return; }
+  if (!cfg.pendingFolderId) { toast('⚠️ أدخل معرّف مجلد العروض المعلقة في الإعدادات'); openSettings(); return; }
+  if (!confirm(`إرسال العرض "${quoteNo}" للمدير للموافقة؟`)) return;
+
+  currentQuoteStatus = 'pending';
+  const state = getQuoteState();
+  toast('⏳ جاري الإرسال...');
+  try {
+    const fileName = quoteNo + '.json';
+    const post = (folderId) => fetch(cfg.appsScriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ fileName, state, folderId }),
+    }).then(r => r.text()).then(t => { try { return JSON.parse(t); } catch { throw new Error(t.substring(0, 200)); } });
+
+    // Save to main folder (so user can still find and load their quote)
+    const mainResult = await post(cfg.quotesFolderId);
+    if (!mainResult.success) throw new Error(mainResult.error || 'فشل الحفظ في المجلد الرئيسي');
+
+    // Also save to pending folder (manager's inbox — non-blocking if it fails)
+    post(cfg.pendingFolderId).catch(e => console.warn('Pending folder save failed:', e.message));
+
+    updatePrintAccess();
+    toast('📤 تم إرسال العرض للمدير بنجاح');
+  } catch (e) {
+    currentQuoteStatus = 'draft';
+    console.error('Submit error:', e);
+    toast('❌ خطأ في الإرسال: ' + e.message);
+  }
+}
+
 // ── LOAD modal ──────────────────────────────────────────────────────────
 function openLoadQuote() {
   document.getElementById('loadQuoteId').value = '';
   document.getElementById('loadResults').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.8rem;padding:1rem">أدخل رقم العرض ثم اضغط بحث</div>';
   document.getElementById('browseUserId').value = cfg.userId || '';
   document.getElementById('browseResults').innerHTML = '';
+  // Show pending section only for manager
+  document.getElementById('pendingSection').style.display = isManager() ? '' : 'none';
+  document.getElementById('pendingResults').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.8rem;padding:.75rem">اضغط "تحديث القائمة" لعرض العروض المعلقة</div>';
   document.getElementById('loadOverlay').classList.add('open');
   setTimeout(() => document.getElementById('loadQuoteId').focus(), 200);
 }
 function closeLoadQuote() {
   document.getElementById('loadOverlay').classList.remove('open');
+}
+
+// ── Manager: load list of pending quotations ─────────────────────────────
+async function loadPendingQuotes() {
+  if (!isManager()) return;
+  if (!cfg.apiKey) { toast('⚠️ أدخل مفتاح API أولاً'); return; }
+  if (!cfg.pendingFolderId) { toast('⚠️ أدخل معرّف مجلد العروض المعلقة في الإعدادات'); openSettings(); return; }
+  const resultsEl = document.getElementById('pendingResults');
+  resultsEl.innerHTML = '<div style="text-align:center;padding:.75rem"><div class="spin"></div><p style="font-size:.78rem;color:var(--muted)">جاري التحميل...</p></div>';
+
+  try {
+    // Just list files in the pending folder — no content reading needed
+    const listUrl = `https://www.googleapis.com/drive/v3/files?q='${cfg.pendingFolderId}'+in+parents+and+trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=200&key=${cfg.apiKey}`;
+    const listRes = await fetch(listUrl);
+    if (!listRes.ok) throw new Error('HTTP ' + listRes.status);
+    const listData = await listRes.json();
+    const files = (listData.files || []).filter(f => f.name.endsWith('.json'));
+
+    if (!files.length) {
+      resultsEl.innerHTML = '<div style="text-align:center;color:var(--green);font-size:.82rem;padding:.75rem">✅ لا توجد عروض بانتظار الموافقة</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = `<div style="font-size:.75rem;color:#856404;margin-bottom:.4rem;text-align:center;font-weight:700">${files.length} عرض بانتظار الموافقة</div>` +
+      files.map(f => {
+        const name = f.name.replace('.json', '');
+        const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('ar-SA') : '';
+        return `<div class="cat-row" style="margin-bottom:.3rem;">
+          <div class="cat-ph" style="width:36px;height:36px;font-size:.85rem;cursor:pointer" onclick="loadQuoteFromPending('${f.id}','${name}')">📄</div>
+          <div class="cat-info" style="cursor:pointer" onclick="loadQuoteFromPending('${f.id}','${name}')">
+            <span class="cat-code">${name}</span>
+            <div class="cat-price">${date}</div>
+          </div>
+          <button class="btn btn-sm" style="background:#d1f0e0;color:#1a7a4a;border:1px solid #2ecc71;white-space:nowrap"
+            onclick="approveQuote('${f.id}','${name}',this)">✅ قبول</button>
+        </div>`;
+      }).join('');
+  } catch (e) {
+    console.error('Pending load error:', e);
+    resultsEl.innerHTML = `<div style="text-align:center;color:var(--red);font-size:.82rem;padding:.75rem">❌ خطأ: ${e.message}</div>`;
+  }
+}
+
+/// Load a pending quote into the editor (reads from pending folder)
+async function loadQuoteFromPending(fileId, name) {
+  toast('⏳ جاري تحميل العرض...');
+  try {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${cfg.apiKey}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const state = await res.json();
+    loadQuoteState(state);
+    closeLoadQuote();
+    toast('✅ تم تحميل العرض: ' + name);
+  } catch (e) {
+    toast('❌ خطأ في التحميل: ' + e.message);
+  }
+}
+
+/// ── Manager: approve a quotation ─────────────────────────────────────────
+async function approveQuote(fileId, name, btn) {
+  if (!isManager()) return;
+  if (!cfg.appsScriptUrl) { toast('⚠️ أدخل رابط Apps Script في الإعدادات'); return; }
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري...';
+
+  let step = '?';
+  try {
+    // Step 1: Read file from pending folder
+    step = '1-read';
+    const readRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${cfg.apiKey}`);
+    const readText = await readRes.text();
+    if (!readRes.ok) throw new Error(`قراءة الملف فشلت (HTTP ${readRes.status}): ${readText.substring(0, 200)}`);
+    let state;
+    try { state = JSON.parse(readText); }
+    catch { throw new Error('الملف ليس JSON صحيح: ' + readText.substring(0, 120)); }
+    state.status = 'approved';
+
+    // Step 2: Save approved copy to the main quotes folder
+    step = '2-save';
+    const saveRes = await fetch(cfg.appsScriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ fileName: name + '.json', state, folderId: cfg.quotesFolderId }),
+    });
+    const saveText = await saveRes.text();
+    let saveData;
+    try { saveData = JSON.parse(saveText); }
+    catch { throw new Error(`Apps Script لم يُرجع JSON (HTTP ${saveRes.status}): ${saveText.substring(0, 200)}`); }
+    if (!saveData.success) throw new Error('Apps Script: ' + (saveData.error || JSON.stringify(saveData)));
+
+    // Step 3: Delete from pending folder (non-critical, fire and forget)
+    step = '3-delete';
+    fetch(cfg.appsScriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'delete', fileId }),
+    }).catch(e => console.warn('Delete from pending failed:', e.message));
+
+    // Step 4: Update UI
+    btn.closest('.cat-row').remove();
+    const remaining = document.querySelectorAll('#pendingResults .cat-row').length;
+    const header = document.querySelector('#pendingResults div[style*="856404"]');
+    if (header) header.textContent = remaining + ' عرض بانتظار الموافقة';
+    if (!remaining) document.getElementById('pendingResults').innerHTML =
+      '<div style="text-align:center;color:var(--green);font-size:.82rem;padding:.75rem">✅ لا توجد عروض بانتظار الموافقة</div>';
+
+    toast('✅ تمت الموافقة على العرض: ' + name);
+
+    if (document.getElementById('quoteNo').value.trim() === name) {
+      currentQuoteStatus = 'approved';
+      updatePrintAccess();
+    }
+  } catch (e) {
+    console.error('Approve error (step ' + step + '):', e);
+    btn.disabled = false;
+    btn.textContent = '✅ قبول';
+    alert('❌ فشلت الموافقة في الخطوة ' + step + ':\n\n' + e.message);
+  }
 }
 
 // List all quotations for a given user (matched by first 2 digits of seq part)
