@@ -484,6 +484,7 @@ table.qt td:last-child{border-left:none;}
           <input type="checkbox" id="vatToggle" onchange="recalc()" checked>
           إضافة ضريبة القيمة المضافة 15%
         </label>
+        <button class="btn btn-outline btn-sm no-print" onclick="addInsManually()" title="إضافة صف تركيب يدوي">🔧 إضافة تركيب</button>
         <button class="btn btn-ghost btn-sm no-print" onclick="clearAll()">🗑️ مسح الكل</button>
       </div>
     </div>
@@ -798,8 +799,15 @@ function filterCat(){
   renderCat();
 }
 
+function addInsManually(){
+  if(items.some(it=>it.code==='INS')){ toast('⚠️ صف التركيب موجود بالفعل'); return; }
+  _insDeleted=false;
+  items.push({code:'INS',desc:'أعمال التركيب والبرمجة | Installation & Programming',price:0,unitPrice:0,qty:1,installCost:0,_isAuto:false,_manualPrice:true});
+  renderQuote();renderCat();
+  toast('✅ تمت إضافة صف التركيب');
+}
 function addItem(code){
-  if(code==='INS'){ _insDeleted=false; syncInsRow(); renderQuote(); renderCat(); toast('✅ تمت إعادة التركيب التلقائي'); return; }
+  if(code==='INS'){ addInsManually(); return; }
   if(items.some(q=>q.code===code)){toast('⚠️ المنتج موجود في العرض');return;}
   const p=products.find(pr=>pr.code===code);
   if(!p)return;
@@ -873,7 +881,7 @@ function syncInsRow(){
   if(insIdx >= 0) items.splice(insIdx, 1);
 
   // Add INS row at the end if there's any install cost OR if user had manual price
-  if((totalInstall > 0 || wasManual) && items.length > 0){
+  if(totalInstall > 0 || wasManual){
     const finalPrice = wasManual ? manualPrice : totalInstall;
     items.push({
       code: 'INS',
