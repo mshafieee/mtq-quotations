@@ -390,6 +390,58 @@ table.qt tbody tr.dragging{opacity:.4;}
   .pf-left  { text-align:right; flex:1; }
   .pf-right { text-align:left; direction:ltr; flex:1; }
 }
+
+/* ══ CONTRACT ═══════════════════════════════════════════════════════════ */
+.contract-overlay{position:fixed;inset:0;z-index:9998;background:#dde1e7;overflow-y:auto;display:none;}
+.ct-toolbar{position:sticky;top:0;z-index:10;background:var(--primary);color:white;display:flex;align-items:center;justify-content:space-between;padding:.55rem 1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.ct-toolbar-title{font-weight:800;font-size:.85rem;display:flex;align-items:center;gap:.5rem;}
+.ct-toolbar-title::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--orange);display:block;}
+.ct-page{max-width:820px;margin:1.5rem auto 3rem;background:white;padding:1.8cm 2cm;box-shadow:0 4px 24px rgba(0,0,0,.14);border-radius:4px;font-size:.79rem;line-height:1.85;direction:rtl;}
+.ct-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
+.ct-logo{height:58px;object-fit:contain;}
+.ct-hdr-center{flex:1;text-align:center;}
+.ct-contract-title{font-size:1.1rem;font-weight:900;color:var(--primary);line-height:1.4;}
+.ct-contract-subtitle{font-size:.88rem;color:var(--orange);font-weight:700;}
+.ct-meta-box{min-width:170px;}
+.ct-meta-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;}
+.ct-meta-row label{font-size:.68rem;color:var(--muted);font-weight:700;white-space:nowrap;min-width:58px;text-align:right;}
+.ct-meta-row input{border:1px solid var(--border);border-radius:4px;padding:.22rem .45rem;font-size:.78rem;font-family:'Cairo',sans-serif;width:115px;text-align:right;}
+.ct-accent{height:3px;background:linear-gradient(90deg,var(--orange),var(--orng2),transparent);margin-bottom:1rem;}
+.ct-parties{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem;}
+.ct-party{border:1.5px solid var(--border);border-radius:6px;padding:.7rem .8rem;}
+.ct-party-second{border-color:var(--orange);background:#fffaf7;}
+.ct-party-lbl{font-size:.7rem;font-weight:800;color:var(--orange);border-bottom:1px solid var(--border);padding-bottom:.3rem;margin-bottom:.4rem;}
+.ct-section{margin-bottom:.85rem;}
+.ct-section-title{font-size:.85rem;font-weight:900;color:var(--primary);border-right:3px solid var(--orange);padding-right:.5rem;margin-bottom:.4rem;}
+[contenteditable]{border-radius:3px;transition:background .12s,outline .12s;}
+[contenteditable]:hover{background:#fffbf8;outline:1px dashed #ffb380;cursor:text;}
+[contenteditable]:focus{background:#fffbf8;outline:2px solid var(--orange);}
+.ct-table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.4rem 0;}
+.ct-table thead tr{background:var(--primary);color:white;}
+.ct-table th,.ct-table td{padding:.38rem .5rem;text-align:center;border:1px solid var(--border);}
+.ct-table td.td-desc-ct{text-align:right;padding:.38rem .6rem;}
+.ct-totals{margin-top:.4rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.ct-tot-row{display:flex;justify-content:space-between;padding:.28rem .75rem;font-size:.82rem;border-bottom:1px solid var(--border);}
+.ct-tot-row:last-child{border-bottom:none;}
+.ct-tot-row.grand{background:var(--primary);color:white;font-weight:800;font-size:.88rem;}
+.ct-bank{background:var(--th-bg);border:1px solid var(--border);border-radius:6px;padding:.55rem .8rem;margin-top:.4rem;font-size:.8rem;line-height:2.1;direction:ltr;text-align:left;}
+.ct-signature{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:2rem;border-top:1.5px solid var(--border);padding-top:1.5rem;}
+.ct-sig-col{text-align:center;}
+.ct-sig-line{border-bottom:1.5px solid var(--primary);margin:2.2rem 1rem .3rem;}
+@media print{
+  body.contract-mode .topnav,body.contract-mode .workspace,body.contract-mode #toast,
+  body.contract-mode .overlay,body.contract-mode #loadOverlay,body.contract-mode #print-footer{display:none !important;}
+  body.contract-mode{min-height:0 !important;height:auto !important;overflow:visible !important;}
+  html{height:auto !important;overflow:visible !important;}
+  body.contract-mode .contract-overlay{position:static !important;overflow:visible !important;background:white !important;display:block !important;height:auto !important;}
+  body.contract-mode .ct-toolbar{display:none !important;}
+  body.contract-mode .ct-page{box-shadow:none !important;margin:0 !important;padding:.3cm 1cm !important;max-width:100% !important;height:auto !important;overflow:visible !important;}
+  .ct-totals{overflow:visible !important;}
+  [contenteditable]:hover,[contenteditable]:focus{background:transparent !important;outline:none !important;}
+  .ct-table{font-size:7.5pt !important;}
+  .ct-section-title{page-break-after:avoid;}
+  .ct-signature{page-break-inside:avoid;}
+}
 </style>
 </head>
 <body>
@@ -473,6 +525,14 @@ table.qt tbody tr.dragging{opacity:.4;}
       <div class="info-cell">
         <label>المندوب / Sales Rep</label>
         <input id="salesRep" placeholder="اسم المندوب">
+      </div>
+      <div class="info-cell">
+        <label>السجل التجاري / CR No.</label>
+        <input id="crNumber" placeholder="رقم السجل التجاري">
+      </div>
+      <div class="info-cell">
+        <label>البطاقة الضريبية / Tax Card</label>
+        <input id="taxCard" placeholder="رقم البطاقة الضريبية">
       </div>
     </div>
 
@@ -559,6 +619,20 @@ table.qt tbody tr.dragging{opacity:.4;}
   </main>
 </div>
 
+<!-- Contract Overlay -->
+<div class="contract-overlay" id="contractOverlay">
+  <div class="ct-toolbar">
+    <div class="ct-toolbar-title">عقد الاتفاق</div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-ghost" style="color:white;border-color:rgba(255,255,255,.3)" onclick="closeContract()">✕ إغلاق</button>
+      <button class="btn btn-ghost" style="color:white;border-color:rgba(255,255,255,.3)" onclick="openLoadContract()">📂 تحميل عقد</button>
+      <button class="btn btn-ghost" style="color:white;border-color:rgba(255,255,255,.3)" onclick="saveContract()">💾 حفظ</button>
+      <button class="btn btn-orange" onclick="printContract()">🖨️ طباعة العقد / PDF</button>
+    </div>
+  </div>
+  <div id="ctContent"></div>
+</div>
+
 <!-- Settings Modal -->
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
@@ -578,8 +652,12 @@ table.qt tbody tr.dragging{opacity:.4;}
     <input id="quotesFolderIn">
     <label>رابط Apps Script (لحفظ العروض)</label>
     <input id="appsScriptUrlIn" placeholder="https://script.google.com/macros/s/...../exec" style="direction:ltr;font-size:.78rem;">
+    <label>معرّف مجلد Drive (العقود المحفوظة)</label>
+    <input id="contractsFolderIn" style="direction:ltr;font-size:.78rem;">
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeSettings()">إلغاء</button>
+      <button class="btn btn-outline" onclick="closeSettings();openContract()">📄 CTC</button>
+      <button class="btn btn-outline" onclick="closeSettings();openLoadContract()">📂 LC</button>
       <button class="btn btn-orange" onclick="saveSettings()">💾 حفظ وتحميل</button>
     </div>
   </div>
@@ -619,6 +697,23 @@ table.qt tbody tr.dragging{opacity:.4;}
   </div>
 </div>
 
+<!-- Load Contract Modal -->
+<div class="overlay" id="loadContractOverlay">
+  <div class="modal">
+    <h2>📂 تحميل عقد محفوظ</h2>
+    <p class="sub">بحث برقم العقد / Search by Contract No.</p>
+    <div style="display:flex;gap:.5rem;margin-bottom:.5rem;">
+      <input id="loadContractId" placeholder="Q-2026-001 أو *" style="flex:1;padding:.48rem .78rem;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:.86rem;direction:ltr;"
+        onkeydown="if(event.key==='Enter')searchContractInDrive()">
+      <button class="btn btn-orange" onclick="searchContractInDrive()">🔍 بحث</button>
+    </div>
+    <div id="loadContractResults" style="max-height:320px;overflow-y:auto;margin-bottom:.85rem;"></div>
+    <div class="modal-btns" style="margin-top:.75rem;">
+      <button class="btn btn-ghost" onclick="closeLoadContract()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <!-- Print footer: fixed orange bar (text rendered by @page margin boxes) -->
 <!-- Fixed orange bar with static text on left/right -->
 <div class="print-footer" id="print-footer">
@@ -634,6 +729,7 @@ let cfg={
   sheetName:localStorage.getItem('gsheet_name')||'المنتجات',
   folderId:localStorage.getItem('gdrive_folder')||'1B2VMxRZ8rQfU76c4jIhrXhFr56V9M3MS',
   quotesFolderId:localStorage.getItem('gquotes_folder')||'14qmFQmExI9gkEt5kHGBh-ySeU249m2r5',
+  contractsFolderId:localStorage.getItem('gcontracts_folder')||'11SGbxw6NyxB5hpZsBXa5QGRWhE3OYKJQ',
   appsScriptUrl:localStorage.getItem('gapps_script_url')||'',
   userId:localStorage.getItem('guser_id')||'00',
 };
@@ -672,6 +768,7 @@ function openSettings(){
   document.getElementById('sheetNameIn').value=cfg.sheetName;
   document.getElementById('folderIdIn').value=cfg.folderId;
   document.getElementById('quotesFolderIn').value=cfg.quotesFolderId;
+  document.getElementById('contractsFolderIn').value=cfg.contractsFolderId;
   document.getElementById('appsScriptUrlIn').value=cfg.appsScriptUrl;
   document.getElementById('settingsOverlay').classList.add('open');
 }
@@ -683,6 +780,7 @@ function saveSettings(){
   cfg.sheetName=document.getElementById('sheetNameIn').value.trim();
   cfg.folderId=document.getElementById('folderIdIn').value.trim();
   cfg.quotesFolderId=document.getElementById('quotesFolderIn').value.trim();
+  cfg.contractsFolderId=document.getElementById('contractsFolderIn').value.trim()||'11SGbxw6NyxB5hpZsBXa5QGRWhE3OYKJQ';
   cfg.appsScriptUrl=document.getElementById('appsScriptUrlIn').value.trim();
   localStorage.setItem('guser_id',cfg.userId);
   localStorage.setItem('gapi_key',cfg.apiKey);
@@ -690,6 +788,7 @@ function saveSettings(){
   localStorage.setItem('gsheet_name',cfg.sheetName);
   localStorage.setItem('gdrive_folder',cfg.folderId);
   localStorage.setItem('gquotes_folder',cfg.quotesFolderId);
+  localStorage.setItem('gcontracts_folder',cfg.contractsFolderId);
   localStorage.setItem('gapps_script_url',cfg.appsScriptUrl);
   closeSettings();loadAll();
 }
@@ -1061,6 +1160,8 @@ function getQuoteState() {
     clientCo: document.getElementById('clientCo').value,
     project: document.getElementById('project').value,
     salesRep: document.getElementById('salesRep').value,
+    crNumber: document.getElementById('crNumber').value,
+    taxCard: document.getElementById('taxCard').value,
     items: items.map(it => ({ code: it.code, desc: it.desc, price: it.price, unitPrice: it.unitPrice, qty: it.qty, installCost: it.installCost||0, _isAuto: it._isAuto||false, _manualPrice: it._manualPrice||false })),
     discountPercent: parseFloat(document.getElementById('discountPercent').value) || 0,
     vatEnabled: document.getElementById('vatToggle').checked,
@@ -1078,6 +1179,8 @@ function loadQuoteState(state) {
   document.getElementById('clientCo').value = state.clientCo || '';
   document.getElementById('project').value = state.project || '';
   document.getElementById('salesRep').value = state.salesRep || '';
+  document.getElementById('crNumber').value = state.crNumber || '';
+  document.getElementById('taxCard').value = state.taxCard || '';
   document.getElementById('discountPercent').value = state.discountPercent || 0;
   document.getElementById('vatToggle').checked = state.vatEnabled !== false;
   document.getElementById('techNotes').value = state.techNotes || '';
@@ -1319,6 +1422,341 @@ function toggleCatalog() {
   const lbl = document.getElementById('toggleLabel');
   sb.classList.toggle('open');
   lbl.textContent = sb.classList.contains('open') ? 'إخفاء كتالوج المنتجات' : 'عرض كتالوج المنتجات';
+}
+
+// ── CONTRACT ─────────────────────────────────────────────────────────────────
+function openContract(){
+
+  // Financials
+  const sub     = items.reduce((s,it)=>s+it.unitPrice*it.qty,0);
+  const discPct = parseFloat(document.getElementById('discountPercent').value)||0;
+  const discAmt = sub*discPct/100;
+  const afterD  = sub-discAmt;
+  const vatOn   = document.getElementById('vatToggle').checked;
+  const vatAmt  = vatOn ? afterD*0.15 : 0;
+  const grand   = afterD+vatAmt;
+
+  // Quotation fields
+  const clientName = document.getElementById('clientName').value || '___________';
+  const clientCo   = document.getElementById('clientCo').value   || '___________';
+  const crNumber   = document.getElementById('crNumber').value   || '___________';
+  const taxCard    = document.getElementById('taxCard').value    || '___________';
+  const project    = document.getElementById('project').value    || '';
+  const quoteNo    = document.getElementById('quoteNo').value;
+  const quoteDate  = document.getElementById('quoteDate').value;
+  const ctNo       = 'MTQCT-' + quoteNo.split('-').pop();
+
+  // Date display
+  const dateStr = (d => `${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()} م`)
+    (quoteDate ? new Date(quoteDate) : new Date());
+
+  const f2 = v => (Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  const logoSrc = document.querySelector('.company-logo').src;
+
+  // Items table
+  const itemRowsHtml = items.map((it,i)=>{
+    const imgUrl = getImg(it.code);
+    const imgCell = imgUrl
+      ? `<img src="${imgUrl}" style="width:50px;height:50px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'">`
+      : `<div style="width:50px;height:50px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">${it.code==='INS'?'🔧':'📦'}</div>`;
+    return `<tr>
+      <td>${i+1}</td>
+      <td style="width:62px;padding:.25rem">${imgCell}</td>
+      <td style="font-weight:700">${it.code}</td>
+      <td class="td-desc-ct">${it.desc}</td>
+      <td>${it.qty}</td>
+      <td style="white-space:nowrap">${f2(it.unitPrice)} ر.س</td>
+      <td style="white-space:nowrap;font-weight:700">${f2(it.unitPrice*it.qty)} ر.س</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:1rem;font-size:.8rem">— لا توجد أصناف —</td></tr>`;
+
+
+  // Payment amounts
+  const p50=grand*.5, p40=grand*.4, p10=grand*.1;
+
+  document.getElementById('ctContent').innerHTML = `
+<div class="ct-page">
+
+  <!-- Header -->
+  <div class="ct-hdr">
+    <img src="${logoSrc}" class="ct-logo" alt="Motqinon Tech">
+    <div class="ct-meta-box">
+      <div class="ct-meta-row"><label>رقم العقد</label><input id="ctNo" value="${ctNo}" style="direction:ltr"></div>
+      <div class="ct-meta-row"><label>التاريخ</label><input id="ctDate" value="${dateStr}"></div>
+    </div>
+  </div>
+  <div style="text-align:center;margin:.6rem 0 .2rem">
+    <div class="ct-contract-title">عقد اتفاق لتوريد وتركيب</div>
+    <div class="ct-contract-subtitle" contenteditable="true">${project||'نظام الانتركوم والمنزل الذكي'}</div>
+  </div>
+  <div class="ct-accent"></div>
+
+  <!-- Parties -->
+  <div class="ct-section">
+    <div class="ct-section-title">الطرف الأول (العميل / First Party)</div>
+    <div class="ct-section-body" contenteditable="true">
+      <strong>${clientCo}</strong>، سجل تجاري رقم <strong>${crNumber}</strong>، البطاقة الضريبية رقم <strong>${taxCard}</strong>،
+      ويمثلها الأستاذ/ <strong>${clientName}</strong> ويشار إليها لاحقًا بـ "الطرف الأول"،
+      ومقرها: ___________ جوال: ___________
+    </div>
+  </div>
+  <div class="ct-section">
+    <div class="ct-section-title">الطرف الثاني (المورد / Second Party)</div>
+    <div class="ct-section-body" contenteditable="true">
+      <strong>شركة متقنون تك للتجارة</strong>، ويمثلها الأستاذ/ <strong>محمد عبد الله الحامدي</strong>،
+      ويشار إليها لاحقًا بـ "الطرف الثاني"، فرع مكة المكرمة – حي العوالي – مجمع الشريهي التجاري الإداري،
+      سجل تجاري رقم 4031318733، جوال: 0580136000.
+    </div>
+  </div>
+
+  <!-- Preamble -->
+  <div class="ct-section">
+    <div class="ct-section-title">تمهيد</div>
+    <div class="ct-section-body" contenteditable="true">
+      حيث إن الطرف الأول يرغب في تنفيذ أعمال توريد ${project||'نظام الانتركوم والمنزل الذكي'}،
+      وحيث أبدى الطرف الثاني استعداده لتنفيذ تلك الأعمال بما لديه من خبرة فنية وإمكانات تؤهله لذلك،
+      وبعد قيامه بزيارة الموقع والاطلاع على المواصفات المطلوبة، فقد تم الاتفاق بين الطرفين على ما يلي:
+    </div>
+  </div>
+
+  <!-- Article 1 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (1): مرفقات العقد</div>
+    <div class="ct-section-body" contenteditable="true">
+      تُعد المقدمة أعلاه، وجداول الكميات والأسعار والمواصفات الفنية المرفقة والمعتمدة من الطرفين، جزءًا لا يتجزأ من هذا العقد، وتُعد أساسًا للتوريد والتنفيذ.
+    </div>
+  </div>
+
+  <!-- Article 2 (specs + prices table) -->
+  <div class="ct-section ct-section-table">
+    <div class="ct-section-title">المادة (2): المواصفات الفنية والأسعار</div>
+    <div style="font-size:.8rem;margin-bottom:.45rem" contenteditable="true">
+      يلتزم الطرف الثاني بتوريد جميع المواد طبقًا للمواصفات الفنية المعتمدة لكل صنف كما هو موضح في الجدول التالي، وتُعد الأسعار الواردة نهائية وثابتة، ولا يجوز تعديلها إلا بموافقة خطية من الطرفين عند حدوث تغييرات رسمية في المشروع أو المواصفات.
+    </div>
+    <table class="ct-table">
+      <thead>
+        <tr>
+          <th>#</th><th>صورة</th><th>الموديل</th>
+          <th>الوصف / Description</th>
+          <th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody>${itemRowsHtml}</tbody>
+    </table>
+    <div class="ct-totals">
+      <div class="ct-tot-row"><span>المجموع / Subtotal</span><span>${f2(sub)} ر.س</span></div>
+      ${discPct>0?`<div class="ct-tot-row"><span>خصم ${discPct}%</span><span style="color:var(--red)">- ${f2(discAmt)} ر.س</span></div>
+      <div class="ct-tot-row"><span>السعر بعد الخصم</span><span>${f2(afterD)} ر.س</span></div>`:''}
+      ${vatOn?`<div class="ct-tot-row"><span>ضريبة القيمة المضافة 15% / VAT</span><span>${f2(vatAmt)} ر.س</span></div>`:''}
+      <div class="ct-tot-row grand"><span>الإجمالي شامل ضريبة القيمة المضافة / Grand Total</span><span>${f2(grand)} ر.س</span></div>
+    </div>
+  </div>
+
+  <!-- Article 3 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (3): نطاق الأعمال</div>
+    <div class="ct-section-body" contenteditable="true">
+      يشمل هذا العقد توريد وتركيب المواد والأنظمة الواردة فيه وفقًا للمواصفات الفنية المعتمدة وجداول الكميات المرفقة.
+    </div>
+  </div>
+
+  <!-- Article 4 -->
+  <div class="ct-section">
+    <div class="ct-section-title" style="page-break-after:avoid">المادة (4): الدفعات وآلية السداد</div>
+    <div class="ct-section-body" contenteditable="true">
+      <p>يتم سداد قيمة هذا العقد على دفعات وفقًا لآلية السداد التالية:</p>
+      <p><strong>إجمالي قيمة العقد (شامل ضريبة القيمة المضافة):</strong> مبلغ وقدره (<strong>${f2(grand)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>1- الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد، وقدرها (<strong>${f2(p50)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>2- الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع، وقدرها (<strong>${f2(p40)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>3- الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة، وقدرها (<strong>${f2(p10)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p style="margin-top:.5rem">يتم تحويل الدفعات إلى الحساب البنكي التالي الخاص بالطرف الثاني:</p>
+    </div>
+    <div class="ct-bank" contenteditable="true" style="page-break-inside:avoid">
+      اسم الحساب: MOTQINON TECH TRADING COMPANY<br>
+      اسم البنك: البنك السعودي البريطاني (ساب) – SABB<br>
+      رقم الحساب: SASABB034361865001<br>
+      رقم الآيبان: SA9545000000034361865001
+    </div>
+  </div>
+
+  <!-- Article 5 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (5): مدة التوريد والتركيب والبرمجة</div>
+    <div class="ct-section-body" contenteditable="true">
+      يتم توريد المواد والمعدات المتفق عليها خلال فترة تتراوح من (45) إلى (60) يوم عمل، تبدأ من تاريخ استلام الطرف الثاني للدفعة الأولى المنصوص عليها في المادة (4)، وبعد استلام التعميد الخطي النهائي من الطرف الأول على المواصفات، واتجاهات الأبواب، وأرقام الغرف، والتصميم.
+      لا يبدأ تنفيذ العقد ولا يلتزم الطرف الثاني بأي أعمال توريد أو تجهيز أو تركيب، إلا بعد استكمال المتطلبات المذكورة أعلاه واستلام الدفعة الأولى.
+    </div>
+  </div>
+
+  <!-- Article 6 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (6): الاختصاص القضائي</div>
+    <div class="ct-section-body" contenteditable="true">
+      تخضع أحكام هذا العقد للأنظمة واللوائح المعمول بها في المملكة العربية السعودية، وتكون المحاكم المختصة داخل المملكة هي المرجع الحصري للفصل في أي خلاف أو نزاع ينشأ عن تنفيذ أو تفسير أي بند من بنود العقد.
+    </div>
+  </div>
+
+  <!-- Article 7 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (7): الضمان والصيانة</div>
+    <div class="ct-section-body" contenteditable="true">
+      <p>• يضمن الطرف الثاني جميع المواد والأنظمة محل العقد لمدة سنتين تبدأ من تاريخ التركيب والتشغيل الفعلي، ويقتصر نطاق الضمان على العيوب المصنعية وأي خلل ناتج عن البرمجة.</p>
+      <p>لا يشمل الضمان أعطال ناجمة عن سوء الاستخدام، العبث، التعديلات غير المصرح بها، التوصيلات الكهربائية غير المطابقة للمواصفات، أو الاستهلاك الطبيعي، أو العوامل الخارجية، أو انقطاع أو تذبذب التيار الكهربائي.</p>
+      <p>• يلتزم الطرف الثاني بتوفير قطع الغيار لمدة لا تقل عن عشر (10) سنوات من تاريخ التوريد.</p>
+    </div>
+  </div>
+
+  <!-- Article 8 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (8): نسخ العقد</div>
+    <div class="ct-section-body" contenteditable="true">
+      حرر هذا العقد من نسختين أصليتين، تسلم كل طرف نسخة للعمل بموجبها، وتعد كلا النسختين متطابقتين في الحجية القانونية.
+    </div>
+  </div>
+
+  <!-- Signatures -->
+  <div class="ct-signature">
+    <div class="ct-sig-col">
+      <div style="font-weight:800;font-size:.88rem;color:var(--orange)">الطرف الأول / First Party</div>
+      <div style="font-weight:700;margin:.3rem 0" contenteditable="true">${clientCo}</div>
+      <div style="font-size:.82rem;color:var(--muted)" contenteditable="true">${clientName}</div>
+      <div class="ct-sig-line"></div>
+      <div style="font-size:.72rem;color:var(--muted)">التوقيع والختم / Signature &amp; Stamp</div>
+    </div>
+    <div class="ct-sig-col">
+      <div style="font-weight:800;font-size:.88rem;color:var(--orange)">الطرف الثاني / Second Party</div>
+      <div style="font-weight:700;margin:.3rem 0">شركة متقنون تك للتجارة</div>
+      <div style="font-size:.82rem;color:var(--muted)">محمد عبد الله الحامدي</div>
+      <div class="ct-sig-line"></div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">التوقيع والختم / Signature &amp; Stamp</div>
+      <div style="width:166px;height:166px;margin:0 auto;">
+        <img src="https://lh3.googleusercontent.com/d/1leltgheDy9_jf3kE9FLIs7uGAW_oMNeB"
+             style="width:166px;height:166px;object-fit:contain;opacity:.88"
+             onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+
+</div>`;
+
+  document.getElementById('contractOverlay').style.display='block';
+  document.body.classList.add('contract-mode');
+  document.getElementById('contractOverlay').scrollTop=0;
+}
+
+function closeContract(){
+  document.getElementById('contractOverlay').style.display='none';
+  document.body.classList.remove('contract-mode');
+}
+function printContract(){
+  const overlay = document.getElementById('contractOverlay');
+  const content = document.getElementById('ctContent');
+  document.body.appendChild(content);
+  overlay.style.display='none';
+  document.body.classList.add('contract-mode');
+  const restore = ()=>{
+    overlay.appendChild(content);
+    overlay.style.display='block';
+    window.removeEventListener('afterprint', restore);
+  };
+  window.addEventListener('afterprint', restore);
+  window.print();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('contractOverlay').style.display==='block') closeContract();
+    if(document.getElementById('loadContractOverlay').classList.contains('open')) closeLoadContract();
+  }
+});
+
+async function saveContract(){
+  if(!cfg.appsScriptUrl){ toast('⚠️ أدخل رابط Apps Script في الإعدادات'); return; }
+  const ctNoEl = document.getElementById('ctNo');
+  const ctNo = ctNoEl ? ctNoEl.value.trim() : '';
+  if(!ctNo){ toast('⚠️ أدخل رقم العقد'); return; }
+  toast('⏳ جاري حفظ العقد...');
+  try{
+    const res = await fetch(cfg.appsScriptUrl,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        fileName: ctNo + '.json',
+        state:{ html: document.getElementById('ctContent').innerHTML },
+        folderId: cfg.contractsFolderId,
+      }),
+    });
+    const data = await res.json();
+    if(data.success){ toast('✅ تم حفظ العقد: ' + ctNo + (data.action==='updated'?' (تحديث)':' (جديد)')); }
+    else{ throw new Error(data.error||'Unknown error'); }
+  }catch(e){ toast('❌ خطأ في الحفظ: ' + e.message); }
+}
+
+function openLoadContract(){
+  document.getElementById('loadContractId').value='*';
+  document.getElementById('loadContractOverlay').classList.add('open');
+  searchContractInDrive();
+}
+function closeLoadContract(){
+  document.getElementById('loadContractOverlay').classList.remove('open');
+}
+
+async function searchContractInDrive(){
+  const q = document.getElementById('loadContractId').value.trim();
+  const resultsEl = document.getElementById('loadContractResults');
+  if(!q){ toast('⚠️ أدخل رقم العقد أو * لعرض الكل'); return; }
+  if(!cfg.apiKey){ toast('⚠️ أدخل مفتاح API أولاً'); return; }
+  resultsEl.innerHTML='<div style="text-align:center;padding:1rem"><div class="spin"></div><p style="font-size:.78rem;color:var(--muted)">جاري البحث...</p></div>';
+  try{
+    const showAll = q==='*';
+    const apiQ = showAll
+      ? `'${cfg.contractsFolderId}'+in+parents+and+trashed=false`
+      : `name+contains+'${encodeURIComponent(q)}'+and+'${cfg.contractsFolderId}'+in+parents+and+trashed=false`;
+    const url=`https://www.googleapis.com/drive/v3/files?q=${apiQ}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=200&key=${cfg.apiKey}`;
+    const res=await fetch(url);
+    const data=await res.json();
+    if(!res.ok){
+      const msg=(data.error&&data.error.message)||('HTTP '+res.status);
+      const hint=res.status===403?'<br><small style="color:var(--muted)">تأكد أن مجلد العقود مشارك بصلاحية "أي شخص لديه الرابط"</small>':'';
+      resultsEl.innerHTML=`<div style="text-align:center;color:var(--red);font-size:.82rem;padding:1rem">❌ ${msg}${hint}</div>`;
+      return;
+    }
+    const files=(data.files||[]).filter(f=>f.name.endsWith('.json'));
+    if(!files.length){
+      resultsEl.innerHTML=`<div style="text-align:center;color:var(--red);font-size:.82rem;padding:1rem">لم يتم العثور على عقود<br><small style="color:var(--muted)">تأكد من حفظ العقد أولاً أو من صحة معرّف مجلد العقود</small></div>`;
+      return;
+    }
+    resultsEl.innerHTML=`<div style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem;text-align:center">${files.length} عقد</div>`+
+      files.map(f=>{
+        const name=f.name.replace('.json','');
+        const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleDateString('ar-SA'):'';
+        return `<div class="cat-row" style="margin-bottom:.3rem;cursor:pointer" onclick="loadContractFromDrive('${f.id}','${name}')">
+          <div class="cat-ph" style="width:36px;height:36px;font-size:.85rem">📋</div>
+          <div class="cat-info"><span class="cat-code">${name}</span><div class="cat-price">${date}</div></div>
+          <button class="add-btn2" style="background:var(--orange)" title="فتح">↓</button>
+        </div>`;
+      }).join('');
+  }catch(e){
+    resultsEl.innerHTML=`<div style="text-align:center;color:var(--red);font-size:.82rem;padding:1rem">❌ خطأ: ${e.message}</div>`;
+    console.error('searchContractInDrive error:',e);
+  }
+}
+
+async function loadContractFromDrive(fileId, name){
+  toast('⏳ جاري تحميل العقد...');
+  try{
+    const url=`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${cfg.apiKey}`;
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const state=await res.json();
+    if(!state.html) throw new Error('ملف غير صالح');
+    document.getElementById('ctContent').innerHTML=state.html;
+    closeLoadContract();
+    document.getElementById('contractOverlay').style.display='block';
+    document.body.classList.add('contract-mode');
+    document.getElementById('contractOverlay').scrollTop=0;
+    toast('✅ تم تحميل العقد: '+name);
+  }catch(e){ toast('❌ خطأ في التحميل: '+e.message); }
 }
 </script>
 </body>
