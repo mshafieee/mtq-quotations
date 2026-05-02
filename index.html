@@ -940,7 +940,7 @@ function updateQty(i,v){
 function updateRowTotal(i){
   const rows=document.querySelectorAll('#quoteBody tr');
   const tds=rows[i]?.querySelectorAll('td');
-  if(tds&&tds[6]){
+  if(tds&&tds[7]){
     const t=items[i].unitPrice*items[i].qty;
     const r=Math.round(t*100)/100;
     const origTotal=Math.round((items[i].price||0)*items[i].qty*100)/100;
@@ -948,10 +948,10 @@ function updateRowTotal(i){
     const origFmt=priceChanged?origTotal.toLocaleString('en-US',{minimumFractionDigits:(origTotal%1!==0)?2:0,maximumFractionDigits:2})+' ر.س':'';
     const strikeHtml=origFmt?`<div style="text-decoration:line-through;color:var(--muted);font-size:.72rem;font-weight:500;line-height:1.3">${origFmt}</div>`:'';
     if(r===0){
-      tds[6].innerHTML=strikeHtml+'<span style="color:#c0392b;font-weight:800">FREE</span>';
+      tds[7].innerHTML=strikeHtml+'<span style="color:#c0392b;font-weight:800">FREE</span>';
     } else{
       const dec=(r%1)!==0;
-      tds[6].innerHTML=strikeHtml+r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';
+      tds[7].innerHTML=strikeHtml+r.toLocaleString('en-US',{minimumFractionDigits:dec?((r*10%1!==0)?2:1):0,maximumFractionDigits:2})+' ر.س';
     }
   }
 }
