@@ -149,6 +149,9 @@ table.qt tbody tr:nth-child(even){background:#fafafa;}
 table.qt tbody tr:hover{background:#fff5f0;}
 table.qt td{padding:.52rem .7rem;text-align:center;vertical-align:middle;border-left:1px solid var(--border);}
 table.qt td:last-child{border-left:none;}
+.drag-handle{cursor:grab;color:var(--muted);font-size:1.1rem;user-select:none;padding:0 .3rem !important;width:18px;}.drag-handle:active{cursor:grabbing;}
+table.qt tbody tr.drag-over{background:#fff0e6 !important;box-shadow:inset 0 -2px 0 var(--orange);}
+table.qt tbody tr.dragging{opacity:.4;}
 .td-desc{text-align:right !important;white-space:normal;word-break:break-word;}
 .td-pic{width:86px;}
 .td-pic img{width:72px;height:72px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:white;display:block;margin:0 auto;}
@@ -494,6 +497,7 @@ table.qt td:last-child{border-left:none;}
       <table class="qt">
         <thead>
           <tr>
+            <th class="no-print"></th>
             <th>#</th>
             <th>صورة</th>
             <th>الكود</th>
@@ -623,7 +627,7 @@ table.qt td:last-child{border-left:none;}
 </div>
 
 <script>
-let products=[],filtered=[],items=[],imgMap={},rawRows=[];
+let products=[],filtered=[],items=[],imgMap={},rawRows=[],_dragIdx=null;
 let cfg={
   apiKey:localStorage.getItem('gapi_key')||'',
   sheetId:localStorage.getItem('gsheet_id')||'1XEUFJylw6NKiFDuJPMhtoVHtEQHEKkgszUq8_vPRKfo',
@@ -900,7 +904,7 @@ function renderQuote(){
   const tb=document.getElementById('quoteBody');
   document.getElementById('itemCount').textContent=items.length;
   if(!items.length){
-    tb.innerHTML='<tr><td colspan="8"><div class="empty-s"><div class="ei">📋</div><p>اختر منتجات من الكتالوج على اليسار</p></div></td></tr>';
+    tb.innerHTML='<tr><td colspan="9"><div class="empty-s"><div class="ei">📋</div><p>اختر منتجات من الكتالوج على اليسار</p></div></td></tr>';
     recalc();return;
   }
   tb.innerHTML=items.map((it,i)=>{
@@ -909,7 +913,10 @@ function renderQuote(){
     const th=img?`<img src="${img}" onerror="this.style.display='none'">`:`<div class="td-pic-ph">${isIns?'🔧':'📦'}</div>`;
     const t=it.unitPrice*it.qty;
     const rowStyle = isIns ? 'background:#fff8f4 !important;border-top:2px solid var(--orange)' : '';
-    return `<tr style="${rowStyle}">
+    const dragAttrs = isIns ? '' : `draggable="true" data-idx="${i}"`;
+    const dragCell = isIns ? `<td class="no-print"></td>` : `<td class="no-print drag-handle" title="اسحب لإعادة الترتيب">⠿</td>`;
+    return `<tr ${dragAttrs} style="${rowStyle}">
+      ${dragCell}
       <td style="font-weight:700;color:var(--muted);font-size:.78rem">${i+1}</td>
       <td class="td-pic">${th}</td>
       <td><span class="code-tag" ${isIns?'style="background:#ffe8d6;border-color:var(--orange);color:var(--orange)"':''}>${it.code}</span></td>
@@ -940,6 +947,32 @@ function renderQuote(){
       <td class="no-print"><button class="btn btn-del" onclick="removeItem(${i})">✕</button></td>
     </tr>`;
   }).join('');
+  // Drag-and-drop reorder
+  tb.querySelectorAll('tr[draggable]').forEach(row=>{
+    row.addEventListener('dragstart',e=>{
+      _dragIdx=parseInt(row.dataset.idx);
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    row.addEventListener('dragend',()=>{
+      tb.querySelectorAll('tr').forEach(r=>r.classList.remove('dragging','drag-over'));
+    });
+    row.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      tb.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop',e=>{
+      e.preventDefault();
+      const dropIdx=parseInt(row.dataset.idx);
+      if(_dragIdx===null||_dragIdx===dropIdx){_dragIdx=null;return;}
+      const moved=items.splice(_dragIdx,1)[0];
+      items.splice(dropIdx,0,moved);
+      _dragIdx=null;
+      renderQuote();
+    });
+  });
   recalc();
 }
 
