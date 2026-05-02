@@ -656,8 +656,8 @@ table.qt tbody tr.dragging{opacity:.4;}
     <input id="contractsFolderIn" style="direction:ltr;font-size:.78rem;">
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeSettings()">إلغاء</button>
-      <button class="btn btn-outline" onclick="closeSettings();openContract()">📄 CTC</button>
-      <button class="btn btn-outline" onclick="closeSettings();openLoadContract()">📂 LC</button>
+      <button id="ctcBtn" class="btn btn-outline" onclick="closeSettings();openContract()" style="display:none">📄 CTC</button>
+      <button id="lcBtn" class="btn btn-outline" onclick="closeSettings();openLoadContract()" style="display:none">📂 LC</button>
       <button class="btn btn-orange" onclick="saveSettings()">💾 حفظ وتحميل</button>
     </div>
   </div>
@@ -770,6 +770,9 @@ function openSettings(){
   document.getElementById('quotesFolderIn').value=cfg.quotesFolderId;
   document.getElementById('contractsFolderIn').value=cfg.contractsFolderId;
   document.getElementById('appsScriptUrlIn').value=cfg.appsScriptUrl;
+  const isAdmin = (cfg.userId||'') === '99';
+  document.getElementById('ctcBtn').style.display = isAdmin ? '' : 'none';
+  document.getElementById('lcBtn').style.display  = isAdmin ? '' : 'none';
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open');}
@@ -1265,8 +1268,13 @@ async function listUserQuotes() {
     // Fetch all JSON files in the quotes folder (up to 200), newest first
     const url = `https://www.googleapis.com/drive/v3/files?q='${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=200&key=${cfg.apiKey}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    if (!res.ok){
+      const msg=(data.error&&data.error.message)||('HTTP '+res.status);
+      const hint=res.status===403?'<br><small>تأكد أن المجلد مشارك بصلاحية "أي شخص لديه الرابط - قارئ"</small>':'';
+      resultsEl.innerHTML=`<div style="color:var(--red);font-size:.82rem;padding:.75rem;text-align:center">❌ ${msg}${hint}</div>`;
+      return;
+    }
 
     const showAll = userId === '*';
     // Filter: all .json files (if *) or those whose seq part starts with the userId digits
@@ -1350,7 +1358,12 @@ async function loadQuoteFromDrive(fileId, name) {
   try {
     const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${cfg.apiKey}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok){
+      const data = await res.json().catch(()=>({}));
+      const msg = (data.error&&data.error.message)||('HTTP '+res.status);
+      const hint = res.status===403 ? ' — تأكد أن الملف مشارك بصلاحية "أي شخص لديه الرابط"' : '';
+      throw new Error(msg+hint);
+    }
     const state = await res.json();
 
     loadQuoteState(state);
@@ -1487,7 +1500,7 @@ function openContract(){
     </div>
   </div>
   <div style="text-align:center;margin:.6rem 0 .2rem">
-    <div class="ct-contract-title">عقد اتفاق لتوريد وتركيب</div>
+    <div class="ct-contract-title" contenteditable="true">عقد توريد وتركيب</div>
     <div class="ct-contract-subtitle" contenteditable="true">${project||'نظام الانتركوم والمنزل الذكي'}</div>
   </div>
   <div class="ct-accent"></div>
