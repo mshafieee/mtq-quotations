@@ -158,6 +158,15 @@ table.qt tbody tr.dragging{opacity:.4;}
 .td-pic-ph{width:72px;height:72px;border-radius:6px;background:var(--th-bg);display:grid;place-items:center;font-size:1.4rem;margin:0 auto;border:1px solid var(--border);}
 .code-tag{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.04em;color:var(--orange);border:1px solid #ffd0b0;background:#fff4ee;padding:.2rem .6rem;border-radius:4px;white-space:nowrap;min-width:72px;text-align:center;}
 .desc-text{font-size:.79rem;font-weight:600;line-height:1.4;word-break:break-word;}
+.desc-edit{
+  min-width:60px;width:100%;cursor:text;border-radius:4px;
+  padding:.1rem .2rem;outline:none;word-break:break-word;
+  transition:background .12s,outline .12s;
+  font-size:.79rem;font-weight:600;line-height:1.4;font-family:'Cairo',sans-serif;
+}
+.desc-edit:hover{background:#fffbf8;outline:1px dashed #ffb380;}
+.desc-edit:focus{background:#fff8f4;outline:2px solid var(--orange);}
+.desc-modified{text-decoration:underline;}
 .editable{
   border:1.5px solid transparent;border-radius:5px;
   padding:.22rem .38rem;font-family:'Cairo',sans-serif;
@@ -192,8 +201,10 @@ table.qt tbody tr.dragging{opacity:.4;}
 .discount-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem .85rem;border-bottom:1px solid var(--border);}
 .discount-row .tl{color:var(--muted);font-weight:600;font-size:.78rem;}
 .discount-row .tv{font-weight:800;display:flex;align-items:center;gap:4px;}
-.discount-row input{width:58px;border:1.5px solid var(--border);border-radius:6px;padding:.2rem;font-family:'Cairo',sans-serif;font-size:.82rem;text-align:center;}
+.discount-row input{width:54px;border:1.5px solid var(--border);border-radius:6px;padding:.2rem;font-family:'Cairo',sans-serif;font-size:.82rem;text-align:center;direction:ltr;}
 .discount-row input:focus{outline:none;border-color:var(--orange);}
+.disc-sep{font-size:.7rem;color:var(--border2);margin:0 1px;}
+.disc-print-only{display:none;font-weight:800;font-size:.84rem;}
 .tot-r.grand-row{background:var(--primary);padding:.55rem .85rem;}
 .tot-r.grand-row .tl{color:rgba(255,255,255,.65);font-size:.78rem;}
 .tot-r.grand-row .tv{color:var(--orng2);font-size:1rem;font-weight:900;}
@@ -359,13 +370,20 @@ table.qt tbody tr.dragging{opacity:.4;}
   .notes-area label{ color:var(--muted) !important; }
   .validity-inp{ border:none !important; background:transparent !important; font-size:8pt !important; }
 
+  /* Editable description in print */
+  .desc-edit{ outline:none !important; background:transparent !important; padding:0 !important; cursor:default !important; }
+
   /* Remove all input borders */
   .editable{ border:none !important; background:transparent !important; padding:0 !important; }
   .info-cell input{ border:none !important; background:transparent !important; }
   .meta-block input{ border:none !important; background:transparent !important; color:var(--text) !important; }
-  .discount-row input{ border:none !important; background:transparent !important; }
+  .discount-row .disc-inputs{ display:none !important; }
+  .disc-print-only{ display:block !important; }
 
 
+
+  /* Switch to system font so Arabic text is selectable/copyable in the PDF */
+  body, * { font-family:'Tahoma','Arial',sans-serif !important; }
 
   @page{ margin:1cm; margin-bottom:1.7cm; size:A4 portrait; }
 
@@ -451,6 +469,7 @@ table.qt tbody tr.dragging{opacity:.4;}
   <div class="nav-btns">
     <button class="btn btn-ghost" onclick="openLoadQuote()">📂 تحميل عرض</button>
     <button class="btn btn-outline" onclick="openSettings()">⚙️ الإعدادات</button>
+    <button class="btn btn-outline no-print" onclick="exportToExcel()" title="تصدير إلى Excel">📊 Excel</button>
     <button class="btn btn-orange" onclick="doPrint()">🖨️ طباعة / PDF</button>
   </div>
 </nav>
@@ -582,13 +601,17 @@ table.qt tbody tr.dragging{opacity:.4;}
           <span class="tv" id="subTotal">0 ر.س</span>
         </div>
         <div class="discount-row">
-          <span class="tl">خصم / Discount % <span id="discountLabel" style="color:var(--red);font-size:.72rem;"></span></span>
-          <span class="tv" style="display:flex;align-items:center;gap:6px">
-            <input type="number" id="discountPercent" min="0" max="100" step="1" value="0"
-              onchange="syncDiscount(this.value)" oninput="syncDiscount(this.value)"
-              style="width:52px;border:1.5px solid var(--border);border-radius:6px;padding:.2rem;font-family:'Cairo',sans-serif;font-size:.82rem;text-align:center;direction:ltr;">
+          <span class="tl">خصم / Discount</span>
+          <span class="disc-inputs" style="display:flex;align-items:center;gap:5px">
+            <input type="number" id="discountPercent" min="0" max="100" step="0.01" placeholder="0"
+              oninput="onDiscPctInput(this.value)">
             <span style="font-size:.75rem;color:var(--muted)">%</span>
+            <span class="disc-sep">|</span>
+            <input type="number" id="discountValue" min="0" step="0.01" placeholder="0"
+              style="width:65px" oninput="onDiscValInput(this.value)">
+            <span style="font-size:.75rem;color:var(--muted)">ر.س</span>
           </span>
+          <span id="discountPrintAmt" class="disc-print-only"></span>
         </div>
         <div class="tot-r">
           <span class="tl">بعد الخصم / After Discount</span>
@@ -908,7 +931,7 @@ function filterCat(){
 function addInsManually(){
   if(items.some(it=>it.code==='INS')){ toast('⚠️ صف التركيب موجود بالفعل'); return; }
   _insDeleted=false;
-  items.push({code:'INS',desc:'أعمال التركيب والبرمجة | Installation & Programming',price:0,unitPrice:0,qty:1,installCost:0,_isAuto:false,_manualPrice:true});
+  items.push({code:'INS',desc:'أعمال التركيب والبرمجة | Installation & Programming',price:0,unitPrice:0,qty:1,installCost:0,_isAuto:false,_manualPrice:true,_origDesc:'أعمال التركيب والبرمجة | Installation & Programming',_descModified:false});
   renderQuote();renderCat();
   toast('✅ تمت إضافة صف التركيب');
 }
@@ -917,17 +940,28 @@ function addItem(code){
   if(items.some(q=>q.code===code)){toast('⚠️ المنتج موجود في العرض');return;}
   const p=products.find(pr=>pr.code===code);
   if(!p)return;
-  items.push({...p,qty:1,unitPrice:p.price,installCost:p.installCost||0});
+  items.push({...p,qty:1,unitPrice:p.price,installCost:p.installCost||0,_origDesc:p.desc,_descModified:false});
   syncInsRow();
   renderQuote();renderCat();
   toast('✅ تمت إضافة '+p.code);
 }
 let _insDeleted = false; // user explicitly deleted INS — don't auto re-add
+let _discMode = 'pct'; // 'pct' or 'value' — tracks which discount field the user last typed in
 function removeItem(i){
   if(items[i]?.code==='INS') _insDeleted = true;
   items.splice(i,1);
   syncInsRow();
   renderQuote();renderCat();
+}
+function updateDesc(i, val){
+  if(!items[i]) return;
+  const trimmed = val.trim() || items[i].desc;
+  const orig = items[i]._origDesc ?? items[i].desc;
+  items[i].desc = trimmed;
+  const wasModified = items[i]._descModified;
+  items[i]._descModified = trimmed !== orig;
+  // Only re-render if the badge needs to appear/disappear
+  if(items[i]._descModified !== wasModified) renderQuote();
 }
 function updatePrice(i,v){items[i].unitPrice=Math.max(0,parseFloat(v)||0);updateRowTotal(i);recalc();}
 function updateQty(i,v){
@@ -989,15 +1023,19 @@ function syncInsRow(){
   // Add INS row at the end if there's any install cost OR if user had manual price
   if(totalInstall > 0 || wasManual){
     const finalPrice = wasManual ? manualPrice : totalInstall;
+    const insDesc = existing?.desc || 'أعمال التركيب والبرمجة | Installation & Programming';
+    const insOrigDesc = existing?._origDesc || 'أعمال التركيب والبرمجة | Installation & Programming';
     items.push({
       code: 'INS',
-      desc: 'أعمال التركيب والبرمجة | Installation & Programming',
+      desc: insDesc,
       price: finalPrice,
       unitPrice: finalPrice,
       qty: savedQty,
       installCost: 0,
       _isAuto: true,
       _manualPrice: wasManual || false,
+      _origDesc: insOrigDesc,
+      _descModified: existing?._descModified || false,
     });
   }
 }
@@ -1022,7 +1060,11 @@ function renderQuote(){
       <td style="font-weight:700;color:var(--muted);font-size:.78rem">${i+1}</td>
       <td class="td-pic">${th}</td>
       <td><span class="code-tag" ${isIns?'style="background:#ffe8d6;border-color:var(--orange);color:var(--orange)"':''}>${it.code}</span></td>
-      <td class="td-desc"><div class="desc-text">${it.desc}</div></td>
+      <td class="td-desc">
+        <div class="desc-edit${it._descModified?' desc-modified':''}" contenteditable="true"
+          onblur="updateDesc(${i},this.textContent.trim())"
+          title="انقر لتعديل الوصف">${it.desc}</div>
+      </td>
       <td>${(()=>{
         const isFree = it.unitPrice === 0;
         const chFn = isIns ? `updateInsPrice(${i},this.value)` : `updatePrice(${i},this.value)`;
@@ -1078,34 +1120,49 @@ function renderQuote(){
   recalc();
 }
 
-function syncDiscount(v){
-  // keep input value as-is for editing, recalc handles display
+function onDiscPctInput(v){
+  _discMode='pct';
+  // Clear the value field so there's no conflict
+  const valEl=document.getElementById('discountValue');
+  if(valEl) valEl.value='';
   recalc();
+}
+function onDiscValInput(v){
+  _discMode='value';
+  // Clear the percent field so there's no conflict
+  const pctEl=document.getElementById('discountPercent');
+  if(pctEl) pctEl.value='';
+  recalc();
+}
+function getDiscountAmount(sub){
+  if(_discMode==='value'){
+    const v=parseFloat(document.getElementById('discountValue')?.value)||0;
+    return Math.min(v,sub);
+  }else{
+    const pct=parseFloat(document.getElementById('discountPercent')?.value)||0;
+    return sub*pct/100;
+  }
 }
 function recalc(){
   const sub=items.reduce((s,it)=>s+it.unitPrice*it.qty,0);
-  const discountPercent=parseFloat(document.getElementById('discountPercent').value)||0;
-  const discountAmount=sub*discountPercent/100;
+  const discountAmount=getDiscountAmount(sub);
   const afterDiscount=sub-discountAmount;
   const vat=document.getElementById('vatToggle').checked;
   const vatAmt=vat?afterDiscount*0.15:0;
   const grand=afterDiscount+vatAmt;
-  // Smart number format: Arabic numerals, drops .00 decimals
   const fmt=v=>{
     const rounded=Math.round(v*100)/100;
     const hasDecimals=(rounded%1)!==0;
     return rounded.toLocaleString('en-US',{
-      minimumFractionDigits: hasDecimals ? (((rounded*10)%1!==0)?2:1) : 0,
-      maximumFractionDigits: 2
+      minimumFractionDigits: hasDecimals?(((rounded*10)%1!==0)?2:1):0,
+      maximumFractionDigits:2
     })+' ر.س';
   };
   document.getElementById('subTotal').textContent=fmt(sub);
   document.getElementById('afterDiscount').textContent=fmt(afterDiscount);
-  // Show discount amount next to label
-  const discLabelEl=document.getElementById('discountLabel');
-  if(discLabelEl){
-    discLabelEl.textContent=discountAmount>0?'('+fmt(discountAmount)+')':'';
-  }
+  // Print-only discount value span
+  const printAmtEl=document.getElementById('discountPrintAmt');
+  if(printAmtEl) printAmtEl.textContent=discountAmount>0?fmt(discountAmount):'';
   document.getElementById('vatAmt').textContent=fmt(vatAmt);
   document.getElementById('grandTotal').textContent=fmt(grand);
   document.getElementById('vatRow').style.display=vat?'flex':'none';
@@ -1165,8 +1222,10 @@ function getQuoteState() {
     salesRep: document.getElementById('salesRep').value,
     crNumber: document.getElementById('crNumber').value,
     taxCard: document.getElementById('taxCard').value,
-    items: items.map(it => ({ code: it.code, desc: it.desc, price: it.price, unitPrice: it.unitPrice, qty: it.qty, installCost: it.installCost||0, _isAuto: it._isAuto||false, _manualPrice: it._manualPrice||false })),
+    items: items.map(it => ({ code: it.code, desc: it.desc, price: it.price, unitPrice: it.unitPrice, qty: it.qty, installCost: it.installCost||0, _isAuto: it._isAuto||false, _manualPrice: it._manualPrice||false, _descModified: it._descModified||false, _origDesc: it._origDesc||it.desc||'' })),
     discountPercent: parseFloat(document.getElementById('discountPercent').value) || 0,
+    discountValue: parseFloat(document.getElementById('discountValue').value) || 0,
+    discMode: _discMode,
     vatEnabled: document.getElementById('vatToggle').checked,
     techNotes: document.getElementById('techNotes').value,
     terms: document.getElementById('terms').value,
@@ -1184,7 +1243,9 @@ function loadQuoteState(state) {
   document.getElementById('salesRep').value = state.salesRep || '';
   document.getElementById('crNumber').value = state.crNumber || '';
   document.getElementById('taxCard').value = state.taxCard || '';
-  document.getElementById('discountPercent').value = state.discountPercent || 0;
+  _discMode = state.discMode || 'pct';
+  document.getElementById('discountPercent').value = (_discMode==='pct' && state.discountPercent) ? state.discountPercent : '';
+  document.getElementById('discountValue').value   = (_discMode==='value' && state.discountValue)  ? state.discountValue  : '';
   document.getElementById('vatToggle').checked = state.vatEnabled !== false;
   document.getElementById('techNotes').value = state.techNotes || '';
   document.getElementById('terms').value = state.terms || '';
@@ -1199,6 +1260,8 @@ function loadQuoteState(state) {
     installCost: it.installCost || 0,
     _isAuto: it._isAuto || it.code === 'INS',
     _manualPrice: it._manualPrice || false,
+    _descModified: it._descModified || false,
+    _origDesc: it._origDesc || it.desc || '',
   }));
   renderQuote();
   renderCat();
@@ -1442,8 +1505,7 @@ function openContract(){
 
   // Financials
   const sub     = items.reduce((s,it)=>s+it.unitPrice*it.qty,0);
-  const discPct = parseFloat(document.getElementById('discountPercent').value)||0;
-  const discAmt = sub*discPct/100;
+  const discAmt = getDiscountAmount(sub);
   const afterD  = sub-discAmt;
   const vatOn   = document.getElementById('vatToggle').checked;
   const vatAmt  = vatOn ? afterD*0.15 : 0;
@@ -1771,6 +1833,184 @@ async function loadContractFromDrive(fileId, name){
     toast('✅ تم تحميل العقد: '+name);
   }catch(e){ toast('❌ خطأ في التحميل: '+e.message); }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// EXPORT TO EXCEL  (ExcelJS – rich formatting + images)
+// ══════════════════════════════════════════════════════════════════════════
+
+// Fetch a Drive file by ID and return { base64, ext } for ExcelJS
+async function fetchDriveImage(fileId){
+  if(!fileId||!cfg.apiKey) return null;
+  try{
+    const res=await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${cfg.apiKey}`);
+    if(!res.ok) return null;
+    const blob=await res.blob();
+    const ext=blob.type.includes('png')?'png':'jpeg';
+    const base64=await new Promise(resolve=>{
+      const reader=new FileReader();
+      reader.onloadend=()=>resolve(reader.result.split(',')[1]);
+      reader.onerror=()=>resolve(null);
+      reader.readAsDataURL(blob);
+    });
+    return base64?{base64,ext}:null;
+  }catch(e){return null;}
+}
+
+async function exportToExcel(){
+  if(!items.length){toast('⚠️ أضف منتجات أولاً');return;}
+  if(typeof ExcelJS==='undefined'){toast('⚠️ مكتبة Excel لم تحمّل بعد، حاول مجدداً');return;}
+
+  toast('⏳ جاري تصدير الملف...');
+
+  const quoteNo  =document.getElementById('quoteNo').value   ||'عرض_سعر';
+  const quoteDate=document.getElementById('quoteDate').value  ||'';
+  const client   =document.getElementById('clientName').value ||'';
+  const company  =document.getElementById('clientCo').value  ||'';
+  const project  =document.getElementById('project').value   ||'';
+  const salesRep =document.getElementById('salesRep').value  ||'';
+
+  const sub     =items.reduce((s,it)=>s+it.unitPrice*it.qty,0);
+  const discAmt =getDiscountAmount(sub);
+  const afterD  =sub-discAmt;
+  const vatOn   =document.getElementById('vatToggle').checked;
+  const vatAmt  =vatOn?afterD*0.15:0;
+  const grand   =afterD+vatAmt;
+  const r2      =v=>Math.round(v*100)/100;
+
+  // ── Workbook ──────────────────────────────────────────────────────────
+  const wb=new ExcelJS.Workbook();
+  wb.creator='متقنون تك';
+  const ws=wb.addWorksheet('عرض السعر',{
+    views:[{rightToLeft:true}],
+    pageSetup:{paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1},
+  });
+
+  // Palette
+  const DARK='FF2B2B2B', ORANGE='FFE55A00', ORANGE2='FFFF7820';
+  const WHITE='FFFFFFFF', MUTED='FF7A8394', BORDER='FFDDE1E7', THBG='FFF8F9FB', OBFG='FFFFF8F4';
+
+  // Cols: A=image  B=#  C=code  D=description  E=qty  F=unitPrice  G=total
+  ws.columns=[
+    {width:11},{width:4},{width:13},{width:46},{width:8},{width:14},{width:15},
+  ];
+
+  const sc=(cell,o={})=>{
+    if(o.fill) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:o.fill}};
+    if(o.font) cell.font={name:'Tahoma',...o.font};
+    if(o.align) cell.alignment={readingOrder:'rtl',...o.align};
+    if(o.border) cell.border=o.border;
+    if(o.numFmt) cell.numFmt=o.numFmt;
+    if(o.value!==undefined) cell.value=o.value;
+  };
+
+  // ── Row 1: Title banner ───────────────────────────────────────────────
+  ws.mergeCells('A1:G1');
+  sc(ws.getCell('A1'),{
+    fill:DARK,
+    font:{bold:true,size:14,color:{argb:WHITE}},
+    align:{horizontal:'center',vertical:'middle'},
+    value:'عرض سعر  |  QUOTATION  –  متقنون تك',
+  });
+  ws.getRow(1).height=34;
+
+  // ── Rows 2-4: Quote info (2-column grid) ──────────────────────────────
+  const INFO=[
+    ['رقم العرض / Quote No.',quoteNo,  'اسم العميل / Client', client],
+    ['التاريخ / Date',        quoteDate,'الشركة / Company',    company],
+    ['المندوب / Sales Rep',  salesRep, 'المشروع / Project',   project],
+  ];
+  INFO.forEach(([l1,v1,l2,v2])=>{
+    const row=ws.addRow([]);
+    row.height=19;
+    const n=row.number;
+    ws.getCell(`A${n}`).value=l1; ws.getCell(`B${n}`).value=v1;
+    ws.getCell(`E${n}`).value=l2; ws.getCell(`F${n}`).value=v2;
+    ws.mergeCells(`B${n}:D${n}`); ws.mergeCells(`F${n}:G${n}`);
+    ['A','E'].forEach(c=>sc(ws.getCell(`${c}${n}`),{fill:THBG,font:{size:8.5,bold:true,color:{argb:MUTED}},align:{horizontal:'right',vertical:'middle'},border:{bottom:{style:'hair',color:{argb:BORDER}}}}));
+    ['B','F'].forEach(c=>sc(ws.getCell(`${c}${n}`),{font:{size:9,bold:true},align:{horizontal:'right',vertical:'middle'},border:{bottom:{style:'hair',color:{argb:BORDER}}}}));
+  });
+
+  // ── Blank separator ───────────────────────────────────────────────────
+  ws.addRow([]).height=6;
+
+  // ── Table header ──────────────────────────────────────────────────────
+  const hdr=ws.addRow(['صورة','#','الكود','الوصف / Description','الكمية','سعر الوحدة','الإجمالي']);
+  hdr.height=22;
+  const OB={top:{style:'medium',color:{argb:ORANGE}},bottom:{style:'medium',color:{argb:ORANGE}}};
+  hdr.eachCell(cell=>sc(cell,{fill:DARK,font:{bold:true,size:9.5,color:{argb:WHITE}},align:{horizontal:'center',vertical:'middle'},border:OB}));
+
+  // ── Items ─────────────────────────────────────────────────────────────
+  for(let i=0;i<items.length;i++){
+    const it=items[i], isIns=it.code==='INS';
+    const bg=isIns?OBFG:(i%2===0?WHITE:'FFFAFAFA');
+    const dr=ws.addRow(['',i+1,it.code,it.desc,it.qty,it.unitPrice,r2(it.unitPrice*it.qty)]);
+    dr.height=46;
+    dr.eachCell({includeEmpty:true},(cell,col)=>sc(cell,{
+      fill:bg,
+      font:{size:9},
+      align:{horizontal:col===4?'right':'center',vertical:'middle',wrapText:col===4},
+      border:{bottom:{style:'hair',color:{argb:BORDER}}},
+    }));
+    // Code: bold, orange for INS row
+    sc(ws.getCell(`C${dr.number}`),{font:{size:9,bold:true,color:{argb:isIns?ORANGE:DARK}}});
+    // Desc: underline if employee-modified
+    if(it._descModified) ws.getCell(`D${dr.number}`).font={name:'Tahoma',size:9,underline:true};
+    // Numbers
+    sc(ws.getCell(`F${dr.number}`),{numFmt:'#,##0.00',font:{size:9}});
+    sc(ws.getCell(`G${dr.number}`),{numFmt:'#,##0.00',font:{size:9,bold:true}});
+
+    // Product image — fetch via Drive API (has proper CORS headers)
+    const fileId=imgMap[it.code.trim().toUpperCase()];
+    if(fileId){
+      const img=await fetchDriveImage(fileId);
+      if(img){
+        const id=wb.addImage({base64:img.base64,extension:img.ext});
+        ws.addImage(id,{tl:{col:0,row:dr.number-1},ext:{width:52,height:52},editAs:'oneCell'});
+      }
+    }
+  }
+
+  // ── Totals ────────────────────────────────────────────────────────────
+  ws.addRow([]).height=6;
+
+  const totRow=(label,value,isGrand=false)=>{
+    const tr=ws.addRow(['','','','','',label,value]);
+    tr.height=isGrand?24:18;
+    ws.mergeCells(`A${tr.number}:E${tr.number}`);
+    sc(ws.getCell(`F${tr.number}`),{
+      fill:isGrand?DARK:THBG,
+      font:{size:9,bold:isGrand,color:{argb:isGrand?MUTED:DARK}},
+      align:{horizontal:'right',vertical:'middle'},
+      border:isGrand?OB:{},
+    });
+    sc(ws.getCell(`G${tr.number}`),{
+      fill:isGrand?DARK:THBG,
+      font:{size:isGrand?11:9,bold:true,color:{argb:isGrand?ORANGE2:DARK}},
+      align:{horizontal:'center',vertical:'middle'},
+      numFmt:'#,##0.00 "ر.س"',
+      border:isGrand?OB:{},
+    });
+  };
+
+  totRow('المجموع / Subtotal',r2(sub));
+  if(discAmt>0) totRow('خصم / Discount',r2(discAmt));
+  if(discAmt>0) totRow('بعد الخصم / After Discount',r2(afterD));
+  if(vatOn)     totRow('ضريبة 15% / VAT',r2(vatAmt));
+  totRow('الإجمالي الكلي / Grand Total',r2(grand),true);
+
+  // ── Download ──────────────────────────────────────────────────────────
+  try{
+    const buf =await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url =URL.createObjectURL(blob);
+    const a   =document.createElement('a');
+    a.href=url; a.download=quoteNo.replace(/[^a-zA-Z0-9؀-ۿ_-]/g,'_')+'.xlsx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('✅ تم التصدير: '+quoteNo+'.xlsx');
+  }catch(e){toast('❌ خطأ في التصدير: '+e.message);console.error(e);}
+}
 </script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </body>
 </html>
