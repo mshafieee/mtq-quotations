@@ -520,11 +520,13 @@ table.qt tbody tr.dragging{opacity:.4;}
       <div class="doc-meta-blocks">
         <div class="meta-block">
           <label>رقم العرض / Quote No.</label>
-          <div style="display:flex;align-items:center;gap:.3rem;">
-            <button id="quotePrevBtn" class="btn btn-ghost btn-sm no-print nav-arrow-btn" onclick="navigateQuote(-1)" title="العرض السابق">←</button>
-            <input id="quoteNo" placeholder="Q-2025-001" style="flex:1;">
-            <button id="quoteNextBtn" class="btn btn-ghost btn-sm no-print nav-arrow-btn" onclick="navigateQuote(1)" title="العرض التالي">→</button>
-            <button class="btn btn-ghost btn-sm no-print" onclick="newQuoteNumber()" title="رقم جديد" style="padding:.15rem .4rem;font-size:.65rem;white-space:nowrap;">🔄</button>
+          <div style="display:flex;flex-direction:column;gap:.35rem;">
+            <input id="quoteNo" placeholder="Q-2025-001" style="width:100%;">
+            <div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">
+              <button id="quotePrevBtn" class="btn btn-ghost btn-sm no-print nav-arrow-btn" onclick="navigateQuote(-1)" title="العرض السابق">←</button>
+              <button id="quoteNextBtn" class="btn btn-ghost btn-sm no-print nav-arrow-btn" onclick="navigateQuote(1)" title="العرض التالي">→</button>
+              <button class="btn btn-ghost btn-sm no-print" onclick="newQuoteNumber()" title="رقم جديد" style="padding:.15rem .4rem;font-size:.65rem;white-space:nowrap;">🔄</button>
+            </div>
           </div>
         </div>
         <div class="meta-block">
