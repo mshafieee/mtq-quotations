@@ -1487,10 +1487,15 @@ async function loadQuoteFromDrive(fileId, name) {
 // ── Quote Number: Q-YYYY-{userID}{seq} ──────────────────────────────────
 // Scans Drive folder for existing quotes with this user's prefix
 // to find the next sequence number. Works across all browsers/devices.
+function getQuotePrefix(uid) {
+  const year = new Date().getFullYear();
+  const userCode = uid === '6753' ? '80' : uid;
+  return 'Q-' + year + '-' + userCode;
+}
+
 async function fetchNextQuoteNumber() {
   const uid = cfg.userId || '00';
-  const year = new Date().getFullYear();
-  const prefix = 'Q-' + year + '-' + uid;
+  const prefix = getQuotePrefix(uid);
 
   try {
     if (!cfg.apiKey || !cfg.quotesFolderId) {
@@ -1511,8 +1516,7 @@ async function fetchNextQuoteNumber() {
     // Find the highest sequence number for this user
     let maxSeq = 0;
     files.forEach(name => {
-      // Extract the sequence part after the user ID
-      // Q-2026-92001 → after "Q-2026-92" → "001" → 1
+      // Extract the sequence part after the user code
       const after = name.replace(prefix, '');
       const seq = parseInt(after) || 0;
       if (seq > maxSeq) maxSeq = seq;
