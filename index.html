@@ -1474,8 +1474,8 @@ async function loadQuoteFromDrive(fileId, name) {
     setCurrentQuoteIndex(name);
     toast('✅ تم تحميل العرض: ' + name);
   } catch (e) {
-    console.error('Load error:', e);
-    toast('❌ خطأ في التحميل: ' + e.message);
+    console.error('LoadQuoteFromDrive failed:', { fileId, name, error: e });
+    toast('❌ خطأ في التحميل: ' + ((e && e.message) || e) + ' (راجع وحدة التحكم)');
   }
 }
 
@@ -1583,16 +1583,27 @@ async function refreshQuoteNavigationList(){
     setCurrentQuoteIndex(document.getElementById('quoteNo').value.trim());
   } catch (e) {
     console.warn('Quote navigation refresh failed:', e);
+    toast('❌ خطأ في تحديث قائمة العروض: ' + ((e && e.message) || e) + ' (راجع وحدة التحكم)');
     updateQuoteNavButtons();
   }
 }
 
 function navigateQuote(delta){
-  if (quoteNavIndex < 0 || !quoteNavFiles.length) return;
+  console.log('navigateQuote', { delta, quoteNavIndex, total: quoteNavFiles.length });
+  if (quoteNavIndex < 0 || !quoteNavFiles.length) {
+    console.warn('navigateQuote blocked: invalid index or empty list', { quoteNavIndex, total: quoteNavFiles.length });
+    return;
+  }
   const target = quoteNavIndex + delta;
-  if (target < 0 || target >= quoteNavFiles.length) return;
+  if (target < 0 || target >= quoteNavFiles.length) {
+    console.warn('navigateQuote blocked: target out of range', { target, total: quoteNavFiles.length });
+    return;
+  }
   const file = quoteNavFiles[target];
-  if (!file) return;
+  if (!file) {
+    console.warn('navigateQuote blocked: missing file entry', { target, file });
+    return;
+  }
   loadQuoteFromDrive(file.id, file.name.replace('.json',''));
 }
 
