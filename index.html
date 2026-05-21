@@ -792,7 +792,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     "◊ نطاق العرض: توريد وتركيب.";
 
   cfg.apiKey?loadAll():openSettings();
-  // Refresh navigation buttons for user 99
+  // Refresh navigation buttons for user 6753
   refreshQuoteNavigationList();
   document.getElementById('quoteNo').addEventListener('change', () => setCurrentQuoteIndex(document.getElementById('quoteNo').value.trim()));
   // Sync print mirrors after defaults are set
@@ -1547,7 +1547,7 @@ function setCurrentQuoteIndex(name){
 function updateQuoteNavButtons(){
   const prev = document.getElementById('quotePrevBtn');
   const next = document.getElementById('quoteNextBtn');
-  const isAdmin = (cfg.userId||'') === '99';
+  const isAdmin = (cfg.userId||'') === '6753';
   if (prev) prev.style.display = isAdmin ? '' : 'none';
   if (next) next.style.display = isAdmin ? '' : 'none';
   if (!prev || !next || !isAdmin){
@@ -1562,7 +1562,7 @@ function updateQuoteNavButtons(){
 async function refreshQuoteNavigationList(){
   quoteNavFiles = [];
   quoteNavIndex = -1;
-  if ((cfg.userId||'') !== '99' || !cfg.apiKey || !cfg.quotesFolderId) {
+  if ((cfg.userId||'') !== '6753' || !cfg.apiKey || !cfg.quotesFolderId) {
     updateQuoteNavButtons();
     return;
   }
