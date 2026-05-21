@@ -358,6 +358,10 @@ table.qt tbody tr.dragging{opacity:.4;}
   .notes-area{ page-break-inside:avoid; margin-bottom:.3rem !important; }
   /* Hide textareas in print, show mirror divs instead */
   .notes-area textarea{ display:none !important; }
+  .discount-row.no-discount,
+  #afterDiscountRow.no-discount {
+    display:none !important;
+  }
   .print-mirror{
     display:block !important;
     white-space:pre-wrap !important;
@@ -613,7 +617,7 @@ table.qt tbody tr.dragging{opacity:.4;}
           </span>
           <span id="discountPrintAmt" class="disc-print-only"></span>
         </div>
-        <div class="tot-r">
+        <div class="tot-r" id="afterDiscountRow">
           <span class="tl">بعد الخصم / After Discount</span>
           <span class="tv" id="afterDiscount">0 ر.س</span>
         </div>
@@ -1166,10 +1170,13 @@ function recalc(){
   document.getElementById('vatAmt').textContent=fmt(vatAmt);
   document.getElementById('grandTotal').textContent=fmt(grand);
   document.getElementById('vatRow').style.display=vat?'flex':'none';
-  // Hide discount row when no discount is applied
   const discountRowEl=document.querySelector('.discount-row');
+  const afterDiscountRowEl=document.getElementById('afterDiscountRow');
   if(discountRowEl){
-    discountRowEl.style.display=discountAmount>0?'flex':'none';
+    discountRowEl.classList.toggle('no-discount', discountAmount<=0);
+  }
+  if(afterDiscountRowEl){
+    afterDiscountRowEl.classList.toggle('no-discount', discountAmount<=0);
   }
 }
 
