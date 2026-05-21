@@ -1166,6 +1166,11 @@ function recalc(){
   document.getElementById('vatAmt').textContent=fmt(vatAmt);
   document.getElementById('grandTotal').textContent=fmt(grand);
   document.getElementById('vatRow').style.display=vat?'flex':'none';
+  // Hide discount row when no discount is applied
+  const discountRowEl=document.querySelector('.discount-row');
+  if(discountRowEl){
+    discountRowEl.style.display=discountAmount>0?'flex':'none';
+  }
 }
 
 async function doPrint(){
@@ -1507,6 +1512,7 @@ function openContract(){
   const sub     = items.reduce((s,it)=>s+it.unitPrice*it.qty,0);
   const discAmt = getDiscountAmount(sub);
   const afterD  = sub-discAmt;
+  const discPct = parseFloat(document.getElementById('discountPercent')?.value)||0;
   const vatOn   = document.getElementById('vatToggle').checked;
   const vatAmt  = vatOn ? afterD*0.15 : 0;
   const grand   = afterD+vatAmt;
