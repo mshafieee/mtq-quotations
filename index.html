@@ -89,6 +89,8 @@ body{font-family:'Cairo',sans-serif;background:var(--page);color:var(--text);min
 .add-btn2{width:22px;height:22px;border-radius:50%;background:var(--primary);color:white;border:none;font-size:.9rem;cursor:pointer;display:grid;place-items:center;transition:all .13s;flex-shrink:0;}
 .add-btn2:hover{background:var(--orange);transform:scale(1.1);}
 .add-btn2.done{background:var(--green);}
+.nav-arrow-btn{width:34px;min-width:34px;display:grid;place-items:center;padding:.25rem .3rem;font-size:.9rem;}
+.nav-arrow-btn[disabled]{opacity:.35;cursor:not-allowed;}
 
 /* ══ DOCUMENT ═══════════════════════════════════ */
 .doc{background:var(--surface);border-radius:10px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;}
@@ -519,7 +521,9 @@ table.qt tbody tr.dragging{opacity:.4;}
         <div class="meta-block">
           <label>رقم العرض / Quote No.</label>
           <div style="display:flex;align-items:center;gap:.3rem;">
+            <button id="quotePrevBtn" class="btn btn-ghost btn-sm no-print nav-arrow-btn" onclick="navigateQuote(-1)" title="العرض السابق">←</button>
             <input id="quoteNo" placeholder="Q-2025-001" style="flex:1;">
+            <button id="quoteNextBtn" class="btn btn-ghost btn-sm no-print nav-arrow-btn" onclick="navigateQuote(1)" title="العرض التالي">→</button>
             <button class="btn btn-ghost btn-sm no-print" onclick="newQuoteNumber()" title="رقم جديد" style="padding:.15rem .4rem;font-size:.65rem;white-space:nowrap;">🔄</button>
           </div>
         </div>
@@ -750,6 +754,8 @@ table.qt tbody tr.dragging{opacity:.4;}
 
 <script>
 let products=[],filtered=[],items=[],imgMap={},rawRows=[],_dragIdx=null;
+let quoteNavFiles=[];
+let quoteNavIndex=-1;
 let cfg={
   apiKey:localStorage.getItem('gapi_key')||'',
   sheetId:localStorage.getItem('gsheet_id')||'1XEUFJylw6NKiFDuJPMhtoVHtEQHEKkgszUq8_vPRKfo',
@@ -784,6 +790,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     "◊ نطاق العرض: توريد وتركيب.";
 
   cfg.apiKey?loadAll():openSettings();
+  // Refresh navigation buttons for user 99
+  refreshQuoteNavigationList();
+  document.getElementById('quoteNo').addEventListener('change', () => setCurrentQuoteIndex(document.getElementById('quoteNo').value.trim()));
   // Sync print mirrors after defaults are set
   setTimeout(syncPrintMirrors, 100);
 });
@@ -831,6 +840,8 @@ async function loadAll(){
     toast(products.length?'✅ تم تحميل '+products.length+' منتج':'⚠️ لا توجد منتجات');
     // Fetch next quote number from Drive
     await fetchNextQuoteNumber();
+    // Refresh navigation list for user 99
+    await refreshQuoteNavigationList();
   }catch(e){
     console.error(e);
     document.getElementById('catList').innerHTML='<div style="padding:1rem;text-align:center;color:var(--red);font-size:.79rem">⚠️ '+e.message+'<br><br><button class="btn btn-orange btn-sm" onclick="openSettings()">الإعدادات</button></div>';
@@ -1458,6 +1469,7 @@ async function loadQuoteFromDrive(fileId, name) {
 
     loadQuoteState(state);
     closeLoadQuote();
+    setCurrentQuoteIndex(name);
     toast('✅ تم تحميل العرض: ' + name);
   } catch (e) {
     console.error('Load error:', e);
@@ -1517,6 +1529,69 @@ async function newQuoteNumber() {
   await fetchNextQuoteNumber();
   document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
   toast('🔄 رقم عرض جديد: ' + document.getElementById('quoteNo').value);
+}
+
+function setCurrentQuoteIndex(name){
+  if (!name || !quoteNavFiles.length){
+    quoteNavIndex = -1;
+    updateQuoteNavButtons();
+    return;
+  }
+  const target = name.replace('.json','').trim();
+  quoteNavIndex = quoteNavFiles.findIndex(f => f.name.replace('.json','') === target);
+  updateQuoteNavButtons();
+}
+
+function updateQuoteNavButtons(){
+  const prev = document.getElementById('quotePrevBtn');
+  const next = document.getElementById('quoteNextBtn');
+  const isAdmin = (cfg.userId||'') === '99';
+  if (prev) prev.style.display = isAdmin ? '' : 'none';
+  if (next) next.style.display = isAdmin ? '' : 'none';
+  if (!prev || !next || !isAdmin){
+    return;
+  }
+  const disabledPrev = quoteNavIndex <= 0;
+  const disabledNext = quoteNavIndex < 0 || quoteNavIndex >= quoteNavFiles.length - 1;
+  prev.disabled = disabledPrev;
+  next.disabled = disabledNext;
+}
+
+async function refreshQuoteNavigationList(){
+  quoteNavFiles = [];
+  quoteNavIndex = -1;
+  if ((cfg.userId||'') !== '99' || !cfg.apiKey || !cfg.quotesFolderId) {
+    updateQuoteNavButtons();
+    return;
+  }
+
+  try {
+    let filesData=[];
+    let nextPageToken='';
+    do {
+      const pageUrl = `https://www.googleapis.com/drive/v3/files?q='${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=nextPageToken,files(id,name,modifiedTime)&orderBy=name+asc&pageSize=1000${nextPageToken?`&pageToken=${nextPageToken}`:''}&key=${cfg.apiKey}`;
+      const pageRes = await fetch(pageUrl);
+      const pageJson = await pageRes.json();
+      if (!pageRes.ok) throw new Error((pageJson.error&&pageJson.error.message)||('HTTP '+pageRes.status));
+      filesData = filesData.concat(pageJson.files || []);
+      nextPageToken = pageJson.nextPageToken || '';
+    } while(nextPageToken);
+
+    quoteNavFiles = (filesData || []).filter(f => f.name.endsWith('.json'));
+    setCurrentQuoteIndex(document.getElementById('quoteNo').value.trim());
+  } catch (e) {
+    console.warn('Quote navigation refresh failed:', e);
+    updateQuoteNavButtons();
+  }
+}
+
+function navigateQuote(delta){
+  if (quoteNavIndex < 0 || !quoteNavFiles.length) return;
+  const target = quoteNavIndex + delta;
+  if (target < 0 || target >= quoteNavFiles.length) return;
+  const file = quoteNavFiles[target];
+  if (!file) return;
+  loadQuoteFromDrive(file.id, file.name.replace('.json',''));
 }
 
 // Mobile catalog toggle
