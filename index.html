@@ -1475,7 +1475,11 @@ async function loadQuoteFromDrive(fileId, name) {
     toast('✅ تم تحميل العرض: ' + name);
   } catch (e) {
     console.error('LoadQuoteFromDrive failed:', { fileId, name, error: e });
-    toast('❌ خطأ في التحميل: ' + ((e && e.message) || e) + ' (راجع وحدة التحكم)');
+    const msg = (e && e.message) || String(e);
+    const help = msg === 'Failed to fetch'
+      ? ' — تحقق من اتصال الإنترنت، CORS، أو صلاحية API Key'
+      : '';
+    toast(`❌ خطأ في التحميل: ${msg}${help} (راجع وحدة التحكم)`);
   }
 }
 
@@ -1583,7 +1587,11 @@ async function refreshQuoteNavigationList(){
     setCurrentQuoteIndex(document.getElementById('quoteNo').value.trim());
   } catch (e) {
     console.warn('Quote navigation refresh failed:', e);
-    toast('❌ خطأ في تحديث قائمة العروض: ' + ((e && e.message) || e) + ' (راجع وحدة التحكم)');
+    const msg = (e && e.message) || String(e);
+    const help = msg === 'Failed to fetch'
+      ? ' — تحقق من اتصال الإنترنت، CORS، أو صلاحية API Key'
+      : '';
+    toast(`❌ خطأ في تحديث قائمة العروض: ${msg}${help} (راجع وحدة التحكم)`);
     updateQuoteNavButtons();
   }
 }
