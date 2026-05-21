@@ -1403,12 +1403,21 @@ async function searchQuoteInDrive() {
   resultsEl.innerHTML = '<div style="text-align:center;padding:1rem"><div class="spin"></div><p style="font-size:.78rem;color:var(--muted)">جاري البحث...</p></div>';
 
   try {
-    // Search by filename containing the query
-    const searchUrl = `https://www.googleapis.com/drive/v3/files?q=name+contains+'${encodeURIComponent(q)}'+and+'${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=20&key=${cfg.apiKey}`;
-    const res = await fetch(searchUrl);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const files = (data.files || []).filter(f => f.name.endsWith('.json'));
+    const showAll = q === '*';
+    let filesData=[];
+    let nextPageToken='';
+    do {
+      const searchUrl = showAll
+        ? `https://www.googleapis.com/drive/v3/files?q='${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=nextPageToken,files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=1000${nextPageToken?`&pageToken=${nextPageToken}`:''}&key=${cfg.apiKey}`
+        : `https://www.googleapis.com/drive/v3/files?q=name+contains+'${encodeURIComponent(q)}'+and+'${cfg.quotesFolderId}'+in+parents+and+trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=20&key=${cfg.apiKey}`;
+      const res = await fetch(searchUrl);
+      const data = await res.json();
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      filesData = filesData.concat(data.files || []);
+      nextPageToken = showAll ? (data.nextPageToken || '') : '';
+    } while(showAll && nextPageToken);
+
+    const files = filesData.filter(f => f.name.endsWith('.json'));
 
     if (!files.length) {
       resultsEl.innerHTML = '<div style="text-align:center;color:var(--red);font-size:.82rem;padding:1rem">لم يتم العثور على عروض مطابقة</div>';
