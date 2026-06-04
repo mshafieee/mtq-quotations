@@ -1717,7 +1717,7 @@ function openContract(){
   <div class="ct-section">
     <div class="ct-section-title">تمهيد</div>
     <div class="ct-section-body" contenteditable="true">
-      حيث إن الطرف الأول يرغب في تنفيذ أعمال توريد ${project||'نظام الانتركوم والمنزل الذكي'}،
+      حيث إن الطرف الأول يرغب في تنفيذ أعمال توريد وتركيب المواد محل العقد،
       وحيث أبدى الطرف الثاني استعداده لتنفيذ تلك الأعمال بما لديه من خبرة فنية وإمكانات تؤهله لذلك،
       وبعد قيامه بزيارة الموقع والاطلاع على المواصفات المطلوبة، فقد تم الاتفاق بين الطرفين على ما يلي:
     </div>
@@ -1749,7 +1749,7 @@ function openContract(){
     </table>
     <div class="ct-totals">
       <div class="ct-tot-row"><span>المجموع / Subtotal</span><span>${f2(sub)} ر.س</span></div>
-      ${discPct>0?`<div class="ct-tot-row"><span>خصم ${discPct}%</span><span style="color:var(--red)">- ${f2(discAmt)} ر.س</span></div>
+      ${discAmt>0?`<div class="ct-tot-row"><span>خصم${discPct>0?` ${discPct}%`:' / Discount'}</span><span style="color:var(--red)">- ${f2(discAmt)} ر.س</span></div>
       <div class="ct-tot-row"><span>السعر بعد الخصم</span><span>${f2(afterD)} ر.س</span></div>`:''}
       ${vatOn?`<div class="ct-tot-row"><span>ضريبة القيمة المضافة 15% / VAT</span><span>${f2(vatAmt)} ر.س</span></div>`:''}
       <div class="ct-tot-row grand"><span>الإجمالي شامل ضريبة القيمة المضافة / Grand Total</span><span>${f2(grand)} ر.س</span></div>
