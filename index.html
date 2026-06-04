@@ -444,6 +444,9 @@ table.qt tbody tr.dragging{opacity:.4;}
 .ct-table thead tr{background:var(--primary);color:white;}
 .ct-table th,.ct-table td{padding:.38rem .5rem;text-align:center;border:1px solid var(--border);}
 .ct-table td.td-desc-ct{text-align:right;padding:.38rem .6rem;}
+.ct-edit{width:62px;border:1px solid var(--border);border-radius:4px;padding:.18rem .25rem;font-family:'Cairo',sans-serif;font-size:.78rem;text-align:center;direction:ltr;background:#fffdfb;}
+.ct-edit:focus{outline:2px solid var(--orange);border-color:var(--orange);}
+#ctDiscAmt{width:80px;}
 .ct-totals{margin-top:.4rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
 .ct-tot-row{display:flex;justify-content:space-between;padding:.28rem .75rem;font-size:.82rem;border-bottom:1px solid var(--border);}
 .ct-tot-row:last-child{border-bottom:none;}
@@ -463,6 +466,7 @@ table.qt tbody tr.dragging{opacity:.4;}
   .ct-totals{overflow:visible !important;}
   [contenteditable]:hover,[contenteditable]:focus{background:transparent !important;outline:none !important;}
   .ct-table{font-size:7.5pt !important;}
+  body.contract-mode .ct-edit{border:none !important;background:transparent !important;padding:0 !important;}
   .ct-section-title{page-break-after:avoid;}
   .ct-signature{page-break-inside:avoid;}
 }
@@ -562,6 +566,14 @@ table.qt tbody tr.dragging{opacity:.4;}
       <div class="info-cell">
         <label>البطاقة الضريبية / Tax Card</label>
         <input id="taxCard" placeholder="رقم البطاقة الضريبية">
+      </div>
+      <div class="info-cell">
+        <label>العنوان / Address</label>
+        <input id="clientAddress" placeholder="عنوان العميل">
+      </div>
+      <div class="info-cell">
+        <label>الجوال / Phone</label>
+        <input id="clientPhone" placeholder="رقم الجوال" style="direction:ltr;text-align:right;">
       </div>
     </div>
 
@@ -687,6 +699,8 @@ table.qt tbody tr.dragging{opacity:.4;}
     <input id="appsScriptUrlIn" placeholder="https://script.google.com/macros/s/...../exec" style="direction:ltr;font-size:.78rem;">
     <label>معرّف مجلد Drive (العقود المحفوظة)</label>
     <input id="contractsFolderIn" style="direction:ltr;font-size:.78rem;">
+    <label>رقم بداية تسلسل العقود / Contract Serial (مثال: 90)</label>
+    <input id="contractSerialIn" type="number" min="1" step="1" placeholder="90" style="direction:ltr;font-weight:800;letter-spacing:1px;">
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeSettings()">إلغاء</button>
       <button id="ctcBtn" class="btn btn-outline" onclick="closeSettings();openContract()" style="display:none">📄 CTC</button>
@@ -767,6 +781,7 @@ let cfg={
   contractsFolderId:localStorage.getItem('gcontracts_folder')||'11SGbxw6NyxB5hpZsBXa5QGRWhE3OYKJQ',
   appsScriptUrl:localStorage.getItem('gapps_script_url')||'',
   userId:localStorage.getItem('guser_id')||'00',
+  contractSerial:localStorage.getItem('gcontract_serial')||'1',
 };
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -807,6 +822,7 @@ function openSettings(){
   document.getElementById('folderIdIn').value=cfg.folderId;
   document.getElementById('quotesFolderIn').value=cfg.quotesFolderId;
   document.getElementById('contractsFolderIn').value=cfg.contractsFolderId;
+  document.getElementById('contractSerialIn').value=cfg.contractSerial;
   document.getElementById('appsScriptUrlIn').value=cfg.appsScriptUrl;
   const isAdmin = (cfg.userId||'') === '6753';
   document.getElementById('ctcBtn').style.display = isAdmin ? '' : 'none';
@@ -822,6 +838,7 @@ function saveSettings(){
   cfg.folderId=document.getElementById('folderIdIn').value.trim();
   cfg.quotesFolderId=document.getElementById('quotesFolderIn').value.trim();
   cfg.contractsFolderId=document.getElementById('contractsFolderIn').value.trim()||'11SGbxw6NyxB5hpZsBXa5QGRWhE3OYKJQ';
+  cfg.contractSerial=document.getElementById('contractSerialIn').value.trim()||'1';
   cfg.appsScriptUrl=document.getElementById('appsScriptUrlIn').value.trim();
   localStorage.setItem('guser_id',cfg.userId);
   localStorage.setItem('gapi_key',cfg.apiKey);
@@ -830,6 +847,7 @@ function saveSettings(){
   localStorage.setItem('gdrive_folder',cfg.folderId);
   localStorage.setItem('gquotes_folder',cfg.quotesFolderId);
   localStorage.setItem('gcontracts_folder',cfg.contractsFolderId);
+  localStorage.setItem('gcontract_serial',cfg.contractSerial);
   localStorage.setItem('gapps_script_url',cfg.appsScriptUrl);
   closeSettings();loadAll();
 }
@@ -1247,6 +1265,8 @@ function getQuoteState() {
     salesRep: document.getElementById('salesRep').value,
     crNumber: document.getElementById('crNumber').value,
     taxCard: document.getElementById('taxCard').value,
+    clientAddress: document.getElementById('clientAddress').value,
+    clientPhone: document.getElementById('clientPhone').value,
     items: items.map(it => ({ code: it.code, desc: it.desc, price: it.price, unitPrice: it.unitPrice, qty: it.qty, installCost: it.installCost||0, _isAuto: it._isAuto||false, _manualPrice: it._manualPrice||false, _descModified: it._descModified||false, _origDesc: it._origDesc||it.desc||'' })),
     discountPercent: parseFloat(document.getElementById('discountPercent').value) || 0,
     discountValue: parseFloat(document.getElementById('discountValue').value) || 0,
@@ -1268,6 +1288,8 @@ function loadQuoteState(state) {
   document.getElementById('salesRep').value = state.salesRep || '';
   document.getElementById('crNumber').value = state.crNumber || '';
   document.getElementById('taxCard').value = state.taxCard || '';
+  document.getElementById('clientAddress').value = state.clientAddress || '';
+  document.getElementById('clientPhone').value = state.clientPhone || '';
   _discMode = state.discMode || 'pct';
   document.getElementById('discountPercent').value = (_discMode==='pct' && state.discountPercent) ? state.discountPercent : '';
   document.getElementById('discountValue').value   = (_discMode==='value' && state.discountValue)  ? state.discountValue  : '';
@@ -1634,7 +1656,6 @@ function openContract(){
   const sub     = items.reduce((s,it)=>s+it.unitPrice*it.qty,0);
   const discAmt = getDiscountAmount(sub);
   const afterD  = sub-discAmt;
-  const discPct = parseFloat(document.getElementById('discountPercent')?.value)||0;
   const vatOn   = document.getElementById('vatToggle').checked;
   const vatAmt  = vatOn ? afterD*0.15 : 0;
   const grand   = afterD+vatAmt;
@@ -1644,16 +1665,19 @@ function openContract(){
   const clientCo   = document.getElementById('clientCo').value   || '___________';
   const crNumber   = document.getElementById('crNumber').value   || '___________';
   const taxCard    = document.getElementById('taxCard').value    || '___________';
+  const clientAddr = document.getElementById('clientAddress').value || '___________';
+  const clientPhone= document.getElementById('clientPhone').value   || '___________';
   const project    = document.getElementById('project').value    || '';
   const quoteNo    = document.getElementById('quoteNo').value;
   const quoteDate  = document.getElementById('quoteDate').value;
-  const ctNo       = 'MTQCT-' + quoteNo.split('-').pop();
+  const ctNo       = 'MTQCT-' + (cfg.contractSerial||'1');
 
   // Date display
   const dateStr = (d => `${String(d.getDate()).padStart(2,'0')} / ${String(d.getMonth()+1).padStart(2,'0')} / ${d.getFullYear()} م`)
     (quoteDate ? new Date(quoteDate) : new Date());
 
   const f2 = v => (Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const r2c = v => Math.round(v*100)/100;
 
   const logoSrc = document.querySelector('.company-logo').src;
 
@@ -1663,14 +1687,14 @@ function openContract(){
     const imgCell = imgUrl
       ? `<img src="${imgUrl}" style="width:50px;height:50px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'">`
       : `<div style="width:50px;height:50px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">${it.code==='INS'?'🔧':'📦'}</div>`;
-    return `<tr>
+    return `<tr data-ct-item>
       <td>${i+1}</td>
       <td style="width:62px;padding:.25rem">${imgCell}</td>
       <td style="font-weight:700">${it.code}</td>
-      <td class="td-desc-ct">${it.desc}</td>
-      <td>${it.qty}</td>
-      <td style="white-space:nowrap">${f2(it.unitPrice)} ر.س</td>
-      <td style="white-space:nowrap;font-weight:700">${f2(it.unitPrice*it.qty)} ر.س</td>
+      <td class="td-desc-ct" contenteditable="true">${it.desc}</td>
+      <td><input class="ct-edit ct-qty" type="number" min="0" step="1" value="${it.qty}" oninput="ctRecalc()"></td>
+      <td style="white-space:nowrap"><input class="ct-edit ct-price" type="number" min="0" step="0.01" value="${it.unitPrice}" oninput="ctRecalc()"> ر.س</td>
+      <td style="white-space:nowrap;font-weight:700"><span class="ct-line-total">${f2(it.unitPrice*it.qty)}</span> ر.س</td>
     </tr>`;
   }).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:1rem;font-size:.8rem">— لا توجد أصناف —</td></tr>`;
 
@@ -1686,6 +1710,7 @@ function openContract(){
     <img src="${logoSrc}" class="ct-logo" alt="Motqinon Tech">
     <div class="ct-meta-box">
       <div class="ct-meta-row"><label>رقم العقد</label><input id="ctNo" value="${ctNo}" style="direction:ltr"></div>
+      <div class="ct-meta-row"><label>رقم العرض</label><input id="ctQuoteNo" value="${quoteNo||''}" style="direction:ltr"></div>
       <div class="ct-meta-row"><label>التاريخ</label><input id="ctDate" value="${dateStr}"></div>
     </div>
   </div>
@@ -1701,7 +1726,7 @@ function openContract(){
     <div class="ct-section-body" contenteditable="true">
       <strong>${clientCo}</strong>، سجل تجاري رقم <strong>${crNumber}</strong>، البطاقة الضريبية رقم <strong>${taxCard}</strong>،
       ويمثلها الأستاذ/ <strong>${clientName}</strong> ويشار إليها لاحقًا بـ "الطرف الأول"،
-      ومقرها: ___________ جوال: ___________
+      ومقرها: <strong>${clientAddr}</strong> جوال: <strong>${clientPhone}</strong>
     </div>
   </div>
   <div class="ct-section">
@@ -1747,12 +1772,13 @@ function openContract(){
       </thead>
       <tbody>${itemRowsHtml}</tbody>
     </table>
-    <div class="ct-totals">
-      <div class="ct-tot-row"><span>المجموع / Subtotal</span><span>${f2(sub)} ر.س</span></div>
-      ${discAmt>0?`<div class="ct-tot-row"><span>خصم${discPct>0?` ${discPct}%`:' / Discount'}</span><span style="color:var(--red)">- ${f2(discAmt)} ر.س</span></div>
-      <div class="ct-tot-row"><span>السعر بعد الخصم</span><span>${f2(afterD)} ر.س</span></div>`:''}
-      ${vatOn?`<div class="ct-tot-row"><span>ضريبة القيمة المضافة 15% / VAT</span><span>${f2(vatAmt)} ر.س</span></div>`:''}
-      <div class="ct-tot-row grand"><span>الإجمالي شامل ضريبة القيمة المضافة / Grand Total</span><span>${f2(grand)} ر.س</span></div>
+    <div class="ct-totals" data-vat="${vatOn?1:0}">
+      <div class="ct-tot-row"><span>المجموع / Subtotal</span><span id="ctSub">${f2(sub)} ر.س</span></div>
+      <div class="ct-tot-row"><span>خصم / Discount</span>
+        <span style="display:flex;align-items:center;gap:5px;color:var(--red)">- <input id="ctDiscAmt" class="ct-edit" type="number" min="0" step="0.01" value="${discAmt>0?r2c(discAmt):''}" placeholder="0" oninput="ctRecalc()"> ر.س</span></div>
+      <div class="ct-tot-row" id="ctAfterRow" style="${discAmt>0?'':'display:none'}"><span>السعر بعد الخصم</span><span id="ctAfter">${f2(afterD)} ر.س</span></div>
+      <div class="ct-tot-row" id="ctVatRow" style="${vatOn?'':'display:none'}"><span>ضريبة القيمة المضافة 15% / VAT</span><span id="ctVat">${f2(vatAmt)} ر.س</span></div>
+      <div class="ct-tot-row grand"><span>الإجمالي شامل ضريبة القيمة المضافة / Grand Total</span><span id="ctGrand">${f2(grand)} ر.س</span></div>
     </div>
   </div>
 
@@ -1769,10 +1795,10 @@ function openContract(){
     <div class="ct-section-title" style="page-break-after:avoid">المادة (4): الدفعات وآلية السداد</div>
     <div class="ct-section-body" contenteditable="true">
       <p>يتم سداد قيمة هذا العقد على دفعات وفقًا لآلية السداد التالية:</p>
-      <p><strong>إجمالي قيمة العقد (شامل ضريبة القيمة المضافة):</strong> مبلغ وقدره (<strong>${f2(grand)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
-      <p><strong>1- الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد، وقدرها (<strong>${f2(p50)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
-      <p><strong>2- الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع، وقدرها (<strong>${f2(p40)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
-      <p><strong>3- الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة، وقدرها (<strong>${f2(p10)} ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>إجمالي قيمة العقد (شامل ضريبة القيمة المضافة):</strong> مبلغ وقدره (<strong><span id="ctGrandText">${f2(grand)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>1- الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد، وقدرها (<strong><span id="ctP50">${f2(p50)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>2- الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع، وقدرها (<strong><span id="ctP40">${f2(p40)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>3- الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة، وقدرها (<strong><span id="ctP10">${f2(p10)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
       <p style="margin-top:.5rem">يتم تحويل الدفعات إلى الحساب البنكي التالي الخاص بالطرف الثاني:</p>
     </div>
     <div class="ct-bank" contenteditable="true" style="page-break-inside:avoid">
@@ -1846,11 +1872,52 @@ function openContract(){
   document.getElementById('contractOverlay').style.display='block';
   document.body.classList.add('contract-mode');
   document.getElementById('contractOverlay').scrollTop=0;
+  ctRecalc();
 }
 
 function closeContract(){
   document.getElementById('contractOverlay').style.display='none';
   document.body.classList.remove('contract-mode');
+}
+
+// Recalculate contract totals/payments from the editable item & discount fields.
+// Works on both freshly-generated and reloaded contracts (handlers are global).
+function ctRecalc(){
+  const root = document.getElementById('ctContent');
+  if(!root) return;
+  const f2 = v => (Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const set = (sel,txt)=>{ const el=root.querySelector(sel); if(el) el.textContent=txt; };
+
+  let sub = 0;
+  root.querySelectorAll('tr[data-ct-item]').forEach(tr=>{
+    const qty   = parseFloat(tr.querySelector('.ct-qty')?.value)||0;
+    const price = parseFloat(tr.querySelector('.ct-price')?.value)||0;
+    const line  = qty*price;
+    sub += line;
+    const lt = tr.querySelector('.ct-line-total');
+    if(lt) lt.textContent = f2(line);
+  });
+
+  const totals = root.querySelector('.ct-totals');
+  const vatOn  = totals && totals.dataset.vat === '1';
+  let discAmt  = parseFloat(root.querySelector('#ctDiscAmt')?.value)||0;
+  if(discAmt > sub) discAmt = sub;
+  const afterD = sub - discAmt;
+  const vatAmt = vatOn ? afterD*0.15 : 0;
+  const grand  = afterD + vatAmt;
+
+  set('#ctSub', f2(sub)+' ر.س');
+  const afterRow = root.querySelector('#ctAfterRow');
+  if(afterRow) afterRow.style.display = discAmt>0 ? '' : 'none';
+  set('#ctAfter', f2(afterD)+' ر.س');
+  set('#ctVat', f2(vatAmt)+' ر.س');
+  set('#ctGrand', f2(grand)+' ر.س');
+
+  // Article 4 payment amounts
+  set('#ctGrandText', f2(grand));
+  set('#ctP50', f2(grand*0.5));
+  set('#ctP40', f2(grand*0.4));
+  set('#ctP10', f2(grand*0.1));
 }
 function printContract(){
   const overlay = document.getElementById('contractOverlay');
@@ -1878,6 +1945,7 @@ async function saveContract(){
   const ctNoEl = document.getElementById('ctNo');
   const ctNo = ctNoEl ? ctNoEl.value.trim() : '';
   if(!ctNo){ toast('⚠️ أدخل رقم العقد'); return; }
+  const quoteNo = document.getElementById('ctQuoteNo') ? document.getElementById('ctQuoteNo').value.trim() : '';
   toast('⏳ جاري حفظ العقد...');
   try{
     const res = await fetch(cfg.appsScriptUrl,{
@@ -1885,12 +1953,25 @@ async function saveContract(){
       headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({
         fileName: ctNo + '.json',
-        state:{ html: document.getElementById('ctContent').innerHTML },
+        state:{
+          html: document.getElementById('ctContent').innerHTML,
+          contractNo: ctNo,
+          quoteNo: quoteNo,          // original quotation number this contract came from
+          savedAt: new Date().toISOString(),
+        },
         folderId: cfg.contractsFolderId,
       }),
     });
     const data = await res.json();
-    if(data.success){ toast('✅ تم حفظ العقد: ' + ctNo + (data.action==='updated'?' (تحديث)':' (جديد)')); }
+    if(data.success){
+      // Advance the contract serial only when a brand-new contract was created
+      if(data.action!=='updated'){
+        const next = (parseInt(cfg.contractSerial,10)||0) + 1;
+        cfg.contractSerial = String(next);
+        localStorage.setItem('gcontract_serial', cfg.contractSerial);
+      }
+      toast('✅ تم حفظ العقد: ' + ctNo + (data.action==='updated'?' (تحديث)':' (جديد)'));
+    }
     else{ throw new Error(data.error||'Unknown error'); }
   }catch(e){ toast('❌ خطأ في الحفظ: ' + e.message); }
 }
@@ -1958,6 +2039,7 @@ async function loadContractFromDrive(fileId, name){
     document.getElementById('contractOverlay').style.display='block';
     document.body.classList.add('contract-mode');
     document.getElementById('contractOverlay').scrollTop=0;
+    ctRecalc();
     toast('✅ تم تحميل العقد: '+name);
   }catch(e){ toast('❌ خطأ في التحميل: '+e.message); }
 }
