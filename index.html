@@ -447,6 +447,7 @@ table.qt tbody tr.dragging{opacity:.4;}
 .ct-edit{width:62px;border:1px solid var(--border);border-radius:4px;padding:.18rem .25rem;font-family:'Cairo',sans-serif;font-size:.78rem;text-align:center;direction:ltr;background:#fffdfb;}
 .ct-edit:focus{outline:2px solid var(--orange);border-color:var(--orange);}
 #ctDiscAmt{width:80px;}
+.ct-words{font-weight:700;color:var(--primary);}
 .ct-totals{margin-top:.4rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
 .ct-tot-row{display:flex;justify-content:space-between;padding:.28rem .75rem;font-size:.82rem;border-bottom:1px solid var(--border);}
 .ct-tot-row:last-child{border-bottom:none;}
@@ -1795,10 +1796,10 @@ function openContract(){
     <div class="ct-section-title" style="page-break-after:avoid">المادة (4): الدفعات وآلية السداد</div>
     <div class="ct-section-body" contenteditable="true">
       <p>يتم سداد قيمة هذا العقد على دفعات وفقًا لآلية السداد التالية:</p>
-      <p><strong>إجمالي قيمة العقد (شامل ضريبة القيمة المضافة):</strong> مبلغ وقدره (<strong><span id="ctGrandText">${f2(grand)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
-      <p><strong>1- الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد، وقدرها (<strong><span id="ctP50">${f2(p50)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
-      <p><strong>2- الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع، وقدرها (<strong><span id="ctP40">${f2(p40)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
-      <p><strong>3- الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة، وقدرها (<strong><span id="ctP10">${f2(p10)}</span> ريال سعودي</strong>) فقط _______________ لا غير.</p>
+      <p><strong>إجمالي قيمة العقد (شامل ضريبة القيمة المضافة):</strong> مبلغ وقدره (<strong><span id="ctGrandText">${f2(grand)}</span> ريال سعودي</strong>) فقط <span id="ctGrandWords" class="ct-words">${tafqit(grand)}</span> لا غير.</p>
+      <p><strong>1- الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد، وقدرها (<strong><span id="ctP50">${f2(p50)}</span> ريال سعودي</strong>) فقط <span id="ctP50Words" class="ct-words">${tafqit(p50)}</span> لا غير.</p>
+      <p><strong>2- الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع، وقدرها (<strong><span id="ctP40">${f2(p40)}</span> ريال سعودي</strong>) فقط <span id="ctP40Words" class="ct-words">${tafqit(p40)}</span> لا غير.</p>
+      <p><strong>3- الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة، وقدرها (<strong><span id="ctP10">${f2(p10)}</span> ريال سعودي</strong>) فقط <span id="ctP10Words" class="ct-words">${tafqit(p10)}</span> لا غير.</p>
       <p style="margin-top:.5rem">يتم تحويل الدفعات إلى الحساب البنكي التالي الخاص بالطرف الثاني:</p>
     </div>
     <div class="ct-bank" contenteditable="true" style="page-break-inside:avoid">
@@ -1880,6 +1881,59 @@ function closeContract(){
   document.body.classList.remove('contract-mode');
 }
 
+// Convert a money amount to Arabic words (تفقيط) — riyals + halalas.
+function tafqit(amount){
+  amount = Math.round((amount + Number.EPSILON) * 100) / 100;
+  const riyals  = Math.floor(amount);
+  const halalas = Math.round((amount - riyals) * 100);
+
+  const ones = ['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة',
+    'أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+  const tens = ['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+  const hundreds = ['','مائة','مئتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+  const scales = [
+    {one:'',      two:'',         plural:''},
+    {one:'ألف',   two:'ألفان',    plural:'آلاف'},
+    {one:'مليون', two:'مليونان',  plural:'ملايين'},
+    {one:'مليار', two:'ملياران',  plural:'مليارات'},
+  ];
+
+  function three(n){
+    const h = Math.floor(n/100), rem = n%100, parts = [];
+    if(h) parts.push(hundreds[h]);
+    if(rem){
+      if(rem < 20) parts.push(ones[rem]);
+      else{
+        const o = rem%10, t = Math.floor(rem/10);
+        parts.push(o ? ones[o] + ' و' + tens[t] : tens[t]);
+      }
+    }
+    return parts.join(' و');
+  }
+
+  function convert(num){
+    if(num === 0) return 'صفر';
+    const groups = [];
+    while(num > 0){ groups.push(num % 1000); num = Math.floor(num/1000); }
+    const words = [];
+    for(let i = groups.length-1; i >= 0; i--){
+      const g = groups[i];
+      if(g === 0) continue;
+      const s = scales[i];
+      if(i === 0)            words.push(three(g));
+      else if(g === 1)       words.push(s.one);
+      else if(g === 2)       words.push(s.two);
+      else if(g <= 10)       words.push(three(g) + ' ' + s.plural);
+      else                   words.push(three(g) + ' ' + s.one);
+    }
+    return words.join(' و');
+  }
+
+  let result = convert(riyals) + ' ريال سعودي';
+  if(halalas > 0) result += ' و' + convert(halalas) + ' هللة';
+  return result;
+}
+
 // Recalculate contract totals/payments from the editable item & discount fields.
 // Works on both freshly-generated and reloaded contracts (handlers are global).
 function ctRecalc(){
@@ -1913,11 +1967,15 @@ function ctRecalc(){
   set('#ctVat', f2(vatAmt)+' ر.س');
   set('#ctGrand', f2(grand)+' ر.س');
 
-  // Article 4 payment amounts
+  // Article 4 payment amounts (numerals + Arabic words / تفقيط)
   set('#ctGrandText', f2(grand));
   set('#ctP50', f2(grand*0.5));
   set('#ctP40', f2(grand*0.4));
   set('#ctP10', f2(grand*0.1));
+  set('#ctGrandWords', tafqit(grand));
+  set('#ctP50Words', tafqit(grand*0.5));
+  set('#ctP40Words', tafqit(grand*0.4));
+  set('#ctP10Words', tafqit(grand*0.1));
 }
 function printContract(){
   const overlay = document.getElementById('contractOverlay');
