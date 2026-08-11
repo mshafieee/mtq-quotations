@@ -8,7 +8,7 @@ brand identity (the previous orange `#ef5b00` is gone entirely).
 | Token | Hex | Used for |
 | --- | --- | --- |
 | Black | `#01040B` | table header, grand-total bar, sticky footer, body text |
-| Violet | `#7B27FF` | "عرض سعر", quote number, FREE pills, bullets, grand-total figure |
+| Violet | `#7B27FF` | "عرض سعر", quote number, FREE pills, bullets, panel markers |
 | Cool grey | `#A0A2B1` | card labels, "QUOTATION", footer cities |
 | Grey | `#A2A2A2` | English item descriptions, struck-through list prices, row numbers |
 | Light | `#EFEFEF` | row separators |
@@ -58,7 +58,7 @@ the body** — otherwise the name prints twice.
 3. **Items** — `{%items_list%}` with a black rounded header row, alternating violet-tinted
    rows, and hairline separators.
 4. **Totals** — Daftra's totals table, pinned to the right at 50 % width; subtotal and VAT on
-   a tinted panel, grand total on a black rounded bar with the figure in violet.
+   a tinted panel, grand total on a black rounded bar with the figure in white.
 5. **Terms & technical notes** — two static panels.
 6. **Bank details** — Al Rajhi and SAB IBANs.
 7. **Sticky footer** — black bar: company (right) · cities (centre) · phone (left).
