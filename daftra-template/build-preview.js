@@ -34,8 +34,8 @@ const customFields = `
     <td><label>المندوب / SALES REP</label>بشار عادل</td>
   </tr>
   <tr>
-    <td><label>العنوان / ADDRESS</label>مكة المكرمة – حي العوالي</td>
     <td><label>نطاق العمل / SCOPE</label>توريد وتركيب وبرمجة</td>
+    <td><label>رقم الاتصال / CONTACT</label>0553 279 9924</td>
   </tr>
 </table>`;
 
@@ -101,7 +101,8 @@ const values = {
   '{%invoice_number%}': 'Q-2026-92074',
   '{%label_date%}': 'التاريخ',
   '{%invoice_date%}': '2026 / 06 / 27',
-  '{%client_info%}': 'م. يسري',
+  '{%client_info%}': 'شركة اوتادا للتطوير العقاري',
+  '{%client_address%}': 'مكة المكرمة – حي العوالي',
   '{%label_ship%}': 'الشحن إلى',
   '{%ship_info%}': '',
   '{%custom_fields%}': customFields,

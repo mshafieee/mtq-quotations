@@ -134,8 +134,8 @@
     <td><label>المندوب / SALES REP</label>بشار عادل</td>
   </tr>
   <tr>
-    <td><label>العنوان / ADDRESS</label>مكة المكرمة – حي العوالي</td>
     <td><label>نطاق العمل / SCOPE</label>توريد وتركيب وبرمجة</td>
+    <td><label>رقم الاتصال / CONTACT</label>0553 279 9924</td>
   </tr>
 </table> as its own table — restyle each cell into a card. */
         #custom-fields { display: block; margin: -8px -8px 0 -8px; }
@@ -579,17 +579,28 @@
             <div class="meta-cell">
                 <div class="meta-card">
                     <div id="label_client" class="meta-label editable-area">اسم العميل / CLIENT</div>
-                    <div class="meta-value">م. يسري</div>
+                    <div class="meta-value">شركة اوتادا للتطوير العقاري</div>
                 </div>
             </div>
-            <!-- Cell always present so the client card stays half-width; Daftra toggles
-                 display on #shipping_options, which is the card inside it. -->
             <div class="meta-cell last">
+                <div class="meta-card">
+                    <div id="label_address" class="meta-label editable-area">العنوان / ADDRESS</div>
+                    <div class="meta-value">مكة المكرمة – حي العوالي</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping address: its own row now that the client row is full. The cell is always
+             present so the card keeps half width; Daftra toggles display on #shipping_options,
+             which is the card inside it, so this row is invisible until shipping is used. -->
+        <div class="meta-row">
+            <div class="meta-cell">
                 <div class="meta-card" id="shipping_options" style="display:none;">
                     <div class="meta-label"><span id="label_ship" class="editable-area">الشحن إلى</span></div>
                     <div class="meta-value"></div>
                 </div>
             </div>
+            <div class="meta-cell last"></div>
         </div>
 
         <div id="custom-fields" class="editable-area">
@@ -599,8 +610,8 @@
     <td><label>المندوب / SALES REP</label>بشار عادل</td>
   </tr>
   <tr>
-    <td><label>العنوان / ADDRESS</label>مكة المكرمة – حي العوالي</td>
     <td><label>نطاق العمل / SCOPE</label>توريد وتركيب وبرمجة</td>
+    <td><label>رقم الاتصال / CONTACT</label>0553 279 9924</td>
   </tr>
 </table></div>
 
