@@ -42,7 +42,7 @@ The logo is **not** hardcoded — it still renders through `{%logo%}` / `{%logo-
 top right, the Arabic company name beside it, and "عرض سعر" at the top left, with a black rule
 beneath all three.
 
-The logo is capped at 58 px tall / 190 px wide, which suits a square mark. **If the logo
+The logo is capped at 78 px tall / 250 px wide, which suits a square mark. **If the logo
 uploaded in Daftra already contains the company name, delete the `.header-brand` block from
 the body** — otherwise the name prints twice.
 
@@ -61,8 +61,9 @@ the body** — otherwise the name prints twice.
    - Last row: CR No. and VAT No.
 3. **Items** — `{%items_list%}` with a black rounded header row, alternating violet-tinted
    rows, and hairline separators.
-4. **Totals** — Daftra's totals table, pinned to the right at 50 % width; subtotal and VAT on
-   a tinted panel, grand total on a black rounded bar with the figure in white.
+4. **Totals** — Daftra's totals table, pushed to the **left** at 50 % width so it sits under
+   the price columns; subtotal and VAT on a tinted panel, grand total on a black rounded bar
+   with the figure in white.
 5. **Bottom row** — bank accounts (right) facing terms & conditions (left). The terms panel
    lands directly under the totals; the bank panel is headed الحسابات البنكية with Al Rajhi
    first, then SAB. The technical-notes panel has been removed.
@@ -116,7 +117,7 @@ itself, not here.
   its content, so whichever columns are switched on in Daftra's item-table settings, the row
   stays organised — the description simply absorbs the slack. The mockup's `#` and `الكود`
   columns are Daftra settings, not template markup; today the account emits
-  `البند/الوصف | صورة المنتج | سعر الوحدة | الكمية | المجموع`.
+  `البند | الوصف | صورة المنتج | سعر الوحدة | الكمية | المجموع`.
 - **Items vs totals** are told apart by position (`:nth-of-type`), never by class. The account
   puts totals-like classes on the *items* table too, and matching those shrank it to half
   width and forced every cell onto a single overflowing line.
