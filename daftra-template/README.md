@@ -54,7 +54,9 @@ the body** — otherwise the name prints twice.
    is only the mark, or fails to load.
 2. **Meta cards** — rounded, bordered cards with a small grey label over a bold value:
    - Row 1: `{%invoice_number%}` (violet) · `{%invoice_date%}` · validity.
-   - Row 2: `{%client_info%}`, plus the shipping card when Daftra reveals it.
+   - Row 2: `{%client_info%}` and `{%client_address%}`.
+   - Row 3: `{%staff_member_name%}` as المندوب المسؤول, plus the shipping card in the facing
+     half when Daftra reveals it.
    - Row 3+: `{%custom_fields%}` — Daftra's own table, restyled cell-by-cell into the same
      cards, so Project / Sales Rep / Address and anything else configured picks up the look
      automatically.
@@ -67,7 +69,9 @@ the body** — otherwise the name prints twice.
 5. **Bottom row** — bank accounts (right) facing terms & conditions (left). The terms panel
    lands directly under the totals; the bank panel is headed الحسابات البنكية with Al Rajhi
    first, then SAB. The technical-notes panel has been removed.
-6. **Sticky footer** — black bar: company (right) · phone + الإدارة (left).
+6. **Client signature** — a half-width panel in the same chrome, carrying `{%client_info%}`
+   over a signature rule. The facing cell is left empty so the block keeps the page's rhythm.
+7. **Sticky footer** — black bar: company (right) · phone + الإدارة (left).
 
 ## Editing text from Daftra's template editor
 

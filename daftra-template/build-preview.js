@@ -31,7 +31,7 @@ const customFields = `
 <table cellpadding="0" cellspacing="0">
   <tr>
     <td><label>المشروع / PROJECT</label>فندق عين مكة</td>
-    <td><label>المندوب / SALES REP</label>بشار عادل</td>
+    <td><label>الموقع / SITE</label>مكة المكرمة</td>
   </tr>
   <tr>
     <td><label>نطاق العمل / SCOPE</label>توريد وتركيب وبرمجة</td>
@@ -106,6 +106,7 @@ const values = {
   '{%client_address%}': 'مكة المكرمة – حي العوالي',
   '{%label_ship%}': 'الشحن إلى',
   '{%ship_info%}': '',
+  '{%staff_member_name%}': 'بشار عادل',
   '{%invoice_notes%}': 'توريد وتركيب بدون تخريم الأبواب.',
   '{%custom_fields%}': customFields,
   '{%items_list%}': itemsList,

@@ -455,12 +455,36 @@
             letter-spacing: 0.3px;
         }
 
+        /* ---------- Client signature ----------
+           Same panel chrome as the bank and terms blocks, and the same two-cell row, so it
+           keeps the page's rhythm; the facing cell stays empty. */
+        .sign-grid {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 12px;
+            direction: rtl;
+            page-break-inside: avoid;
+        }
+        .sign-cell { display: table-cell; width: 50%; vertical-align: top; }
+        .sign-body { padding: 8px 11px 10px; text-align: center; }
+        .sign-name {
+            height: 26px;
+            overflow: hidden;
+            color: #01040B;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+        .sign-line { height: 34px; margin: 0 14px; border-bottom: 1px solid #01040B; }
+        .sign-cap { margin-top: 4px; color: #A0A2B1; font-size: 8px; font-weight: bold; }
+
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             html, body { min-height: 0; }
             body { background: #ffffff !important; }
             .invoice-wrap { width: 100%; max-width: none; min-height: 0; padding: 0; }
-            .bottom-grid { margin-bottom: 0; }
+            .sign-grid { margin-bottom: 0; }
             @page { size: A4 portrait; margin: 7mm 8mm 20mm; }
         }
 
@@ -531,17 +555,22 @@
             </div>
         </div>
 
-        <!-- Shipping address: its own row now that the client row is full. The cell is always
-             present so the card keeps half width; Daftra toggles display on #shipping_options,
-             which is the card inside it, so this row is invisible until shipping is used. -->
+        <!-- Sales rep on the right; the shipping card fills the facing half when Daftra reveals
+             it. The cell is always present so the rep card keeps half width, and the toggle sits
+             on #shipping_options — the card inside — rather than on the cell. -->
         <div class="meta-row">
             <div class="meta-cell">
+                <div class="meta-card">
+                    <div id="label_staff" class="meta-label editable-area">المندوب المسؤول / SALES REP</div>
+                    <div class="meta-value">{%staff_member_name%}</div>
+                </div>
+            </div>
+            <div class="meta-cell last">
                 <div class="meta-card" id="shipping_options" style="display:none;">
                     <div class="meta-label"><span id="label_ship" class="editable-area">{%label_ship%}</span></div>
                     <div class="meta-value">{%ship_info%}</div>
                 </div>
             </div>
-            <div class="meta-cell last"></div>
         </div>
 
         <custom_field id="custom-fields" class="editable-area">{%custom_fields%}</custom_field>
@@ -604,6 +633,22 @@
 
         <div class="extra-notes">
             <div id="footer" class="editable-area">{%footer%}</div>
+        </div>
+
+        <!-- Client acceptance. Half width, matching the bank panel above it; the facing cell is
+             left empty so the block keeps the same rhythm as the rows above. -->
+        <div class="sign-grid">
+            <div class="sign-cell">
+                <div class="info-panel">
+                    <div class="info-head"><span class="sq"></span><span id="sign_head" class="editable-area">توقيع العميل / CLIENT SIGNATURE</span></div>
+                    <div class="sign-body">
+                        <div class="sign-name">{%client_info%}</div>
+                        <div class="sign-line"></div>
+                        <div id="sign_cap" class="sign-cap editable-area">الاسم والتوقيع والختم / NAME, SIGNATURE &amp; STAMP</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sign-cell last"></div>
         </div>
 
         {%html_sticky_footer%}
