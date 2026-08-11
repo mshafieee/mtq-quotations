@@ -44,10 +44,10 @@ const was = (v) => `<span class="original-price">${v}</span>`;
 const free = '<span class="free-value">FREE</span>';
 
 /* Column set actually emitted by the account today:
-   البند/الوصف | صورة المنتج | سعر الوحدة | الكمية | المجموع, plus a per-column summary
+   البند | الوصف | صورة المنتج | سعر الوحدة | الكمية | المجموع, plus a per-column summary
    row in <tfoot>, then the real totals as a separate table.class="total-table". */
 const rows = [
-  ['1', 'DL-711',
+  ['1', 'POE-24+2',
     'قفل فندقي إلكتروني ببطاقات RF ام1 ار اف، يدعم القراءة والكتابة والتشفير، يعمل بـ 4 بطاريات AAA، إنذار انخفاض البطارية.',
     'RF M1 electronic hotel lock, aluminium reader &amp; handle, 4&times;AAA batteries, low-battery alarm.',
     '225', '400', was('150,000') + money('90,000')],
@@ -70,14 +70,15 @@ const itemsList = `
 <table class="listing-table total-table" cellpadding="0" cellspacing="0">
   <thead>
     <tr>
-      <th>البند / الوصف</th><th>صورة المنتج</th>
+      <th>البند</th><th>الوصف</th><th>صورة المنتج</th>
       <th>سعر الوحدة</th><th>الكمية</th><th>المجموع</th>
     </tr>
   </thead>
   <tbody>
     ${rows.map(([n, code, ar, en, unit, qty, total]) => `
     <tr>
-      <td class="item-description"><span class="code-badge">${code}</span> ${ar}<small>${en}</small></td>
+      <td class="item-code">${code}</td>
+      <td class="item-description">${ar}<small>${en}</small></td>
       <td><img src="${thumb}" alt="" /></td>
       <td>${unit}</td>
       <td>${qty}</td>
@@ -85,7 +86,7 @@ const itemsList = `
     </tr>`).join('')}
   </tbody>
   <tfoot>
-    <tr><td></td><td></td><td>0.00</td><td>0</td><td>0.00</td></tr>
+    <tr><td></td><td></td><td></td><td>0.00</td><td>0</td><td>0.00</td></tr>
   </tfoot>
 </table>
 <table class="total-table" cellpadding="0" cellspacing="0">

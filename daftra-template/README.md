@@ -63,11 +63,10 @@ the body** — otherwise the name prints twice.
    rows, and hairline separators.
 4. **Totals** — Daftra's totals table, pinned to the right at 50 % width; subtotal and VAT on
    a tinted panel, grand total on a black rounded bar with the figure in white.
-5. **Terms & conditions** — one static panel, sized to its own content rather than to the
-   sheet (`display: table; width: auto`), sitting at the right edge under the totals. The
-   technical-notes panel has been removed.
-6. **Bank details** — Al Rajhi and SAB IBANs.
-7. **Sticky footer** — black bar: company (right) · الإدارة + phone (left).
+5. **Bottom row** — bank accounts (right) facing terms & conditions (left). The terms panel
+   lands directly under the totals; the bank panel is headed الحسابات البنكية with Al Rajhi
+   first, then SAB. The technical-notes panel has been removed.
+6. **Sticky footer** — black bar: company (right) · phone + الإدارة (left).
 
 ## Editing text from Daftra's template editor
 
@@ -95,8 +94,19 @@ itself, not here.
   underneath the panel — it stays invisible when the field is empty.
 - **The footer is self-contained.** wkhtmltopdf renders the footer section as its own
   document, inheriting nothing from the HTML section — so `footer.html` carries its own Cairo
-  `@import` and the full Arabic-capable font stack. Without them the bar falls back to a
-  Latin-only face and the Arabic company name silently drops out of the PDF.
+  `@import`, the full Arabic-capable font stack, *and* its own margin reset. Without the font
+  stack the bar falls back to a Latin-only face and the Arabic company name silently drops out
+  of the PDF; without `html, body { margin: 0 }` the renderer's default ~8 px body margin pushes
+  the bar down out of the strip reserved for it and the bottom gets clipped. The bar is 30 px
+  tall against a 20 mm bottom page margin, which leaves headroom for both.
+- **Item table boundaries** — cells carry a left border (`#EFEFEF` in the body, `#33333C` in the
+  black header) to draw vertical column rules; the last cell in each row drops it so no line is
+  painted on the outer left edge.
+- **The item-code column** is held at 9 % and `white-space: nowrap`, so a code like `POE-24+2`
+  cannot break across two lines. A `:not(.item-description):not(.description)` guard keeps the
+  rule off accounts whose first column is the description instead.
+- **Totals sit on the left**, under the price columns. Daftra emits the totals table inside
+  `{%items_list%}`, so it can only be positioned with margins — `margin-right: auto` does it.
 - **The footer's `الإدارة` and phone are inline-blocks on purpose.** As plain inline text the
   digits join the Arabic run beside them and bidi reorders the pair, printing the number to the
   *left* of `الإدارة`; `unicode-bidi: embed` does not help, because the embedding still nests

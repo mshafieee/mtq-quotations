@@ -57,20 +57,20 @@
         .header-logo img {
             display: block !important;
             width: auto !important;
-            max-width: 190px !important;
-            max-height: 58px !important;
+            max-width: 250px !important;
+            max-height: 78px !important;
             height: auto !important;
             margin: 0 !important;
         }
         .header-logo #logo img,
-        .header-logo .logo img { max-width: 100% !important; max-height: 58px !important; }
+        .header-logo .logo img { max-width: 100% !important; max-height: 78px !important; }
         /* Delete this cell from the body if the uploaded logo already carries the name. */
         .header-brand { width: 1px; padding-right: 12px; text-align: right; white-space: nowrap; }
-        .brand-ar { color: #01040B; font-size: 20px; font-weight: bold; line-height: 1.2; }
+        .brand-ar { color: #01040B; font-size: 17px; font-weight: bold; line-height: 1.25; }
         .header-title { text-align: left; }
         .header-title .arabic-title {
             color: #7B27FF;
-            font-size: 27px;
+            font-size: 19px;
             font-weight: bold;
             line-height: 1.1;
         }
@@ -85,9 +85,9 @@
         }
         .meta-cell { display: table-cell; vertical-align: top; }
         .meta-card {
-            margin: 0 0 8px 8px;
-            padding: 6px 12px 7px;
-            min-height: 44px;
+            margin: 0 0 7px 7px;
+            padding: 5px 11px 6px;
+            min-height: 38px;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
             background: #FBFBFD;
@@ -95,15 +95,15 @@
         .meta-cell.last .meta-card { margin-left: 0; }
         .meta-label {
             color: #A0A2B1;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
             letter-spacing: 0.4px;
             line-height: 1.4;
         }
         .meta-value {
-            margin-top: 2px;
+            margin-top: 1px;
             color: #01040B;
-            font-size: 15px;
+            font-size: 12px;
             font-weight: bold;
             line-height: 1.45;
         }
@@ -111,25 +111,25 @@
         .meta-value.ltr { direction: ltr; text-align: right; unicode-bidi: embed; }
 
         /* Daftra renders {%custom_fields%} as its own table — restyle each cell into a card. */
-        #custom-fields { display: block; margin: -8px -8px 0 -8px; }
+        #custom-fields { display: block; margin: -7px -7px 0 -7px; }
         #custom-fields table {
             width: 100% !important;
             table-layout: fixed !important;
             border-collapse: separate !important;
-            border-spacing: 8px 8px !important;
+            border-spacing: 7px 7px !important;
             margin: 0 !important;
         }
         #custom-fields tr { page-break-inside: avoid; }
         #custom-fields td {
-            padding: 6px 12px 7px !important;
-            min-height: 44px;
+            padding: 5px 11px 6px !important;
+            min-height: 38px;
             border: 1px solid #E4E4EA !important;
             border-radius: 10px;
             background: #FBFBFD !important;
             color: #01040B !important;
             text-align: right !important;
             vertical-align: top !important;
-            font-size: 15px !important;
+            font-size: 12px !important;
             font-weight: bold !important;
             line-height: 1.45 !important;
         }
@@ -146,7 +146,7 @@
             background: none !important;
             color: #A0A2B1 !important;
             text-align: right !important;
-            font-size: 9px !important;
+            font-size: 8px !important;
             font-weight: bold !important;
             letter-spacing: 0.4px !important;
             line-height: 1.4 !important;
@@ -173,6 +173,7 @@
         #items-list th, .listing-table th {
             padding: 7px 6px !important;
             border: 0 !important;
+            border-left: 1px solid #33333C !important;
             background: #01040B !important;
             color: #ffffff !important;
             text-align: center !important;
@@ -183,11 +184,15 @@
         }
         /* RTL: first cell sits on the right edge, last cell on the left edge. */
         #items-list th:first-child, .listing-table th:first-child { border-radius: 0 9px 9px 0; }
-        #items-list th:last-child, .listing-table th:last-child { border-radius: 9px 0 0 9px; }
+        #items-list th:last-child, .listing-table th:last-child {
+            border-radius: 9px 0 0 9px;
+            border-left: 0 !important;
+        }
         #items-list td, .listing-table td {
             padding: 7px 6px !important;
             border: 0 !important;
             border-bottom: 1px solid #EFEFEF !important;
+            border-left: 1px solid #EFEFEF !important;
             background: #ffffff;
             color: #01040B;
             text-align: center !important;
@@ -198,6 +203,16 @@
             word-wrap: break-word;
         }
         #items-list tbody tr:nth-child(even) td, .listing-table tbody tr:nth-child(even) td { background: #FAF7FF; }
+        /* RTL: the last cell is the leftmost, so its left border would draw an outer edge. */
+        #items-list td:last-child, .listing-table td:last-child { border-left: 0 !important; }
+
+        /* Item-code column: wide enough for a code like POE-24+2, and never broken mid-code.
+           The :not() guard keeps the rule off accounts whose first column is the description. */
+        #items-list > table:nth-of-type(1) td:first-child:not(.item-description):not(.description),
+        #items-list > table:nth-of-type(1) th:first-child {
+            width: 9% !important;
+            white-space: nowrap !important;
+        }
 
         /* The description column takes the slack; every other column sizes to its content
            (the header labels carry white-space: nowrap, so none of them can be squeezed). */
@@ -211,7 +226,7 @@
         .listing-table td.item-description, .listing-table td.description {
             padding-right: 10px !important;
             text-align: right !important;
-            font-size: 10.5px !important;
+            font-size: 10px !important;
             font-weight: bold;
             line-height: 1.5 !important;
         }
@@ -288,7 +303,7 @@
         #items-list table.total-table:not(:first-of-type),
         #items-list table.totals:not(:first-of-type) {
             width: 50% !important;
-            margin: 12px 0 0 auto !important;
+            margin: 12px auto 0 0 !important;
             border: 0 !important;
             page-break-inside: avoid !important;
             break-inside: avoid-page !important;
@@ -351,15 +366,22 @@
            has no per-column sums to show). Uncomment to hide it. */
         /* #items-list > table:nth-of-type(1) tfoot { display: none !important; } */
 
-        /* ---------- Terms & conditions ----------
-           display:table with width:auto shrinks the panel to its longest line instead of
-           stretching it across the sheet; max-width keeps an over-long line wrapping inside
-           the page rather than overflowing it. It sits at the right — the RTL start edge. */
-        .info-panel {
+        /* ---------- Bottom row: bank accounts (right) · terms & conditions (left) ----------
+           The totals table is emitted inside {%items_list%}, so it can only be positioned with
+           margins — it is pushed left, under the price columns. This row then puts the terms
+           panel directly beneath it and fills the facing half with the bank accounts. */
+        .bottom-grid {
             display: table;
-            width: auto;
-            max-width: 100%;
-            margin: 14px 0 0 0;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 14px;
+            direction: rtl;
+            page-break-inside: avoid;
+        }
+        .bottom-cell { display: table-cell; width: 50%; vertical-align: top; }
+        .info-panel {
+            width: 100%;
+            margin-left: 12px;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
             background: #ffffff;
@@ -367,6 +389,7 @@
             direction: rtl;
             page-break-inside: avoid;
         }
+        .bottom-cell.last .info-panel { margin-left: 0; }
         .info-head {
             padding: 6px 11px;
             border-bottom: 1px solid #E4E4EA;
@@ -414,27 +437,31 @@
         .extra-notes { margin: 8px 0 0; color: #01040B; font-size: 9px; line-height: 1.75; page-break-inside: avoid; }
         .extra-notes ul, .extra-notes ol { margin: 0 16px 0 0; padding: 0; }
 
-        /* ---------- Bank details ---------- */
-        .bank-bar {
-            display: table;
-            width: 100%;
-            table-layout: fixed;
-            margin-top: 11px;
-            direction: rtl;
-            page-break-inside: avoid;
+        /* ---------- Bank accounts, inside the bottom row ---------- */
+        .bank-line {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #EFEFEF;
         }
-        .bank-cell { display: table-cell; width: 50%; padding: 2px 10px; text-align: center; vertical-align: middle; }
-        .bank-cell.last { border-right: 1px solid #E4E4EA; }
+        .bank-line.last { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
         .bank-name { color: #7B27FF; font-size: 9px; font-weight: bold; }
-        .bank-iban { color: #01040B; direction: ltr; font-size: 12px; font-weight: bold; letter-spacing: 0.4px; }
+        .bank-iban {
+            margin-top: 1px;
+            color: #01040B;
+            direction: ltr;
+            text-align: right;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+        }
 
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             html, body { min-height: 0; }
             body { background: #ffffff !important; }
             .invoice-wrap { width: 100%; max-width: none; min-height: 0; padding: 0; }
-            .bank-bar { margin-bottom: 0; }
-            @page { size: A4 portrait; margin: 7mm 8mm 16mm; }
+            .bottom-grid { margin-bottom: 0; }
+            @page { size: A4 portrait; margin: 7mm 8mm 20mm; }
         }
 
         /* Product image column — bounded so it cannot widen and squeeze the description. */
@@ -537,33 +564,43 @@
         <div id="items-list">{%items_list%}</div>
         <div class="totals-clear"></div>
 
-        <div class="info-panel">
-            <div class="info-head"><span class="sq"></span><span id="terms_head" class="editable-area">الشروط والأحكام / TERMS &amp; CONDITIONS</span></div>
-            <div class="info-body">
-                <ul id="terms_body" class="editable-area">
-                    <li>الدفعات: 50% مقدمة عند التوقيع، 40% قبل التوريد، 10% بعد التركيب وقبل البرمجة.</li>
-                    <li>مدة التوريد: 45-60 يوم عمل من تاريخ التعميد واستلام الدفعة الأولى واعتماد التفاصيل.</li>
-                    <li>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</li>
-                    <li>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</li>
-                    <li>صلاحية العرض: 10 أيام من تاريخه.</li>
-                    <li>نطاق العرض: توريد فقط.</li>
-                </ul>
+        <!-- RTL: the first cell is the right-hand one. Bank accounts face the terms panel,
+             which lands directly under the totals on the left. -->
+        <div class="bottom-grid">
+            <div class="bottom-cell">
+                <div class="info-panel">
+                    <div class="info-head"><span class="sq"></span><span id="banks_head" class="editable-area">الحسابات البنكية / BANK ACCOUNTS</span></div>
+                    <div class="info-body">
+                        <div class="bank-line">
+                            <div id="bank1_name" class="bank-name editable-area">مصرف الراجحي</div>
+                            <div id="bank1_iban" class="bank-iban editable-area">SA56 8000 0201 6080 1660 8470</div>
+                        </div>
+                        <div class="bank-line last">
+                            <div id="bank2_name" class="bank-name editable-area">البنك الأول (SAB)</div>
+                            <div id="bank2_iban" class="bank-iban editable-area">SA95 4500 0000 0343 6186 5001</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-cell last">
+                <div class="info-panel">
+                    <div class="info-head"><span class="sq"></span><span id="terms_head" class="editable-area">الشروط والأحكام / TERMS &amp; CONDITIONS</span></div>
+                    <div class="info-body">
+                        <ul id="terms_body" class="editable-area">
+                            <li>الدفعات: 50% مقدمة عند التوقيع، 40% قبل التوريد، 10% بعد التركيب وقبل البرمجة.</li>
+                            <li>مدة التوريد: 45-60 يوم عمل من تاريخ التعميد واستلام الدفعة الأولى واعتماد التفاصيل.</li>
+                            <li>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</li>
+                            <li>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</li>
+                            <li>صلاحية العرض: 10 أيام من تاريخه.</li>
+                            <li>نطاق العرض: توريد فقط.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="extra-notes">
             <div id="footer" class="editable-area">{%footer%}</div>
-        </div>
-
-        <div class="bank-bar">
-            <div class="bank-cell">
-                <div id="bank1_name" class="bank-name editable-area">مصرف الراجحي</div>
-                <div id="bank1_iban" class="bank-iban editable-area">SA56 8000 0201 6080 1660 8470</div>
-            </div>
-            <div class="bank-cell last">
-                <div id="bank2_name" class="bank-name editable-area">البنك الأول (SAB)</div>
-                <div id="bank2_iban" class="bank-iban editable-area">SA95 4500 0000 0343 6186 5001</div>
-            </div>
         </div>
 
         {%html_sticky_footer%}

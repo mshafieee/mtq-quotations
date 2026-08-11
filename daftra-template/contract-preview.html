@@ -901,10 +901,18 @@
        Latin-only face and the Arabic silently drops out. @import must stay the first rule. */
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 
-    * { box-sizing: border-box; }
+    /* The footer document gets the renderer's default body margin (~8px), which pushes the bar
+       down out of the strip wkhtmltopdf reserves for it and clips the bottom off. Reset it. */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+        overflow: hidden;
+    }
     .mto-sticky-footer {
         width: 100%;
-        height: 34px;
+        height: 30px;
         margin: 0;
         padding: 0;
         background-color: #01040B !important;
@@ -921,7 +929,7 @@
     }
     .mto-sticky-footer table {
         width: 100%;
-        height: 34px;
+        height: 30px;
         margin: 0;
         padding: 0;
         border: 0;
@@ -931,7 +939,7 @@
     }
     /* Set on the cells too, so nothing inherits a face without Arabic coverage. */
     .mto-sticky-footer td {
-        height: 34px;
+        height: 30px;
         padding: 0 14px;
         border: 0;
         background-color: #01040B !important;
