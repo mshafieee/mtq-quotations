@@ -93,6 +93,10 @@ itself, not here.
 - **Terms and conditions** are static company boilerplate in `template.html`. Per-quote notes
   typed into Daftra still print, via `{%footer%}` in the borderless `.extra-notes` block
   underneath the panel — it stays invisible when the field is empty.
+- **The footer is self-contained.** wkhtmltopdf renders the footer section as its own
+  document, inheriting nothing from the HTML section — so `footer.html` carries its own Cairo
+  `@import` and the full Arabic-capable font stack. Without them the bar falls back to a
+  Latin-only face and the Arabic company name silently drops out of the PDF.
 - **The footer's `الإدارة` and phone are inline-blocks on purpose.** As plain inline text the
   digits join the Arabic run beside them and bidi reorders the pair, printing the number to the
   *left* of `الإدارة`; `unicode-bidi: embed` does not help, because the embedding still nests

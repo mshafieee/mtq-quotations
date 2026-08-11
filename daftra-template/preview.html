@@ -695,6 +695,11 @@
         </div>
 
         <style type="text/css">
+    /* wkhtmltopdf renders the footer as its OWN document — it does not inherit anything from
+       the HTML section, so Cairo has to be imported again here or the bar falls back to a
+       Latin-only face and the Arabic silently drops out. @import must stay the first rule. */
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
     * { box-sizing: border-box; }
     .mto-sticky-footer {
         width: 100%;
@@ -704,7 +709,10 @@
         background-color: #01040B !important;
         color: #ffffff !important;
         direction: rtl;
-        font-family: "Avenir Next", Tahoma, Arial, sans-serif;
+        /* Same formal stack as the company name in the header. Every fallback carries Arabic,
+           so the name prints even when the webfont cannot be fetched. */
+        font-family: "Cairo", "Sakkal Majalla", "Traditional Arabic", "GE SS Two",
+                     "Droid Arabic Naskh", "Noto Naskh Arabic", Tahoma, Arial, sans-serif;
         font-size: 10px;
         font-weight: bold;
         -webkit-print-color-adjust: exact !important;
@@ -720,6 +728,7 @@
         table-layout: fixed;
         background-color: #01040B !important;
     }
+    /* Set on the cells too, so nothing inherits a face without Arabic coverage. */
     .mto-sticky-footer td {
         height: 34px;
         padding: 0 14px;
@@ -728,20 +737,29 @@
         color: #ffffff !important;
         vertical-align: middle;
         white-space: nowrap;
+        font-family: "Cairo", "Sakkal Majalla", "Traditional Arabic", "GE SS Two",
+                     "Droid Arabic Naskh", "Noto Naskh Arabic", Tahoma, Arial, sans-serif;
     }
     .mto-footer-company { width: 55%; text-align: right; }
     .mto-footer-phone   { width: 45%; direction: ltr; text-align: left; }
-    /* Both parts are inline-blocks so the bidi algorithm sees two neutral objects and leaves
-       them in source order. As plain inline text the digits join the Arabic run beside them
-       and get reordered, which printed the phone to the left of الإدارة instead of its right;
-       unicode-bidi: embed does not help, since the embedding still nests inside that run. */
+
+    /* Phone and الإدارة are inline-blocks so the bidi algorithm sees two neutral objects and
+       leaves them in source order. As plain inline text the digits join the Arabic run beside
+       them and get reordered; unicode-bidi: embed does not help, because the embedding still
+       nests inside that run. */
+    .mto-footer-phone #footer_phone {
+        display: inline-block;
+        direction: ltr;
+        vertical-align: middle;
+        font-family: "Avenir Next", Arial, Helvetica, sans-serif;
+    }
     .mto-footer-phone .mto-dept {
         display: inline-block;
         margin-left: 6px;
         direction: rtl;
         vertical-align: middle;
     }
-    .mto-footer-phone #footer_phone { display: inline-block; direction: ltr; vertical-align: middle; }
+
     .mto-sq {
         display: inline-block;
         width: 7px;
