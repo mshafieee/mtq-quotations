@@ -23,7 +23,7 @@
             font-size: 12px;
             line-height: 1.55;
         }
-        .brand-en, .header-title .english-title, .bank-value, .meta-value.ltr,
+        .bank-value, .meta-value.ltr,
         #items-list td.item-description small, #items-list td.item-description .en,
         #items-list td.description small, #items-list td.description .en,
         #items-list .code-badge, #items-list td.item-code, #items-list td.code {
@@ -51,39 +51,22 @@
         .header-logo img {
             display: block !important;
             width: auto !important;
-            max-width: 190px !important;
-            max-height: 58px !important;
+            max-width: 250px !important;
+            max-height: 78px !important;
             height: auto !important;
             margin: 0 !important;
         }
         .header-logo #logo img,
-        .header-logo .logo img { max-width: 100% !important; max-height: 58px !important; }
+        .header-logo .logo img { max-width: 100% !important; max-height: 78px !important; }
         /* Delete this cell from the body if the uploaded logo already carries the name. */
         .header-brand { width: 1px; padding-right: 12px; text-align: right; white-space: nowrap; }
-        .brand-ar { color: #01040B; font-size: 20px; font-weight: bold; line-height: 1.2; }
-        .brand-en {
-            color: #A0A2B1;
-            direction: ltr;
-            text-align: right;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 3px;
-        }
+        .brand-ar { color: #01040B; font-size: 17px; font-weight: bold; line-height: 1.25; }
         .header-title { text-align: left; }
         .header-title .arabic-title {
             color: #7B27FF;
-            font-size: 27px;
+            font-size: 19px;
             font-weight: bold;
             line-height: 1.1;
-        }
-        .header-title .english-title {
-            margin-top: 1px;
-            color: #A0A2B1;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            direction: ltr;
-            text-align: left;
         }
         .rule-black { height: 3px; margin: 9px 0 12px; background: #01040B; }
 
@@ -97,8 +80,8 @@
             text-align: center;
             page-break-inside: avoid;
         }
-        .contract-title .ct-main { color: #01040B; font-size: 17px; font-weight: bold; line-height: 1.35; }
-        .contract-title .ct-sub { margin-top: 2px; color: #7B27FF; font-size: 12px; font-weight: bold; }
+        .contract-title .ct-main { color: #01040B; font-size: 15px; font-weight: bold; line-height: 1.35; }
+        .contract-title .ct-sub { margin-top: 2px; color: #7B27FF; font-size: 11px; font-weight: bold; }
 
         /* ---------- Meta cards (contract no / date / …) ---------- */
         .meta-row {
@@ -109,9 +92,9 @@
         }
         .meta-cell { display: table-cell; vertical-align: top; }
         .meta-card {
-            margin: 0 0 8px 8px;
-            padding: 6px 12px 7px;
-            min-height: 44px;
+            margin: 0 0 7px 7px;
+            padding: 5px 11px 6px;
+            min-height: 38px;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
             background: #FBFBFD;
@@ -119,15 +102,15 @@
         .meta-cell.last .meta-card { margin-left: 0; }
         .meta-label {
             color: #A0A2B1;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
             letter-spacing: 0.4px;
             line-height: 1.4;
         }
         .meta-value {
-            margin-top: 2px;
+            margin-top: 1px;
             color: #01040B;
-            font-size: 15px;
+            font-size: 12px;
             font-weight: bold;
             line-height: 1.45;
         }
@@ -272,6 +255,7 @@
         #items-list th, .listing-table th {
             padding: 7px 6px !important;
             border: 0 !important;
+            border-left: 1px solid #33333C !important;
             background: #01040B !important;
             color: #ffffff !important;
             text-align: center !important;
@@ -282,11 +266,15 @@
         }
         /* RTL: first cell sits on the right edge, last cell on the left edge. */
         #items-list th:first-child, .listing-table th:first-child { border-radius: 0 9px 9px 0; }
-        #items-list th:last-child, .listing-table th:last-child { border-radius: 9px 0 0 9px; }
+        #items-list th:last-child, .listing-table th:last-child {
+            border-radius: 9px 0 0 9px;
+            border-left: 0 !important;
+        }
         #items-list td, .listing-table td {
             padding: 7px 6px !important;
             border: 0 !important;
             border-bottom: 1px solid #EFEFEF !important;
+            border-left: 1px solid #EFEFEF !important;
             background: #ffffff;
             color: #01040B;
             text-align: center !important;
@@ -297,6 +285,17 @@
             word-wrap: break-word;
         }
         #items-list tbody tr:nth-child(even) td, .listing-table tbody tr:nth-child(even) td { background: #FAF7FF; }
+        /* RTL: the last cell is the leftmost, so its left border would draw an outer edge. */
+        #items-list td:last-child, .listing-table td:last-child { border-left: 0 !important; }
+
+        /* Item-code column: wide enough for a code like POE-24+2, and never broken mid-code.
+           The :not() guard keeps the rule off accounts whose first column is the description. */
+        #items-list > table:nth-of-type(1) td:first-child:not(.item-description):not(.description),
+        #items-list > table:nth-of-type(1) th:first-child {
+            width: 9% !important;
+            white-space: nowrap !important;
+        }
+
         #items-list td.item-description, #items-list td.description,
         .listing-table td.item-description, .listing-table td.description { width: 42%; }
         #items-list > table:nth-of-type(1) td:first-child,
@@ -305,7 +304,7 @@
         .listing-table td.item-description, .listing-table td.description {
             padding-right: 10px !important;
             text-align: right !important;
-            font-size: 10.5px !important;
+            font-size: 10px !important;
             font-weight: bold;
             line-height: 1.5 !important;
         }
@@ -386,7 +385,7 @@
         #items-list table.total-table:not(:first-of-type),
         #items-list table.totals:not(:first-of-type) {
             width: 50% !important;
-            margin: 12px 0 0 auto !important;
+            margin: 12px auto 0 0 !important;
             border: 0 !important;
             page-break-inside: avoid !important;
             break-inside: avoid-page !important;
@@ -544,7 +543,7 @@
             body { background: #ffffff !important; }
             .invoice-wrap { width: 100%; max-width: none; min-height: 0; padding: 0; }
             .sign-grid { margin-bottom: 0; }
-            @page { size: A4 portrait; margin: 7mm 8mm 16mm; }
+            @page { size: A4 portrait; margin: 7mm 8mm 20mm; }
         }
     </style>
 </head>
@@ -557,11 +556,9 @@
             <!-- Remove this cell if the logo uploaded in Daftra already includes the name. -->
             <div class="header-brand">
                 <div id="brand_ar" class="brand-ar editable-area">شركة متقنون تك للتجارة</div>
-                <div id="brand_en" class="brand-en editable-area">MOTQINON TECH</div>
             </div>
             <div class="header-title">
                 <div id="doc_title_ar" class="arabic-title editable-area">عقد اتفاق</div>
-                <div id="doc_title_en" class="english-title editable-area">CONTRACT</div>
             </div>
         </div>
 

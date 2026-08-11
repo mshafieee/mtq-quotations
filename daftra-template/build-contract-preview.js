@@ -2,8 +2,9 @@
  * Builds daftra-template/contract-preview.html from contract22.html + footer.html.
  *
  * Sample values imitate the markup Daftra substitutes into each {%placeholder%} — the same
- * five-column item table and totals-like classes the live account emits — so the preview
- * exercises the real stylesheet. Run:  node daftra-template/build-contract-preview.js
+ * six-column item table (البند | الوصف | صورة المنتج | سعر الوحدة | الكمية | المجموع) and
+ * totals-like classes the live account emits — so the preview exercises the real stylesheet.
+ * Run:  node daftra-template/build-contract-preview.js
  */
 const fs = require('fs');
 const path = require('path');
@@ -13,9 +14,9 @@ const template = fs.readFileSync(path.join(dir, 'contract22.html'), 'utf8');
 const stickyFooter = fs.readFileSync(path.join(dir, 'footer.html'), 'utf8');
 
 const logo = 'data:image/svg+xml;base64,' + Buffer.from(`
-<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
-  <rect x="0" y="0" width="56" height="56" rx="13" fill="#01040B"/>
-  <rect x="18" y="18" width="20" height="20" rx="4" fill="#7B27FF"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="74" height="74" viewBox="0 0 74 74">
+  <rect x="0" y="0" width="74" height="74" rx="17" fill="#01040B"/>
+  <rect x="24" y="24" width="26" height="26" rx="5" fill="#7B27FF"/>
 </svg>`).toString('base64');
 
 const thumb = 'data:image/svg+xml;base64,' + Buffer.from(`
@@ -61,14 +62,15 @@ const itemsList = `
 <table class="listing-table total-table" cellpadding="0" cellspacing="0">
   <thead>
     <tr>
-      <th>البند / الوصف</th><th>صورة المنتج</th>
+      <th>البند</th><th>الوصف</th><th>صورة المنتج</th>
       <th>سعر الوحدة</th><th>الكمية</th><th>المجموع</th>
     </tr>
   </thead>
   <tbody>
     ${rows.map(([code, ar, en, unit, qty, total]) => `
     <tr>
-      <td class="item-description"><span class="code-badge">${code}</span> ${ar}<small>${en}</small></td>
+      <td class="item-code">${code}</td>
+      <td class="item-description">${ar}<small>${en}</small></td>
       <td><img src="${thumb}" alt="" /></td>
       <td>${unit}</td>
       <td>${qty}</td>
@@ -76,7 +78,7 @@ const itemsList = `
     </tr>`).join('')}
   </tbody>
   <tfoot>
-    <tr><td></td><td></td><td>0.00</td><td>0</td><td>0.00</td></tr>
+    <tr><td></td><td></td><td></td><td>0.00</td><td>0</td><td>0.00</td></tr>
   </tfoot>
 </table>
 <table class="total-table" cellpadding="0" cellspacing="0">
@@ -91,7 +93,7 @@ const notes = `<p>إجمالي قيمة العقد شامل ضريبة القي�
 
 const values = {
   '{%logo%}': logo,
-  '{%logo-width%}': '56',
+  '{%logo-width%}': '74',
   '{%logo-height%}': '',
   '{%invoice_number%}': 'MTQCT-072',
   '{%label_date%}': 'التاريخ',
