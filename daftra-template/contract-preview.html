@@ -1,0 +1,962 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ar" dir="rtl">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>عقد اتفاق - متقنون تك</title>
+    <style type="text/css">
+        /* @import must stay the first rule in the block. If the PDF renderer has no outbound
+           network the fetch fails silently and the local fallbacks below take over. */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+        /* Motqinon Tech brand palette — same identity as the quotation template.
+           #01040B black · #7B27FF violet · #A0A2B1 cool grey · #A2A2A2 grey · #EFEFEF light
+           Layout uses display:table only — wkhtmltopdf (QtWebKit) has no reliable flexbox. */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-height: 100%; }
+        body {
+            background: #ffffff;
+            color: #01040B;
+            direction: rtl;
+            text-align: right;
+            font-family: "Cairo", "Sakkal Majalla", "Traditional Arabic", "GE SS Two",
+                         "Droid Arabic Naskh", "Noto Naskh Arabic", Tahoma, Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+        .brand-en, .header-title .english-title, .bank-value, .meta-value.ltr,
+        #items-list td.item-description small, #items-list td.item-description .en,
+        #items-list td.description small, #items-list td.description .en,
+        #items-list .code-badge, #items-list td.item-code, #items-list td.code {
+            font-family: "Avenir Next", Arial, Helvetica, sans-serif;
+        }
+        .invoice-wrap {
+            width: 100%;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 4px;
+            background: #ffffff;
+        }
+
+        /* ---------- Header: logo (from Daftra settings) + company name + title ---------- */
+        .document-header {
+            width: 100%;
+            display: table;
+            padding: 10px 0 4px;
+            direction: rtl;
+        }
+        .header-logo, .header-brand, .header-title { display: table-cell; vertical-align: middle; }
+        .header-logo { width: 1px; text-align: right; white-space: nowrap; }
+        .header-logo #logo,
+        .header-logo .logo,
+        .header-logo img {
+            display: block !important;
+            width: auto !important;
+            max-width: 190px !important;
+            max-height: 58px !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+        .header-logo #logo img,
+        .header-logo .logo img { max-width: 100% !important; max-height: 58px !important; }
+        /* Delete this cell from the body if the uploaded logo already carries the name. */
+        .header-brand { width: 1px; padding-right: 12px; text-align: right; white-space: nowrap; }
+        .brand-ar { color: #01040B; font-size: 20px; font-weight: bold; line-height: 1.2; }
+        .brand-en {
+            color: #A0A2B1;
+            direction: ltr;
+            text-align: right;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+        .header-title { text-align: left; }
+        .header-title .arabic-title {
+            color: #7B27FF;
+            font-size: 27px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+        .header-title .english-title {
+            margin-top: 1px;
+            color: #A0A2B1;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            direction: ltr;
+            text-align: left;
+        }
+        .rule-black { height: 3px; margin: 9px 0 12px; background: #01040B; }
+
+        /* ---------- Contract title block ---------- */
+        .contract-title {
+            margin: 0 0 12px;
+            padding: 10px 12px;
+            border: 1px solid #E4E4EA;
+            border-radius: 10px;
+            background: #FAF7FF;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+        .contract-title .ct-main { color: #01040B; font-size: 17px; font-weight: bold; line-height: 1.35; }
+        .contract-title .ct-sub { margin-top: 2px; color: #7B27FF; font-size: 12px; font-weight: bold; }
+
+        /* ---------- Meta cards (contract no / date / …) ---------- */
+        .meta-row {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            direction: rtl;
+        }
+        .meta-cell { display: table-cell; vertical-align: top; }
+        .meta-card {
+            margin: 0 0 8px 8px;
+            padding: 6px 12px 7px;
+            min-height: 44px;
+            border: 1px solid #E4E4EA;
+            border-radius: 10px;
+            background: #FBFBFD;
+        }
+        .meta-cell.last .meta-card { margin-left: 0; }
+        .meta-label {
+            color: #A0A2B1;
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 0.4px;
+            line-height: 1.4;
+        }
+        .meta-value {
+            margin-top: 2px;
+            color: #01040B;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.45;
+        }
+        .meta-value.accent { color: #7B27FF; }
+        .meta-value.ltr { direction: ltr; text-align: right; unicode-bidi: embed; }
+
+        /* ---------- Parties ---------- */
+        .party {
+            margin-bottom: 8px;
+            border: 1px solid #E4E4EA;
+            border-radius: 10px;
+            background: #ffffff;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+        .party-head {
+            padding: 6px 11px;
+            border-bottom: 1px solid #E4E4EA;
+            background: #F4F0FD;
+            color: #01040B;
+            text-align: right;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+        }
+        .party-second .party-head { background: #F1F1F3; }
+        .party-body {
+            padding: 8px 11px 9px;
+            color: #01040B;
+            font-size: 10px;
+            line-height: 1.95;
+            text-align: justify;
+        }
+        .party-body strong, .party-body b { font-weight: bold; }
+        .party-body .pv { display: inline; font-weight: bold; }
+
+        /* Daftra renders 
+<table cellpadding="0" cellspacing="0">
+  <tr>
+    <td><label>ممثل الطرف الأول</label>ثامر محمد راشد حسن</td>
+    <td><label>السجل التجاري</label>7011019275</td>
+  </tr>
+  <tr>
+    <td><label>الرقم الضريبي</label>310122334500003</td>
+    <td><label>جوال</label>0553710221</td>
+  </tr>
+</table> as its own table — restyle each cell into a card.
+           Sits inside the first-party panel, so client CR / VAT / representative / phone
+           configured as custom fields land with the rest of the client's details. */
+        #custom-fields { display: block; margin: 6px 0 0; }
+        #custom-fields table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: separate !important;
+            border-spacing: 6px 6px !important;
+            margin: -6px !important;
+        }
+        #custom-fields tr { page-break-inside: avoid; }
+        #custom-fields td {
+            padding: 5px 10px 6px !important;
+            border: 1px solid #E4E4EA !important;
+            border-radius: 8px;
+            background: #FBFBFD !important;
+            color: #01040B !important;
+            text-align: right !important;
+            vertical-align: top !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+            line-height: 1.45 !important;
+        }
+        #custom-fields td:empty { border-color: transparent !important; background: transparent !important; }
+        #custom-fields label,
+        #custom-fields .label,
+        #custom-fields strong,
+        #custom-fields b,
+        #custom-fields th {
+            display: block !important;
+            margin: 0 0 1px !important;
+            padding: 0 !important;
+            border: 0 !important;
+            background: none !important;
+            color: #A0A2B1 !important;
+            text-align: right !important;
+            font-size: 8px !important;
+            font-weight: bold !important;
+            letter-spacing: 0.4px !important;
+            line-height: 1.4 !important;
+        }
+
+        /* ---------- Articles ---------- */
+        .article { margin-top: 11px; page-break-inside: avoid; }
+        .art-head {
+            padding-bottom: 4px;
+            border-bottom: 1px solid #E4E4EA;
+            page-break-after: avoid;
+        }
+        .sq {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin-left: 7px;
+            border-radius: 2px;
+            background: #7B27FF;
+            vertical-align: middle;
+        }
+        .art-no { color: #7B27FF; font-size: 11px; font-weight: bold; }
+        .art-title { color: #01040B; font-size: 11px; font-weight: bold; }
+        .art-body {
+            margin-top: 5px;
+            color: #01040B;
+            font-size: 10px;
+            line-height: 1.95;
+            text-align: justify;
+        }
+        .art-body p { margin: 0 0 4px; }
+        .art-body p:last-child { margin-bottom: 0; }
+        .art-body ul, .art-body ol { margin: 0; padding: 0; list-style: none; }
+        .art-body li {
+            margin: 0 0 4px;
+            padding-right: 13px;
+            text-indent: -13px;
+            list-style: none;
+        }
+        .art-body li:last-child { margin-bottom: 0; }
+        /* The marker is a pseudo-element, so a line added in Daftra's editor gets its diamond
+           without the editor having to preserve any inner markup. */
+        .art-body li:before {
+            content: "\25C6";
+            margin-left: 5px;
+            color: #7B27FF;
+            font-size: 7px;
+        }
+
+        /* ---------- Items table emitted by 
+<table class="listing-table total-table" cellpadding="0" cellspacing="0">
+  <thead>
+    <tr>
+      <th>البند / الوصف</th><th>صورة المنتج</th>
+      <th>سعر الوحدة</th><th>الكمية</th><th>المجموع</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td class="item-description"><span class="code-badge">MI-K80</span> وحدة انتركوم ComView K-Series — إنتركوم خارجي بدقة 1080P مع شاشة IPS مقاس 8 بوصة، يدعم التعرف على الوجه، RFID، PoE، تحكم بالمصاعد، وحماية IP65.<small>1080P outdoor intercom, 8-inch IPS screen, face recognition, RFID, PoE, lift control, IP65, aluminium housing.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>2,160.00</td>
+      <td>1</td>
+      <td>2,160.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">MI-K7</span> شاشة ComTouch K-Series — شاشة إنتركوم داخلية 7 بوصة، اتصال ومراقبة وفتح بابين، ربط متعدد، تحكم بالصوت والصورة، تصميم أنيق ومتين.<small>7-inch indoor intercom monitor with call, talk, monitoring, dual-door unlock and full audio/video adjustment.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>330.00</td>
+      <td>18</td>
+      <td>5,940.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">DP-3</span> لوحة باب خارجية Exterior Door Panel — بإطار معدني باللون الأسود، مصنوعة من البلاستيك عالي الجودة لمقاومة العوامل البيئية، بمقاس 130×230 مم.<small>Outdoor door panel, black metal frame, high-quality weather-resistant plastic, 130×230 mm.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>132.00</td>
+      <td>18</td>
+      <td>2,376.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">ML-1</span> قفل مغناطيسي Magnetic Lock — قفل عالي الجودة يعمل بالكهرباء، متوافق مع أنظمة وأجهزة الإنتركوم، مناسب للمباني التجارية والمكاتب والفنادق والمنازل الذكية.<small>High-quality electric magnetic lock, compatible with intercom systems; commercial buildings, offices, hotels, smart homes.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>372.00</td>
+      <td>1</td>
+      <td>372.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">POE-24+2</span> سويتش Switch POE 24+2 — سويتش شبكة عالي الكفاءة مزود بـ 24 منفذ لتغذية وتشغيل الأجهزة عبر الكابل مباشرة، مع منفذين إضافيين للربط الشبكي.<small>High-performance POE switch, 24 ports with Power over Ethernet plus 2 uplink ports.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>540.00</td>
+      <td>1</td>
+      <td>540.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">EX-1</span> زر خروج Exit Button — زر خروج بدون لمس، تصميم أنيق وعالي الحساسية للاستجابة السريعة، مناسب لأنظمة التحكم في الدخول والخروج.<small>Touchless exit button, sleek design, high sensitivity, suitable for access-control systems.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>144.00</td>
+      <td>1</td>
+      <td>144.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">INS</span> أعمال التركيب والبرمجة — خدمة التركيب والبرمجة وتشغيل النظام وفق متطلبات العميل، مع تنفيذ الأعمال بدقة عالية وضمان توافق جميع المكونات.<small>Installation, programming and system commissioning to client requirements.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>1,500.00</td>
+      <td>1</td>
+      <td>1,500.00 <span class="cur">ر.س</span></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr><td></td><td></td><td>0.00</td><td>0</td><td>0.00</td></tr>
+  </tfoot>
+</table>
+<table class="total-table" cellpadding="0" cellspacing="0">
+  <tr><td>المجموع / Subtotal</td><td>13,032.00 <span class="cur">ر.س</span></td></tr>
+  <tr><td>خصم خاص / Discount</td><td>1,511.71 <span class="cur">ر.س</span></td></tr>
+  <tr><td>السعر بعد الخصم</td><td>11,520.29 <span class="cur">ر.س</span></td></tr>
+  <tr><td>ضريبة القيمة المضافة 15% / VAT</td><td>1,728.04 <span class="cur">ر.س</span></td></tr>
+  <tr><td>الإجمالي شامل الضريبة / Grand Total</td><td>13,248.33 <span class="cur">ر.س</span></td></tr>
+</table> ----------
+           Daftra emits the items table first and the totals table(s) after it, and the classes
+           it puts on them differ between accounts — this one puts totals-like classes on the
+           items table too — so the two are told apart by position (:nth-of-type) rather than by
+           class. Column widths are left to `table-layout: auto` so the layout survives whichever
+           columns are switched on in Daftra's item-table settings. */
+        #items-list { width: 100%; padding: 6px 0 0; }
+        #items-list table {
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            table-layout: auto !important;
+            margin: 0 !important;
+            direction: rtl !important;
+        }
+        #items-list thead { display: table-header-group; }
+        #items-list tfoot { display: table-row-group; }
+        #items-list tr { page-break-inside: avoid !important; }
+        #items-list th, .listing-table th {
+            padding: 7px 6px !important;
+            border: 0 !important;
+            background: #01040B !important;
+            color: #ffffff !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 10px !important;
+            font-weight: bold !important;
+            white-space: nowrap !important;
+        }
+        /* RTL: first cell sits on the right edge, last cell on the left edge. */
+        #items-list th:first-child, .listing-table th:first-child { border-radius: 0 9px 9px 0; }
+        #items-list th:last-child, .listing-table th:last-child { border-radius: 9px 0 0 9px; }
+        #items-list td, .listing-table td {
+            padding: 7px 6px !important;
+            border: 0 !important;
+            border-bottom: 1px solid #EFEFEF !important;
+            background: #ffffff;
+            color: #01040B;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 10px !important;
+            line-height: 1.45 !important;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        #items-list tbody tr:nth-child(even) td, .listing-table tbody tr:nth-child(even) td { background: #FAF7FF; }
+        #items-list td.item-description, #items-list td.description,
+        .listing-table td.item-description, .listing-table td.description { width: 42%; }
+        #items-list > table:nth-of-type(1) td:first-child,
+        #items-list > table:nth-of-type(1) th:first-child { text-align: right !important; }
+        #items-list td.item-description, #items-list td.description, #items-list .item-description,
+        .listing-table td.item-description, .listing-table td.description {
+            padding-right: 10px !important;
+            text-align: right !important;
+            font-size: 10.5px !important;
+            font-weight: bold;
+            line-height: 1.5 !important;
+        }
+        #items-list td.item-description small,
+        #items-list td.item-description .en,
+        #items-list td.description small,
+        #items-list td.description .en,
+        .listing-table td.item-description small,
+        .listing-table td.item-description .en {
+            display: block;
+            margin-top: 3px;
+            color: #A2A2A2;
+            direction: ltr;
+            text-align: left;
+            font-size: 9px;
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1.45;
+        }
+        #items-list td.item-code span, #items-list td.code span,
+        .listing-table td.item-code span, .listing-table td.code span,
+        #items-list .code-badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 6px;
+            background: #01040B;
+            color: #ffffff !important;
+            direction: ltr;
+            font-family: "Avenir Next", Consolas, "Courier New", monospace;
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        #items-list td.item-code, #items-list td.code,
+        .listing-table td.item-code, .listing-table td.code {
+            color: #01040B !important;
+            direction: ltr;
+            font-family: "Avenir Next", Consolas, "Courier New", monospace;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        #items-list .free-value, #items-list .free, .listing-table .free-value {
+            display: inline-block;
+            padding: 4px 11px;
+            border-radius: 20px;
+            background: #7B27FF;
+            color: #ffffff !important;
+            font-size: 9px;
+            font-weight: bold !important;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        #items-list .original-price, .listing-table .original-price {
+            display: block;
+            color: #A2A2A2 !important;
+            font-size: 9px;
+            font-weight: normal;
+            text-decoration: line-through;
+        }
+        #items-list .cur, .listing-table .cur { color: #A2A2A2; font-size: 9px; font-weight: normal; }
+        #items-list td:last-child, .listing-table td:last-child { font-size: 11px !important; font-weight: bold; }
+        #items-list td img, .listing-table td img {
+            display: block !important;
+            max-width: 46px !important;
+            max-height: 46px !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 auto !important;
+            padding: 3px;
+            border: 1px solid #E4E4EA;
+            border-radius: 6px;
+        }
+
+        /* ---------- Totals: every table after the first one inside #items-list ---------- */
+        #items-list > table:nth-of-type(n+2),
+        #items-list table.total-table:not(:first-of-type),
+        #items-list table.totals:not(:first-of-type) {
+            width: 50% !important;
+            margin: 12px 0 0 auto !important;
+            border: 0 !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid-page !important;
+        }
+        #items-list > table:nth-of-type(n+2) tr,
+        #items-list table.total-table:not(:first-of-type) tr,
+        #items-list table.totals:not(:first-of-type) tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid-page !important;
+        }
+        #items-list > table:nth-of-type(n+2) td,
+        #items-list table.total-table:not(:first-of-type) td,
+        #items-list table.totals:not(:first-of-type) td {
+            padding: 7px 12px !important;
+            border: 0 !important;
+            border-bottom: 1px solid #EFEFEF !important;
+            background: #FAF7FF !important;
+            color: #01040B;
+            font-size: 10px !important;
+            font-weight: bold;
+            white-space: nowrap !important;
+            page-break-inside: avoid !important;
+        }
+        #items-list > table:nth-of-type(n+2) tr:first-child td:first-child,
+        #items-list table.total-table:not(:first-of-type) tr:first-child td:first-child,
+        #items-list table.totals:not(:first-of-type) tr:first-child td:first-child { border-radius: 0 10px 0 0; }
+        #items-list > table:nth-of-type(n+2) tr:first-child td:last-child,
+        #items-list table.total-table:not(:first-of-type) tr:first-child td:last-child,
+        #items-list table.totals:not(:first-of-type) tr:first-child td:last-child { border-radius: 10px 0 0 0; }
+        #items-list > table:nth-of-type(n+2) td:first-child,
+        #items-list table.total-table:not(:first-of-type) td:first-child,
+        #items-list table.totals:not(:first-of-type) td:first-child { text-align: right !important; }
+        #items-list > table:nth-of-type(n+2) td:last-child,
+        #items-list table.total-table:not(:first-of-type) td:last-child,
+        #items-list table.totals:not(:first-of-type) td:last-child { direction: ltr; text-align: left !important; }
+        #items-list > table:nth-of-type(n+2) tr:last-child td,
+        #items-list table.total-table:not(:first-of-type) tr:last-child td,
+        #items-list table.totals:not(:first-of-type) tr:last-child td {
+            padding: 9px 12px !important;
+            border-bottom: 0 !important;
+            background: #01040B !important;
+            color: #ffffff !important;
+            font-size: 13px !important;
+        }
+        #items-list > table:nth-of-type(n+2) tr:last-child td:first-child,
+        #items-list table.total-table:not(:first-of-type) tr:last-child td:first-child,
+        #items-list table.totals:not(:first-of-type) tr:last-child td:first-child { border-radius: 0 10px 10px 0; }
+        #items-list > table:nth-of-type(n+2) tr:last-child td:last-child,
+        #items-list table.total-table:not(:first-of-type) tr:last-child td:last-child,
+        #items-list table.totals:not(:first-of-type) tr:last-child td:last-child {
+            border-radius: 10px 0 0 10px;
+            color: #ffffff !important;
+            font-size: 17px !important;
+        }
+        #items-list > table:nth-of-type(n+2) tr:last-child .cur,
+        #items-list table.total-table:not(:first-of-type) tr:last-child .cur { color: #ffffff; }
+        .totals-clear { clear: both; height: 1px; font-size: 1px; line-height: 1px; }
+
+        /* Daftra's per-column summary row under the items. Uncomment to hide it. */
+        /* #items-list > table:nth-of-type(1) tfoot { display: none !important; } */
+
+        /* ---------- Bank box ---------- */
+        .bank-box {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 7px;
+            border: 1px solid #E4E4EA;
+            border-radius: 10px;
+            background: #FBFBFD;
+            direction: rtl;
+            page-break-inside: avoid;
+        }
+        .bank-row { display: table-row; }
+        .bank-label, .bank-value {
+            display: table-cell;
+            padding: 5px 11px;
+            border-bottom: 1px solid #EFEFEF;
+            vertical-align: middle;
+        }
+        .bank-label { width: 34%; color: #A0A2B1; font-size: 9px; font-weight: bold; }
+        .bank-value {
+            color: #01040B;
+            direction: ltr;
+            text-align: left;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+        }
+        .bank-row.last .bank-label, .bank-row.last .bank-value { border-bottom: 0; }
+
+        /* ---------- Per-contract notes (<p>إجمالي قيمة العقد شامل ضريبة القيمة المضافة: مبلغ وقدره (13,248.33 ريال سعودي) فقط ثلاثة عشر ألفًا ومائتان وثمانية وأربعون ريالًا سعوديًا وثلاثة وثلاثون هللة لا غير.</p>) — borderless, invisible when empty ------- */
+        .extra-notes {
+            margin: 9px 0 0;
+            color: #01040B;
+            font-size: 10px;
+            line-height: 1.95;
+            text-align: justify;
+            page-break-inside: avoid;
+        }
+        .extra-notes p { margin: 0 0 4px; }
+        .extra-notes p:last-child { margin-bottom: 0; }
+        .extra-notes ul, .extra-notes ol { margin: 0 16px 0 0; padding: 0; }
+
+        /* ---------- Signatures ---------- */
+        .sign-grid {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 18px;
+            padding-top: 12px;
+            border-top: 2px solid #01040B;
+            direction: rtl;
+            page-break-inside: avoid;
+        }
+        .sign-cell { display: table-cell; width: 50%; vertical-align: top; }
+        .sign-card {
+            margin-left: 12px;
+            padding: 9px 11px 11px;
+            border: 1px solid #E4E4EA;
+            border-radius: 10px;
+            background: #ffffff;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+        .sign-cell.last .sign-card { margin-left: 0; background: #FAF7FF; }
+        .sign-role { color: #7B27FF; font-size: 9px; font-weight: bold; letter-spacing: 0.4px; }
+        /* Fixed heights so both signature rules sit at the same level whatever the length of
+           the client's name. */
+        .sign-co {
+            margin-top: 3px;
+            height: 32px;
+            overflow: hidden;
+            color: #01040B;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        .sign-rep { height: 15px; margin-top: 1px; color: #A2A2A2; font-size: 10px; }
+        .sign-line { height: 42px; margin: 0 14px; border-bottom: 1px solid #01040B; }
+        .sign-cap { margin-top: 4px; color: #A0A2B1; font-size: 8px; font-weight: bold; }
+        .sign-stamp { margin-top: 5px; }
+        .sign-stamp img {
+            display: block !important;
+            max-width: 96px !important;
+            max-height: 96px !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 auto !important;
+        }
+
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            html, body { min-height: 0; }
+            body { background: #ffffff !important; }
+            .invoice-wrap { width: 100%; max-width: none; min-height: 0; padding: 0; }
+            .sign-grid { margin-bottom: 0; }
+            @page { size: A4 portrait; margin: 7mm 8mm 16mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-wrap">
+        <div class="document-header">
+            <div class="header-logo">
+                <img style="vertical-align:top;" id="logo" class="editable-area" src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIHZpZXdCb3g9IjAgMCA1NiA1NiI+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iMTMiIGZpbGw9IiMwMTA0MEIiLz4KICA8cmVjdCB4PSIxOCIgeT0iMTgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcng9IjQiIGZpbGw9IiM3QjI3RkYiLz4KPC9zdmc+" width="56" height="" />
+            </div>
+            <!-- Remove this cell if the logo uploaded in Daftra already includes the name. -->
+            <div class="header-brand">
+                <div id="brand_ar" class="brand-ar editable-area">شركة متقنون تك للتجارة</div>
+                <div id="brand_en" class="brand-en editable-area">MOTQINON TECH</div>
+            </div>
+            <div class="header-title">
+                <div id="doc_title_ar" class="arabic-title editable-area">عقد اتفاق</div>
+                <div id="doc_title_en" class="english-title editable-area">CONTRACT</div>
+            </div>
+        </div>
+
+        <div class="rule-black"></div>
+
+        <div class="meta-row">
+            <div class="meta-cell">
+                <div class="meta-card">
+                    <div id="label_contract_no" class="meta-label editable-area">رقم العقد / CONTRACT No.</div>
+                    <div class="meta-value accent ltr">MTQCT-072</div>
+                </div>
+            </div>
+            <div class="meta-cell last">
+                <div class="meta-card">
+                    <div class="meta-label"><span id="label_date" class="editable-area">التاريخ</span> / <span id="label_date_en" class="editable-area">DATE</span></div>
+                    <div class="meta-value ltr">2026 / 04 / 13</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subtitle names the system being supplied. Edit it here, or configure it as a
+             Daftra custom field so it changes per contract. -->
+        <div class="contract-title">
+            <div id="contract_headline" class="ct-main editable-area">عقد توريد وتركيب</div>
+            <div id="contract_subject" class="ct-sub editable-area">نظام الانتركوم والمنزل الذكي</div>
+        </div>
+
+        <div class="party">
+            <div class="party-head"><span class="sq"></span><span id="party1_head" class="editable-area">الطرف الأول (العميل) / FIRST PARTY</span></div>
+            <div class="party-body">
+                <span class="pv">شركة المشاريع السكنية للمقاولات العامة المحدودة</span><span id="party1_mid" class="editable-area">، ومقرها: </span><span class="pv">مدينة جدة – حي النهضة</span><span id="party1_tail" class="editable-area">، ويشار إليها لاحقًا بـ "الطرف الأول".</span>
+                <!-- Client CR / VAT / representative / phone: configure them as Daftra custom
+                     fields and they print here as cards. -->
+                <div id="custom-fields" class="editable-area">
+<table cellpadding="0" cellspacing="0">
+  <tr>
+    <td><label>ممثل الطرف الأول</label>ثامر محمد راشد حسن</td>
+    <td><label>السجل التجاري</label>7011019275</td>
+  </tr>
+  <tr>
+    <td><label>الرقم الضريبي</label>310122334500003</td>
+    <td><label>جوال</label>0553710221</td>
+  </tr>
+</table></div>
+            </div>
+        </div>
+
+        <div class="party party-second">
+            <div class="party-head"><span class="sq"></span><span id="party2_head" class="editable-area">الطرف الثاني (المورد) / SECOND PARTY</span></div>
+            <div class="party-body" id="party2_body">
+                <span class="editable-area" id="party2_text"><strong>شركة متقنون تك للتجارة</strong>، ويمثلها الأستاذ/ <strong>محمد عبد الله الحامدي</strong>، ويشار إليها لاحقًا بـ "الطرف الثاني"، فرع مكة المكرمة – حي العوالي – مجمع الشريهي التجاري الإداري، سجل تجاري رقم <strong>4031318733</strong>، الرقم الضريبي <strong>312772334500003</strong>، جوال: <strong>0580136000</strong>.</span>
+            </div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span id="preamble_head" class="editable-area art-title">تمهيد</span></div>
+            <div class="art-body" id="preamble_body">
+                <p class="editable-area" id="preamble_text">حيث إن الطرف الأول يرغب في تنفيذ أعمال توريد وتركيب المواد محل العقد، وحيث أبدى الطرف الثاني استعداده لتنفيذ تلك الأعمال بما لديه من خبرة فنية وإمكانات تؤهله لذلك، وبعد قيامه بزيارة الموقع والاطلاع على المواصفات المطلوبة، فقد تم الاتفاق بين الطرفين على ما يلي:</p>
+            </div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (1):</span> <span id="art1_head" class="art-title editable-area">مرفقات العقد</span></div>
+            <div class="art-body">
+                <p class="editable-area" id="art1_body">تُعد المقدمة أعلاه، وجداول الكميات والأسعار والمواصفات الفنية المرفقة والمعتمدة من الطرفين، جزءًا لا يتجزأ من هذا العقد، وتُعد أساسًا للتوريد والتنفيذ.</p>
+            </div>
+        </div>
+
+        <!-- Article 2 carries the item table, so it must be allowed to break across pages. -->
+        <div class="article" style="page-break-inside:auto">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (2):</span> <span id="art2_head" class="art-title editable-area">المواصفات الفنية والأسعار</span></div>
+            <div class="art-body">
+                <p class="editable-area" id="art2_body">يلتزم الطرف الثاني بتوريد جميع المواد طبقًا للمواصفات الفنية المعتمدة لكل صنف كما هو موضح في الجدول التالي، وتُعد الأسعار الواردة نهائية وثابتة، ولا يجوز تعديلها إلا بموافقة خطية من الطرفين عند حدوث تغييرات رسمية في المشروع أو المواصفات.</p>
+            </div>
+            <div id="items-list">
+<table class="listing-table total-table" cellpadding="0" cellspacing="0">
+  <thead>
+    <tr>
+      <th>البند / الوصف</th><th>صورة المنتج</th>
+      <th>سعر الوحدة</th><th>الكمية</th><th>المجموع</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td class="item-description"><span class="code-badge">MI-K80</span> وحدة انتركوم ComView K-Series — إنتركوم خارجي بدقة 1080P مع شاشة IPS مقاس 8 بوصة، يدعم التعرف على الوجه، RFID، PoE، تحكم بالمصاعد، وحماية IP65.<small>1080P outdoor intercom, 8-inch IPS screen, face recognition, RFID, PoE, lift control, IP65, aluminium housing.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>2,160.00</td>
+      <td>1</td>
+      <td>2,160.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">MI-K7</span> شاشة ComTouch K-Series — شاشة إنتركوم داخلية 7 بوصة، اتصال ومراقبة وفتح بابين، ربط متعدد، تحكم بالصوت والصورة، تصميم أنيق ومتين.<small>7-inch indoor intercom monitor with call, talk, monitoring, dual-door unlock and full audio/video adjustment.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>330.00</td>
+      <td>18</td>
+      <td>5,940.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">DP-3</span> لوحة باب خارجية Exterior Door Panel — بإطار معدني باللون الأسود، مصنوعة من البلاستيك عالي الجودة لمقاومة العوامل البيئية، بمقاس 130×230 مم.<small>Outdoor door panel, black metal frame, high-quality weather-resistant plastic, 130×230 mm.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>132.00</td>
+      <td>18</td>
+      <td>2,376.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">ML-1</span> قفل مغناطيسي Magnetic Lock — قفل عالي الجودة يعمل بالكهرباء، متوافق مع أنظمة وأجهزة الإنتركوم، مناسب للمباني التجارية والمكاتب والفنادق والمنازل الذكية.<small>High-quality electric magnetic lock, compatible with intercom systems; commercial buildings, offices, hotels, smart homes.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>372.00</td>
+      <td>1</td>
+      <td>372.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">POE-24+2</span> سويتش Switch POE 24+2 — سويتش شبكة عالي الكفاءة مزود بـ 24 منفذ لتغذية وتشغيل الأجهزة عبر الكابل مباشرة، مع منفذين إضافيين للربط الشبكي.<small>High-performance POE switch, 24 ports with Power over Ethernet plus 2 uplink ports.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>540.00</td>
+      <td>1</td>
+      <td>540.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">EX-1</span> زر خروج Exit Button — زر خروج بدون لمس، تصميم أنيق وعالي الحساسية للاستجابة السريعة، مناسب لأنظمة التحكم في الدخول والخروج.<small>Touchless exit button, sleek design, high sensitivity, suitable for access-control systems.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>144.00</td>
+      <td>1</td>
+      <td>144.00 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td class="item-description"><span class="code-badge">INS</span> أعمال التركيب والبرمجة — خدمة التركيب والبرمجة وتشغيل النظام وفق متطلبات العميل، مع تنفيذ الأعمال بدقة عالية وضمان توافق جميع المكونات.<small>Installation, programming and system commissioning to client requirements.</small></td>
+      <td><img src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+CiAgPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iNiIgZmlsbD0iI0VGRUZFRiIvPgogIDxyZWN0IHg9IjEwIiB5PSIxNiIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI2IiByeD0iMyIgZmlsbD0iI0EwQTJCMSIvPgo8L3N2Zz4=" alt="" /></td>
+      <td>1,500.00</td>
+      <td>1</td>
+      <td>1,500.00 <span class="cur">ر.س</span></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr><td></td><td></td><td>0.00</td><td>0</td><td>0.00</td></tr>
+  </tfoot>
+</table>
+<table class="total-table" cellpadding="0" cellspacing="0">
+  <tr><td>المجموع / Subtotal</td><td>13,032.00 <span class="cur">ر.س</span></td></tr>
+  <tr><td>خصم خاص / Discount</td><td>1,511.71 <span class="cur">ر.س</span></td></tr>
+  <tr><td>السعر بعد الخصم</td><td>11,520.29 <span class="cur">ر.س</span></td></tr>
+  <tr><td>ضريبة القيمة المضافة 15% / VAT</td><td>1,728.04 <span class="cur">ر.س</span></td></tr>
+  <tr><td>الإجمالي شامل الضريبة / Grand Total</td><td>13,248.33 <span class="cur">ر.س</span></td></tr>
+</table></div>
+            <div class="totals-clear"></div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (3):</span> <span id="art3_head" class="art-title editable-area">نطاق الأعمال</span></div>
+            <div class="art-body">
+                <p class="editable-area" id="art3_body">يشمل هذا العقد توريد وتركيب المواد والأنظمة الواردة فيه وفقًا للمواصفات الفنية المعتمدة وجداول الكميات المرفقة.</p>
+            </div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (4):</span> <span id="art4_head" class="art-title editable-area">الدفعات وآلية السداد</span></div>
+            <div class="art-body">
+                <p class="editable-area" id="art4_intro">يتم سداد قيمة هذا العقد على دفعات، استنادًا إلى إجمالي قيمة العقد شامل ضريبة القيمة المضافة المبيّن في المادة (2) أعلاه، ووفقًا لآلية السداد التالية:</p>
+                <ul id="art4_payments" class="editable-area">
+                    <li><strong>الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد.</li>
+                    <li><strong>الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع.</li>
+                    <li><strong>الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة.</li>
+                </ul>
+                <p class="editable-area" id="art4_bank_intro" style="margin-top:5px">يتم تحويل الدفعات إلى الحساب البنكي التالي الخاص بالطرف الثاني:</p>
+            </div>
+            <div class="bank-box">
+                <div class="bank-row">
+                    <div id="bank_label_account" class="bank-label editable-area">اسم الحساب / Account Name</div>
+                    <div id="bank_value_account" class="bank-value editable-area">MOTQINON TECH TRADING COMPANY</div>
+                </div>
+                <div class="bank-row">
+                    <div id="bank_label_bank" class="bank-label editable-area">اسم البنك / Bank</div>
+                    <div id="bank_value_bank" class="bank-value editable-area">SABB — البنك السعودي البريطاني (ساب)</div>
+                </div>
+                <div class="bank-row">
+                    <div id="bank_label_acc_no" class="bank-label editable-area">رقم الحساب / Account No.</div>
+                    <div id="bank_value_acc_no" class="bank-value editable-area">SASABB034361865001</div>
+                </div>
+                <div class="bank-row last">
+                    <div id="bank_label_iban" class="bank-label editable-area">رقم الآيبان / IBAN</div>
+                    <div id="bank_value_iban" class="bank-value editable-area">SA95 4500 0000 0343 6186 5001</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (5):</span> <span id="art5_head" class="art-title editable-area">مدة التوريد والتركيب والبرمجة</span></div>
+            <div class="art-body">
+                <p class="editable-area" id="art5_body1">يتم توريد المواد والمعدات المتفق عليها خلال فترة تتراوح من (45) إلى (60) يوم عمل، تبدأ من تاريخ استلام الطرف الثاني للدفعة الأولى المنصوص عليها في المادة (4)، وبعد استلام التعميد الخطي النهائي من الطرف الأول على المواصفات، واتجاهات الأبواب، وأرقام الغرف، والتصميم.</p>
+                <p class="editable-area" id="art5_body2">لا يبدأ تنفيذ العقد ولا يلتزم الطرف الثاني بأي أعمال توريد أو تجهيز أو تركيب، إلا بعد استكمال المتطلبات المذكورة أعلاه واستلام الدفعة الأولى.</p>
+            </div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (6):</span> <span id="art6_head" class="art-title editable-area">الاختصاص القضائي</span></div>
+            <div class="art-body">
+                <p class="editable-area" id="art6_body">تخضع أحكام هذا العقد للأنظمة واللوائح المعمول بها في المملكة العربية السعودية، وتكون المحاكم المختصة داخل المملكة هي المرجع الحصري للفصل في أي خلاف أو نزاع ينشأ عن تنفيذ أو تفسير أي بند من بنود العقد.</p>
+            </div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (7):</span> <span id="art7_head" class="art-title editable-area">الضمان والصيانة</span></div>
+            <div class="art-body">
+                <ul id="art7_body" class="editable-area">
+                    <li>يضمن الطرف الثاني جميع المواد والأنظمة محل العقد لمدة سنتين تبدأ من تاريخ التركيب والتشغيل الفعلي، ويقتصر نطاق الضمان على العيوب المصنعية وأي خلل ناتج عن البرمجة.</li>
+                    <li>لا يشمل الضمان أعطالًا ناجمة عن سوء الاستخدام، العبث، التعديلات غير المصرح بها، التوصيلات الكهربائية غير المطابقة للمواصفات، أو الاستهلاك الطبيعي، أو العوامل الخارجية، أو انقطاع أو تذبذب التيار الكهربائي.</li>
+                    <li>يلتزم الطرف الثاني بتوفير قطع الغيار لمدة لا تقل عن عشر (10) سنوات من تاريخ التوريد.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="article">
+            <div class="art-head"><span class="sq"></span><span class="art-no">المادة (8):</span> <span id="art8_head" class="art-title editable-area">نسخ العقد</span></div>
+            <div class="art-body">
+                <p class="editable-area" id="art8_body">حرر هذا العقد من نسختين أصليتين، تسلم كل طرف نسخة للعمل بموجبها، وتعد كلتا النسختين متطابقتين في الحجية القانونية.</p>
+            </div>
+        </div>
+
+        <!-- Per-contract notes typed into Daftra. Use this field for anything specific to one
+             contract — the total in words (تفقيط), an agreed exception, a delivery address. -->
+        <div class="extra-notes">
+            <div id="footer" class="editable-area"><p>إجمالي قيمة العقد شامل ضريبة القيمة المضافة: مبلغ وقدره (13,248.33 ريال سعودي) فقط ثلاثة عشر ألفًا ومائتان وثمانية وأربعون ريالًا سعوديًا وثلاثة وثلاثون هللة لا غير.</p></div>
+        </div>
+
+        <div class="sign-grid">
+            <div class="sign-cell">
+                <div class="sign-card">
+                    <div id="sign1_role" class="sign-role editable-area">الطرف الأول / FIRST PARTY</div>
+                    <div class="sign-co">شركة المشاريع السكنية للمقاولات العامة المحدودة</div>
+                    <!-- Blank counterpart to the supplier's representative line, so both
+                         signature rules land at the same height. -->
+                    <div class="sign-rep">&#160;</div>
+                    <div class="sign-line"></div>
+                    <div id="sign1_cap" class="sign-cap editable-area">التوقيع والختم / SIGNATURE &amp; STAMP</div>
+                </div>
+            </div>
+            <div class="sign-cell last">
+                <div class="sign-card">
+                    <div id="sign2_role" class="sign-role editable-area">الطرف الثاني / SECOND PARTY</div>
+                    <div id="sign2_co" class="sign-co editable-area">شركة متقنون تك للتجارة</div>
+                    <div id="sign2_rep" class="sign-rep editable-area">محمد عبد الله الحامدي</div>
+                    <div class="sign-line"></div>
+                    <div id="sign2_cap" class="sign-cap editable-area">التوقيع والختم / SIGNATURE &amp; STAMP</div>
+                    <!-- Company stamp, same image the quotation app uses. Delete this block to
+                         sign and stamp by hand instead. -->
+                    <div class="sign-stamp">
+                        <img id="company_stamp" class="editable-area" src="https://lh3.googleusercontent.com/d/1leltgheDy9_jf3kE9FLIs7uGAW_oMNeB" alt="" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style type="text/css">
+    * { box-sizing: border-box; }
+    .mto-sticky-footer {
+        width: 100%;
+        height: 34px;
+        margin: 0;
+        padding: 0;
+        background-color: #01040B !important;
+        color: #ffffff !important;
+        direction: rtl;
+        font-family: "Avenir Next", Tahoma, Arial, sans-serif;
+        font-size: 10px;
+        font-weight: bold;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .mto-sticky-footer table {
+        width: 100%;
+        height: 34px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-collapse: collapse;
+        table-layout: fixed;
+        background-color: #01040B !important;
+    }
+    .mto-sticky-footer td {
+        height: 34px;
+        padding: 0 14px;
+        border: 0;
+        background-color: #01040B !important;
+        color: #ffffff !important;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .mto-footer-company { width: 38%; text-align: right; }
+    .mto-footer-cities  { width: 32%; color: #A0A2B1 !important; text-align: center; font-weight: normal; }
+    .mto-footer-phone   { width: 30%; direction: ltr; text-align: left; }
+    .mto-sq {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+        background-color: #7B27FF !important;
+        vertical-align: middle;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .mto-footer-company .mto-sq { margin-right: 0; margin-left: 7px; }
+    .mto-footer-phone .mto-sq { margin-right: 7px; margin-left: 0; }
+</style>
+
+<div class="mto-sticky-footer">
+    <table border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td class="mto-footer-company"><span class="mto-sq"></span><span id="footer_company" class="editable-area">شركة متقنون تك للتجارة</span></td>
+            <td class="mto-footer-cities"><span id="footer_cities" class="editable-area">مكة المكرمة - جدة - المدينة المنورة</span></td>
+            <td class="mto-footer-phone"><span class="mto-sq"></span><span id="footer_phone" class="editable-area">+966 53 279 9924</span></td>
+        </tr>
+    </table>
+</div>
+
+    </div>
+</body>
+</html>

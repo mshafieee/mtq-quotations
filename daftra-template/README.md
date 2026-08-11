@@ -28,11 +28,14 @@ Arabic font's Latin glyphs.
 
 | File | Daftra section |
 | --- | --- |
-| `template.html` | **HTML** (the main body) |
+| `template.html` | **HTML** (the main body) — quotation template |
+| `contract22.html` | **HTML** — contract template, uploaded as a second Daftra template |
 | `header.html` | **Header** — deliberately empty; see the comment inside |
 | `footer.html` | **Footer** (the sticky bar printed at the bottom of every page) |
 
-Paste each file's contents into the matching box in Daftra's template editor.
+Paste each file's contents into the matching box in Daftra's template editor. The contract is
+a separate template: give it `contract22.html` as its HTML and the same `footer.html`, so both
+documents carry the same sticky bar.
 
 The logo is **not** hardcoded — it still renders through `{%logo%}` / `{%logo-width%}` /
 `{%logo-height%}`, so it keeps coming from the website's template settings. It sits at the
@@ -111,16 +114,50 @@ itself, not here.
   To let the client card span the full row instead, move `id="shipping_options"` and its
   `style="display:none;"` back onto the surrounding `.meta-cell`.
 
+## The contract template (`contract22.html`)
+
+Same identity as the quotation — Cairo, the five brand colours, the rounded cards, the black
+item-table header and grand-total bar, the violet diamonds — applied to the contract the
+quotation app generates (`index.html`, `buildContract`) and to the wording in `contract.txt`.
+
+Document order: header · contract no + date · title block · الطرف الأول (with `{%client_info%}`,
+`{%client_address%}` and the custom-field cards) · الطرف الثاني (static supplier details) ·
+تمهيد · eight numbered articles, with `{%items_list%}` and its totals inside المادة (2) ·
+bank box · `{%footer%}` notes · two signature cards · sticky footer.
+
+Points worth knowing:
+
+- **Amounts in words (تفقيط)** cannot be computed by a template — Daftra does no arithmetic.
+  المادة (4) therefore states the 50 / 40 / 10 % split and refers to the grand total in
+  المادة (2) rather than restating figures. Type the written total into the document's Notes
+  field in Daftra and it prints, justified, just above the signatures.
+- **Article 2 is the one section allowed to break across pages** (`page-break-inside: auto`),
+  because it carries the item table. Every other article, the bank box and the signature block
+  stay whole.
+- **Signature rules are height-locked** (`.sign-co` 32 px, `.sign-rep` 15 px) so both sit at the
+  same level whether the client's name runs to one line or two.
+- **The company stamp** is the image the quotation app uses. If the PDF renderer cannot reach
+  `lh3.googleusercontent.com` the image collapses silently and the signature line still prints;
+  delete the `.sign-stamp` block to sign and stamp by hand instead.
+- **Supplier details** come from `index.html` (محمد عبد الله الحامدي, جوال 0580136000), which
+  differs from the older `contract.txt` sample (رياض أحمد بحير, 0532799924). Both the name and
+  the number are `editable-area`, so correct them on the website if the sample was right.
+- **53 editable areas**, same convention as the quotation: every heading, article body, bank
+  line and signature label can be edited from Daftra rather than by re-pasting HTML.
+
 ## Previewing changes
 
-`preview.html` is generated — it feeds sample Daftra output through the real `template.html`
-and `footer.html`, so it always exercises the shipped stylesheet:
+`preview.html` and `contract-preview.html` are generated — they feed sample Daftra output
+through the real templates and `footer.html`, so they always exercise the shipped stylesheet:
 
 ```
 node daftra-template/build-preview.js
+node daftra-template/build-contract-preview.js
 ```
 
-Then open `daftra-template/preview.html` in a browser (print preview shows the A4 result).
+Then open the generated file in a browser (print preview shows the A4 result). The contract
+sample uses the seven-line quotation from `contract.txt`, which runs to roughly two and a half
+A4 pages — enough to exercise the page-break rules.
 
 ## Rendering constraints
 
