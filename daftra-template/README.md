@@ -13,8 +13,16 @@ brand identity (the previous orange `#ef5b00` is gone entirely).
 | Grey | `#A2A2A2` | English item descriptions, struck-through list prices, row numbers |
 | Light | `#EFEFEF` | row separators |
 
-Type is `"Avenir Next", Tahoma, Arial, sans-serif` — Avenir Next when the renderer has it,
-Tahoma as the Arabic-safe fallback (wkhtmltopdf will normally land on Tahoma).
+Arabic is set in **Cairo**, pulled from Google Fonts by an `@import` that must stay the first
+rule in the `<style>` block. If the PDF renderer has no outbound network the fetch fails
+silently and the stack falls back through Sakkal Majalla / Traditional Arabic / GE SS Two /
+Noto Naskh Arabic to Tahoma — so confirm on a real PDF that Cairo actually arrives. For a
+traditional Naskh instead of a corporate sans, swap `Cairo` for `Amiri` in the `@import` and
+in the two font stacks under it.
+
+Latin runs — numbers, IBANs, English item descriptions, the code pills — are pinned to
+`"Avenir Next", Arial, Helvetica` so they keep the brand's Latin face instead of borrowing the
+Arabic font's Latin glyphs.
 
 ## Files → Daftra template sections
 
@@ -54,6 +62,21 @@ the body** — otherwise the name prints twice.
 5. **Terms & technical notes** — two static panels.
 6. **Bank details** — Al Rajhi and SAB IBANs.
 7. **Sticky footer** — black bar: company (right) · cities (centre) · phone (left).
+
+## Editing text from Daftra's template editor
+
+Every hardcoded string carries a unique `id` and `class="editable-area"`, so it can be edited
+in place on the website rather than by re-pasting HTML: the company name and `MOTQINON TECH`,
+the `عرض سعر` / `QUOTATION` title, all six meta-card labels, the validity value, the CR and VAT
+numbers, both panel headings, both bullet lists, all four bank lines, and the three strings in
+the sticky footer.
+
+The bullet lists are `<ul>` elements whose diamond comes from a `:before` pseudo-element, so a
+line added or removed in the editor picks up (or drops) its marker automatically — there is no
+inner markup for the editor to preserve.
+
+Anything wrapped in `{%…%}` is quotation data, not template text; it is edited on the quotation
+itself, not here.
 
 ## Things you may want to adjust
 
