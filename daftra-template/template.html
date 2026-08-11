@@ -156,10 +156,10 @@
 
         /* ---------- Items table emitted by {%items_list%} ----------
            Daftra emits the items table first and the totals table(s) after it, and the
-           classes it puts on them differ between accounts — so the two are told apart by
-           position (:nth-of-type) rather than by class, and the items rules are re-asserted
-           further down to win any tie. Column widths are left to `table-layout: auto` so the
-           layout survives whichever columns are switched on in Daftra's item-table settings. */
+           classes it puts on them differ between accounts — this one puts totals-like classes
+           on the items table too — so the two are told apart by position (:nth-of-type) rather
+           than by class. Column widths are left to `table-layout: auto` so the layout survives
+           whichever columns are switched on in Daftra's item-table settings. */
         #items-list { width: 100%; padding: 5px 0 0; }
         #items-list table {
             width: 100% !important;
