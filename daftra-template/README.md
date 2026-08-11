@@ -57,9 +57,8 @@ the body** — otherwise the name prints twice.
    - Row 2: `{%client_info%}` and `{%client_address%}`.
    - Row 3: `{%staff_member_name%}` as المندوب المسؤول, plus the shipping card in the facing
      half when Daftra reveals it.
-   - Row 3+: `{%custom_fields%}` — Daftra's own table, restyled cell-by-cell into the same
-     cards, so Project / Sales Rep / Address and anything else configured picks up the look
-     automatically.
+   - Row 4+: `{%custom_fields%}` — Daftra's own table, restyled cell-by-cell into the same
+     cards, so Project / Scope / anything else configured picks up the look automatically.
    - Last row: CR No. and VAT No.
 3. **Items** — `{%items_list%}` with a black rounded header row, alternating violet-tinted
    rows, and hairline separators.
