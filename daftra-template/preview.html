@@ -1,0 +1,759 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ar" dir="rtl">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>عرض سعر - متقنون تك</title>
+    <style type="text/css">
+        /* Motqinon Tech brand palette
+           #01040B black · #7B27FF violet · #A0A2B1 cool grey · #A2A2A2 grey · #EFEFEF light
+           Layout uses display:table only — wkhtmltopdf (QtWebKit) has no reliable flexbox. */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-height: 100%; }
+        body {
+            background: #ffffff;
+            color: #01040B;
+            direction: rtl;
+            text-align: right;
+            font-family: "Avenir Next", Tahoma, Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .invoice-wrap {
+            width: 100%;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 4px;
+            background: #ffffff;
+        }
+
+        /* ---------- Header: logo (from Daftra settings) + document title ---------- */
+        .document-header {
+            width: 100%;
+            display: table;
+            table-layout: fixed;
+            padding: 10px 0 4px;
+            direction: rtl;
+        }
+        .header-logo, .header-title { display: table-cell; vertical-align: middle; }
+        .header-logo { width: 55%; text-align: right; }
+        .header-logo #logo,
+        .header-logo .logo,
+        .header-logo img {
+            display: block !important;
+            width: auto !important;
+            max-width: 400px !important;
+            max-height: 74px !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+        .header-logo #logo img,
+        .header-logo .logo img { max-width: 100% !important; max-height: 74px !important; }
+        .header-title { width: 45%; text-align: left; }
+        .header-title .arabic-title {
+            color: #7B27FF;
+            font-size: 27px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+        .header-title .english-title {
+            margin-top: 1px;
+            color: #A0A2B1;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            direction: ltr;
+            text-align: left;
+        }
+        .rule-black { height: 3px; margin: 9px 0 14px; background: #01040B; }
+
+        /* ---------- Meta cards (quote no / date / client / custom fields …) ---------- */
+        .meta-row {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            direction: rtl;
+        }
+        .meta-cell { display: table-cell; vertical-align: top; }
+        .meta-card {
+            margin: 0 0 9px 9px;
+            padding: 7px 14px 8px;
+            min-height: 50px;
+            border: 1px solid #E4E4EA;
+            border-radius: 10px;
+            background: #FBFBFD;
+        }
+        .meta-cell.last .meta-card { margin-left: 0; }
+        .meta-label {
+            color: #A0A2B1;
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 0.4px;
+            line-height: 1.4;
+        }
+        .meta-value {
+            margin-top: 2px;
+            color: #01040B;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.45;
+        }
+        .meta-value.accent { color: #7B27FF; }
+        .meta-value.ltr { direction: ltr; text-align: right; unicode-bidi: embed; }
+
+        /* Daftra renders 
+<table cellpadding="0" cellspacing="0">
+  <tr>
+    <td><label>المشروع / PROJECT</label>فندق عين مكة</td>
+    <td><label>المندوب / SALES REP</label>بشار عادل</td>
+  </tr>
+  <tr>
+    <td><label>العنوان / ADDRESS</label>مكة المكرمة – حي العوالي</td>
+    <td><label>نطاق العمل / SCOPE</label>توريد وتركيب وبرمجة</td>
+  </tr>
+</table> as its own table — restyle each cell into a card. */
+        #custom-fields { display: block; margin: -9px -9px 0 -9px; }
+        #custom-fields table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: separate !important;
+            border-spacing: 9px 9px !important;
+            margin: 0 !important;
+        }
+        #custom-fields tr { page-break-inside: avoid; }
+        #custom-fields td {
+            padding: 7px 14px 8px !important;
+            min-height: 50px;
+            border: 1px solid #E4E4EA !important;
+            border-radius: 10px;
+            background: #FBFBFD !important;
+            color: #01040B !important;
+            text-align: right !important;
+            vertical-align: top !important;
+            font-size: 15px !important;
+            font-weight: bold !important;
+            line-height: 1.45 !important;
+        }
+        #custom-fields td:empty { border-color: transparent !important; background: transparent !important; }
+        #custom-fields label,
+        #custom-fields .label,
+        #custom-fields strong,
+        #custom-fields b,
+        #custom-fields th {
+            display: block !important;
+            margin: 0 0 2px !important;
+            padding: 0 !important;
+            border: 0 !important;
+            background: none !important;
+            color: #A0A2B1 !important;
+            text-align: right !important;
+            font-size: 9px !important;
+            font-weight: bold !important;
+            letter-spacing: 0.4px !important;
+            line-height: 1.4 !important;
+        }
+
+        /* ---------- Items table emitted by 
+<table class="listing-table" cellpadding="0" cellspacing="0">
+  <thead>
+    <tr>
+      <th>#</th><th>الكود</th><th>Description / الوصف</th>
+      <th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>1</td>
+      <td class="item-code"><span>DL-711</span></td>
+      <td class="item-description">قفل فندقي إلكتروني ببطاقات RF ام1 ار اف، يدعم القراءة والكتابة والتشفير، يعمل بـ 4 بطاريات AAA، إنذار انخفاض البطارية.<small>RF M1 electronic hotel lock, aluminium reader &amp; handle, 4&times;AAA batteries, low-battery alarm.</small></td>
+      <td>225</td>
+      <td>400</td>
+      <td><span class="original-price">150,000</span>90,000 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td class="item-code"><span>ENC-1</span></td>
+      <td class="item-description">جهاز إنكودر لبرمجة كروت مايفير الذكية، يدعم القراءة والكتابة والتشفير، يتيح تخصيص البيانات على البطاقات للاستخدام في أنظمة التحكم في الدخول والفنادق والمرافق الذكية.<small>Encoder for programming Mifare smart cards — read / write / encryption for access-control, hotels &amp; smart facilities.</small></td>
+      <td><span class="free-value">FREE</span></td>
+      <td>1</td>
+      <td><span class="original-price">650</span><span class="free-value">FREE</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td class="item-code"><span>CARD</span></td>
+      <td class="item-description">كارت مايفير ذكي، يستخدم للتعريف والدخول في أنظمة التحكم والفنادق والمرافق الذكية بتقنية 13.56MHz مع إمكانية البرمجة والتشفير.<small>Mifare smart card 13.56MHz RFID — identification &amp; access for control systems, hotels &amp; smart facilities; programmable &amp; encryptable.</small></td>
+      <td><span class="free-value">FREE</span></td>
+      <td>1200</td>
+      <td><span class="original-price">3,600</span><span class="free-value">FREE</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td class="item-code"><span>ENS-2</span></td>
+      <td class="item-description">موفر طاقة للفنادق يعمل بالكروت (Mifare)، يشغّل الكهرباء داخل الغرفة عند إدخال الكارت، يدعم التعرف على الكارت المبرمج (ID) وخاصية التوقيت، مناسب لأنظمة إدارة الطاقة وتقليل الاستهلاك.<small>Mifare energy-saving room switch — activates power on card insertion, supports programmed card ID &amp; timing; ideal for hotel energy management.</small></td>
+      <td>60</td>
+      <td>400</td>
+      <td><span class="original-price">40,000</span>24,000 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td class="item-code"><span>INS</span></td>
+      <td class="item-description">أعمال التركيب والبرمجة<small>Installation &amp; Programming</small></td>
+      <td>160</td>
+      <td>400</td>
+      <td>64,000 <span class="cur">ر.س</span></td>
+    </tr>
+  </tbody>
+</table>
+<table class="total-table" cellpadding="0" cellspacing="0">
+  <tr><td>المجموع / Subtotal</td><td>178,000 <span class="cur">ر.س</span></td></tr>
+  <tr><td>ضريبة القيمة المضافة 15% / VAT</td><td>26,700 <span class="cur">ر.س</span></td></tr>
+  <tr><td>الإجمالي الكلي / Grand Total</td><td>204,700 <span class="cur">ر.س</span></td></tr>
+</table> ---------- */
+        #items-list { width: 100%; padding: 5px 0 0; }
+        #items-list table, .listing-table {
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            table-layout: fixed !important;
+            margin: 0 !important;
+            direction: rtl !important;
+        }
+        #items-list thead { display: table-header-group; }
+        #items-list tfoot { display: table-row-group; }
+        #items-list tr { page-break-inside: avoid !important; }
+        #items-list th, .listing-table th {
+            padding: 9px 6px !important;
+            border: 0 !important;
+            background: #01040B !important;
+            color: #ffffff !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 10px !important;
+            font-weight: bold !important;
+            white-space: nowrap !important;
+        }
+        /* RTL: first cell sits on the right edge, last cell on the left edge. */
+        #items-list th:first-child, .listing-table th:first-child { border-radius: 0 9px 9px 0; }
+        #items-list th:last-child, .listing-table th:last-child { border-radius: 9px 0 0 9px; }
+        #items-list td, .listing-table td {
+            padding: 10px 7px !important;
+            border: 0 !important;
+            border-bottom: 1px solid #EFEFEF !important;
+            background: #ffffff;
+            color: #01040B;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 10px !important;
+            line-height: 1.5 !important;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        #items-list tbody tr:nth-child(even) td, .listing-table tbody tr:nth-child(even) td { background: #FAF7FF; }
+
+        /* Column widths — matches: # | code | description | unit price | qty | total.
+           If the account's item table still shows an image column instead of "#",
+           swap in the alternative block kept at the bottom of this stylesheet. */
+        #items-list table:not(.total-table):not(.totals) th:nth-child(1),
+        #items-list table:not(.total-table):not(.totals) td:nth-child(1),
+        .listing-table th:nth-child(1), .listing-table td:nth-child(1) { width: 6% !important; color: #A2A2A2; }
+        #items-list table:not(.total-table):not(.totals) th:nth-child(2),
+        #items-list table:not(.total-table):not(.totals) td:nth-child(2),
+        .listing-table th:nth-child(2), .listing-table td:nth-child(2) { width: 12% !important; }
+        #items-list table:not(.total-table):not(.totals) th:nth-child(3),
+        #items-list table:not(.total-table):not(.totals) td:nth-child(3),
+        .listing-table th:nth-child(3), .listing-table td:nth-child(3) { width: 42% !important; }
+        #items-list table:not(.total-table):not(.totals) th:nth-child(4),
+        #items-list table:not(.total-table):not(.totals) td:nth-child(4),
+        .listing-table th:nth-child(4), .listing-table td:nth-child(4) { width: 13% !important; }
+        #items-list table:not(.total-table):not(.totals) th:nth-child(5),
+        #items-list table:not(.total-table):not(.totals) td:nth-child(5),
+        .listing-table th:nth-child(5), .listing-table td:nth-child(5) { width: 10% !important; }
+        #items-list table:not(.total-table):not(.totals) th:nth-child(6),
+        #items-list table:not(.total-table):not(.totals) td:nth-child(6),
+        .listing-table th:nth-child(6), .listing-table td:nth-child(6) { width: 17% !important; }
+
+        /* Description cell: bold Arabic line + muted English line underneath. */
+        #items-list td.item-description, #items-list td.description, #items-list .item-description,
+        .listing-table td.item-description, .listing-table td.description {
+            padding-right: 10px !important;
+            text-align: right !important;
+            font-size: 11px !important;
+            font-weight: bold;
+            line-height: 1.6 !important;
+        }
+        #items-list td.item-description small,
+        #items-list td.item-description .en,
+        #items-list td.description small,
+        #items-list td.description .en,
+        .listing-table td.item-description small,
+        .listing-table td.item-description .en {
+            display: block;
+            margin-top: 3px;
+            color: #A2A2A2;
+            direction: ltr;
+            text-align: left;
+            font-size: 9px;
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1.45;
+        }
+
+        /* Item code — pill when Daftra wraps the value, monospace fallback when it does not. */
+        #items-list td.item-code span, #items-list td.code span,
+        .listing-table td.item-code span, .listing-table td.code span,
+        #items-list .code-badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 6px;
+            background: #01040B;
+            color: #ffffff !important;
+            direction: ltr;
+            font-family: "Avenir Next", Consolas, "Courier New", monospace;
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        #items-list td.item-code, #items-list td.code,
+        .listing-table td.item-code, .listing-table td.code {
+            color: #01040B !important;
+            direction: ltr;
+            font-family: "Avenir Next", Consolas, "Courier New", monospace;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        /* Free-of-charge pill + struck-through list price. */
+        #items-list .free-value, #items-list .free, .listing-table .free-value {
+            display: inline-block;
+            padding: 4px 11px;
+            border-radius: 20px;
+            background: #7B27FF;
+            color: #ffffff !important;
+            font-size: 9px;
+            font-weight: bold !important;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        #items-list .original-price, .listing-table .original-price {
+            display: block;
+            color: #A2A2A2 !important;
+            font-size: 9px;
+            font-weight: normal;
+            text-decoration: line-through;
+        }
+        #items-list .cur, .listing-table .cur { color: #A2A2A2; font-size: 9px; font-weight: normal; }
+        #items-list td:last-child, .listing-table td:last-child { font-size: 11px !important; font-weight: bold; }
+
+        /* ---------- Totals (Daftra emits this as a second table inside #items-list) ---------- */
+        #items-list table.total-table, #items-list .total-table, #items-list table.totals,
+        .total-table, .totals-table {
+            width: 50% !important;
+            margin: 16px 0 0 auto !important;
+            border: 0 !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid-page !important;
+        }
+        #items-list > table:nth-of-type(2),
+        #items-list > table:nth-of-type(2) tr,
+        #items-list > table:nth-of-type(2) td {
+            page-break-inside: avoid !important;
+            break-inside: avoid-page !important;
+        }
+        .total-table td, .totals-table td, #items-list .total-table td, #items-list .totals td {
+            padding: 9px 14px !important;
+            border: 0 !important;
+            border-bottom: 1px solid #EFEFEF !important;
+            background: #FAF7FF !important;
+            color: #01040B;
+            font-size: 10px !important;
+            font-weight: bold;
+            white-space: nowrap !important;
+        }
+        .total-table tr:first-child td:first-child, .totals-table tr:first-child td:first-child,
+        #items-list .total-table tr:first-child td:first-child { border-radius: 0 10px 0 0; }
+        .total-table tr:first-child td:last-child, .totals-table tr:first-child td:last-child,
+        #items-list .total-table tr:first-child td:last-child { border-radius: 10px 0 0 0; }
+        .total-table td:first-child, .totals-table td:first-child,
+        #items-list .total-table td:first-child, #items-list .totals td:first-child {
+            text-align: right !important;
+        }
+        .total-table td:last-child, .totals-table td:last-child,
+        #items-list .total-table td:last-child, #items-list .totals td:last-child {
+            direction: ltr;
+            text-align: left !important;
+        }
+        .total-table tr:last-child td, .totals-table tr:last-child td,
+        #items-list .total-table tr:last-child td, #items-list .totals tr:last-child td {
+            padding: 12px 14px !important;
+            border-bottom: 0 !important;
+            background: #01040B !important;
+            color: #ffffff !important;
+            font-size: 13px !important;
+        }
+        .total-table tr:last-child td:first-child, #items-list .total-table tr:last-child td:first-child,
+        .totals-table tr:last-child td:first-child { border-radius: 0 10px 10px 0; }
+        .total-table tr:last-child td:last-child, #items-list .total-table tr:last-child td:last-child,
+        .totals-table tr:last-child td:last-child {
+            border-radius: 10px 0 0 10px;
+            color: #7B27FF !important;
+            font-size: 17px !important;
+        }
+        .total-table tr:last-child .cur, #items-list .total-table tr:last-child .cur { color: #A0A2B1; }
+        .totals-clear { clear: both; height: 1px; font-size: 1px; line-height: 1px; }
+
+        /* ---------- Terms & technical notes ---------- */
+        .info-grid {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 22px;
+            direction: rtl;
+            page-break-inside: avoid;
+        }
+        .info-cell { display: table-cell; vertical-align: top; }
+        .info-panel {
+            margin-left: 12px;
+            border: 1px solid #E4E4EA;
+            border-radius: 10px;
+            background: #ffffff;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+        .info-cell.last .info-panel { margin-left: 0; }
+        .info-head {
+            padding: 7px 12px;
+            border-bottom: 1px solid #E4E4EA;
+            background: #F4F0FD;
+            color: #01040B;
+            text-align: right;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+        }
+        .sq {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin-left: 7px;
+            border-radius: 2px;
+            background: #7B27FF;
+            vertical-align: middle;
+        }
+        .info-body { padding: 9px 12px 10px; }
+        .info-body .li,
+        .info-body p,
+        .info-body li {
+            margin: 0 0 5px;
+            padding-right: 13px;
+            color: #01040B;
+            text-align: right;
+            text-indent: -13px;
+            font-size: 9px;
+            line-height: 1.75;
+            list-style: none;
+        }
+        .info-body ul, .info-body ol { margin: 0; padding: 0; list-style: none; }
+        .info-body .li:last-child, .info-body p:last-child, .info-body li:last-child { margin-bottom: 0; }
+        .dm { margin-left: 5px; color: #7B27FF; font-size: 7px; }
+        /* Per-quote notes typed into Daftra () — borderless so an empty one is invisible. */
+        .extra-notes { margin: 10px 0 0; color: #01040B; font-size: 9px; line-height: 1.75; page-break-inside: avoid; }
+        .extra-notes ul, .extra-notes ol { margin: 0 16px 0 0; padding: 0; }
+
+        /* ---------- Bank details ---------- */
+        .bank-bar {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 14px;
+            direction: rtl;
+            page-break-inside: avoid;
+        }
+        .bank-cell { display: table-cell; width: 50%; padding: 2px 10px; text-align: center; vertical-align: middle; }
+        .bank-cell.last { border-right: 1px solid #E4E4EA; }
+        .bank-name { color: #7B27FF; font-size: 9px; font-weight: bold; }
+        .bank-iban { color: #01040B; direction: ltr; font-size: 12px; font-weight: bold; letter-spacing: 0.4px; }
+
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            html, body { min-height: 0; }
+            body { background: #ffffff !important; }
+            .invoice-wrap { width: 100%; max-width: none; min-height: 0; padding: 0; }
+            .bank-bar { margin-bottom: 0; }
+            @page { size: A4 portrait; margin: 7mm 8mm 16mm; }
+        }
+
+        /* ----------------------------------------------------------------------
+           ALTERNATIVE COLUMN WIDTHS
+           Use these instead of the block above if the item table is still
+           item | description | image | unit price | qty | total (i.e. it shows a
+           picture column and no "#" column):
+
+           …th:nth-child(1) { width: 11% !important; }   item / code
+           …th:nth-child(2) { width: 37% !important; }   description
+           …th:nth-child(3) { width: 12% !important; }   image
+           …th:nth-child(4) { width: 15% !important; }   unit price
+           …th:nth-child(5) { width: 10% !important; }   quantity
+           …th:nth-child(6) { width: 15% !important; }   total
+        ---------------------------------------------------------------------- */
+        #items-list td img, .listing-table td img {
+            display: block !important;
+            max-width: 50px !important;
+            max-height: 50px !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 auto !important;
+            padding: 3px;
+            border: 1px solid #E4E4EA;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-wrap">
+        <div class="document-header">
+            <div class="header-logo">
+                <img style="vertical-align:top;" id="logo" class="editable-area" src="data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgNDAwIDYwIj4KICA8cmVjdCB4PSIzNTIiIHk9IjciIHdpZHRoPSI0NiIgaGVpZ2h0PSI0NiIgcng9IjExIiBmaWxsPSIjMDEwNDBCIi8+CiAgPHJlY3QgeD0iMzY3IiB5PSIyMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiByeD0iMyIgZmlsbD0iIzdCMjdGRiIvPgogIDx0ZXh0IHg9IjMzOCIgeT0iMzEiIHRleHQtYW5jaG9yPSJlbmQiIGZvbnQtZmFtaWx5PSJUYWhvbWEsIEFyaWFsIiBmb250LXNpemU9IjIwIgogICAgICAgIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMDEwNDBCIj4mI3g2MzQ7JiN4NjMxOyYjeDY0MzsmI3g2Mjk7ICYjeDY0NTsmI3g2MkE7JiN4NjQyOyYjeDY0NjsmI3g2NDg7JiN4NjQ2OyAmI3g2MkE7JiN4NjQzOyAmI3g2NDQ7JiN4NjQ0OyYjeDYyQTsmI3g2MkM7JiN4NjI3OyYjeDYzMTsmI3g2Mjk7PC90ZXh0PgogIDx0ZXh0IHg9IjMzOCIgeT0iNDciIHRleHQtYW5jaG9yPSJlbmQiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIKICAgICAgICBsZXR0ZXItc3BhY2luZz0iMyIgZmlsbD0iI0EwQTJCMSI+TU9UUUlOT04gVEVDSDwvdGV4dD4KPC9zdmc+" width="400" height="" />
+            </div>
+            <div class="header-title">
+                <div class="arabic-title">عرض سعر</div>
+                <div class="english-title">QUOTATION</div>
+            </div>
+        </div>
+
+        <div class="rule-black"></div>
+
+        <div class="meta-row">
+            <div class="meta-cell">
+                <div class="meta-card">
+                    <div class="meta-label">رقم العرض / QUOTE No.</div>
+                    <div class="meta-value accent ltr">Q-2026-92074</div>
+                </div>
+            </div>
+            <div class="meta-cell">
+                <div class="meta-card">
+                    <div class="meta-label">التاريخ / DATE</div>
+                    <div class="meta-value ltr">2026 / 06 / 27</div>
+                </div>
+            </div>
+            <div class="meta-cell last">
+                <div class="meta-card">
+                    <div class="meta-label">صلاحية العرض / VALID</div>
+                    <div class="meta-value">10 أيام</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="meta-row">
+            <div class="meta-cell">
+                <div class="meta-card">
+                    <div class="meta-label">اسم العميل / CLIENT</div>
+                    <div class="meta-value">م. يسري</div>
+                </div>
+            </div>
+            <div class="meta-cell last" id="shipping_options" style="display:none;">
+                <div class="meta-card">
+                    <div class="meta-label"><span id="label_ship" class="editable-area">الشحن إلى</span></div>
+                    <div class="meta-value"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="custom-fields" class="editable-area">
+<table cellpadding="0" cellspacing="0">
+  <tr>
+    <td><label>المشروع / PROJECT</label>فندق عين مكة</td>
+    <td><label>المندوب / SALES REP</label>بشار عادل</td>
+  </tr>
+  <tr>
+    <td><label>العنوان / ADDRESS</label>مكة المكرمة – حي العوالي</td>
+    <td><label>نطاق العمل / SCOPE</label>توريد وتركيب وبرمجة</td>
+  </tr>
+</table></div>
+
+        <div class="meta-row">
+            <div class="meta-cell">
+                <div class="meta-card">
+                    <div class="meta-label">السجل التجاري / CR No.</div>
+                    <div class="meta-value ltr">4031318733</div>
+                </div>
+            </div>
+            <div class="meta-cell last">
+                <div class="meta-card">
+                    <div class="meta-label">الرقم الضريبي / VAT No.</div>
+                    <div class="meta-value ltr">312772334500003</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="items-list">
+<table class="listing-table" cellpadding="0" cellspacing="0">
+  <thead>
+    <tr>
+      <th>#</th><th>الكود</th><th>Description / الوصف</th>
+      <th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>1</td>
+      <td class="item-code"><span>DL-711</span></td>
+      <td class="item-description">قفل فندقي إلكتروني ببطاقات RF ام1 ار اف، يدعم القراءة والكتابة والتشفير، يعمل بـ 4 بطاريات AAA، إنذار انخفاض البطارية.<small>RF M1 electronic hotel lock, aluminium reader &amp; handle, 4&times;AAA batteries, low-battery alarm.</small></td>
+      <td>225</td>
+      <td>400</td>
+      <td><span class="original-price">150,000</span>90,000 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td class="item-code"><span>ENC-1</span></td>
+      <td class="item-description">جهاز إنكودر لبرمجة كروت مايفير الذكية، يدعم القراءة والكتابة والتشفير، يتيح تخصيص البيانات على البطاقات للاستخدام في أنظمة التحكم في الدخول والفنادق والمرافق الذكية.<small>Encoder for programming Mifare smart cards — read / write / encryption for access-control, hotels &amp; smart facilities.</small></td>
+      <td><span class="free-value">FREE</span></td>
+      <td>1</td>
+      <td><span class="original-price">650</span><span class="free-value">FREE</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td class="item-code"><span>CARD</span></td>
+      <td class="item-description">كارت مايفير ذكي، يستخدم للتعريف والدخول في أنظمة التحكم والفنادق والمرافق الذكية بتقنية 13.56MHz مع إمكانية البرمجة والتشفير.<small>Mifare smart card 13.56MHz RFID — identification &amp; access for control systems, hotels &amp; smart facilities; programmable &amp; encryptable.</small></td>
+      <td><span class="free-value">FREE</span></td>
+      <td>1200</td>
+      <td><span class="original-price">3,600</span><span class="free-value">FREE</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td class="item-code"><span>ENS-2</span></td>
+      <td class="item-description">موفر طاقة للفنادق يعمل بالكروت (Mifare)، يشغّل الكهرباء داخل الغرفة عند إدخال الكارت، يدعم التعرف على الكارت المبرمج (ID) وخاصية التوقيت، مناسب لأنظمة إدارة الطاقة وتقليل الاستهلاك.<small>Mifare energy-saving room switch — activates power on card insertion, supports programmed card ID &amp; timing; ideal for hotel energy management.</small></td>
+      <td>60</td>
+      <td>400</td>
+      <td><span class="original-price">40,000</span>24,000 <span class="cur">ر.س</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td class="item-code"><span>INS</span></td>
+      <td class="item-description">أعمال التركيب والبرمجة<small>Installation &amp; Programming</small></td>
+      <td>160</td>
+      <td>400</td>
+      <td>64,000 <span class="cur">ر.س</span></td>
+    </tr>
+  </tbody>
+</table>
+<table class="total-table" cellpadding="0" cellspacing="0">
+  <tr><td>المجموع / Subtotal</td><td>178,000 <span class="cur">ر.س</span></td></tr>
+  <tr><td>ضريبة القيمة المضافة 15% / VAT</td><td>26,700 <span class="cur">ر.س</span></td></tr>
+  <tr><td>الإجمالي الكلي / Grand Total</td><td>204,700 <span class="cur">ر.س</span></td></tr>
+</table></div>
+        <div class="totals-clear"></div>
+
+        <div class="info-grid">
+            <div class="info-cell">
+                <div class="info-panel">
+                    <div class="info-head"><span class="sq"></span>الشروط والأحكام / TERMS &amp; CONDITIONS</div>
+                    <div class="info-body">
+                        <div class="li"><span class="dm">&#9670;</span>الدفعات: 50% مقدمة عند التوقيع، 40% قبل التوريد، 10% بعد التركيب وقبل البرمجة.</div>
+                        <div class="li"><span class="dm">&#9670;</span>مدة التوريد: 45-60 يوم عمل من تاريخ التعميد واستلام الدفعة الأولى واعتماد التفاصيل.</div>
+                        <div class="li"><span class="dm">&#9670;</span>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</div>
+                        <div class="li"><span class="dm">&#9670;</span>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</div>
+                        <div class="li"><span class="dm">&#9670;</span>صلاحية العرض: 10 أيام من تاريخه.</div>
+                        <div class="li"><span class="dm">&#9670;</span>نطاق العرض: توريد فقط.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-cell last">
+                <div class="info-panel">
+                    <div class="info-head"><span class="sq"></span>الملاحظات الفنية / TECHNICAL NOTES</div>
+                    <div class="info-body">
+                        <div class="li"><span class="dm">&#9670;</span>تعتمد على تقنيات لاسلكية عالية الكفاءة (غير مرتبطة بالواي فاي) لضمان استمرار العمل.</div>
+                        <div class="li"><span class="dm">&#9670;</span>توفير نقطة كهرباء و (Data) لوحدة التحكم الرئيسية (Gateway).</div>
+                        <div class="li"><span class="dm">&#9670;</span>توفير نقطة كهرباء لوحدة التحكم بالمكيف ضمن نطاق الغرفة المباشرة.</div>
+                        <div class="li"><span class="dm">&#9670;</span>نظام إنتركوم مرئي حديث بتقنية TCP/IP.</div>
+                        <div class="li"><span class="dm">&#9670;</span>يتطلب تشغيل نظام الإنتركوم كابلات CAT6 ومبدلات (Switches) مخصصة.</div>
+                        <div class="li"><span class="dm">&#9670;</span>تعتمد لوحة الجرس الخارجية على توصيل 220V مباشر ونظام جرس داخلي.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="extra-notes">
+            <div id="footer" class="editable-area"></div>
+        </div>
+
+        <div class="bank-bar">
+            <div class="bank-cell">
+                <div class="bank-name">مصرف الراجحي</div>
+                <div class="bank-iban">SA56 8000 0201 6080 1660 8470</div>
+            </div>
+            <div class="bank-cell last">
+                <div class="bank-name">البنك الأول (SAB)</div>
+                <div class="bank-iban">SA95 4500 0000 0343 6186 5001</div>
+            </div>
+        </div>
+
+        <style type="text/css">
+    * { box-sizing: border-box; }
+    .mto-sticky-footer {
+        width: 100%;
+        height: 34px;
+        margin: 0;
+        padding: 0;
+        background-color: #01040B !important;
+        color: #ffffff !important;
+        direction: rtl;
+        font-family: "Avenir Next", Tahoma, Arial, sans-serif;
+        font-size: 10px;
+        font-weight: bold;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .mto-sticky-footer table {
+        width: 100%;
+        height: 34px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-collapse: collapse;
+        table-layout: fixed;
+        background-color: #01040B !important;
+    }
+    .mto-sticky-footer td {
+        height: 34px;
+        padding: 0 14px;
+        border: 0;
+        background-color: #01040B !important;
+        color: #ffffff !important;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .mto-footer-company { width: 38%; text-align: right; }
+    .mto-footer-cities  { width: 32%; color: #A0A2B1 !important; text-align: center; font-weight: normal; }
+    .mto-footer-phone   { width: 30%; direction: ltr; text-align: left; }
+    .mto-sq {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+        background-color: #7B27FF !important;
+        vertical-align: middle;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .mto-footer-company .mto-sq { margin-right: 0; margin-left: 7px; }
+    .mto-footer-phone .mto-sq { margin-right: 7px; margin-left: 0; }
+</style>
+
+<div class="mto-sticky-footer">
+    <table border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td class="mto-footer-company"><span class="mto-sq"></span>شركة متقنون تك للتجارة</td>
+            <td class="mto-footer-cities">مكة المكرمة - جدة - المدينة المنورة</td>
+            <td class="mto-footer-phone"><span class="mto-sq"></span>+966 53 279 9924</td>
+        </tr>
+    </table>
+</div>
+
+    </div>
+</body>
+</html>
