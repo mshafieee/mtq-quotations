@@ -67,8 +67,11 @@ top right; "عرض سعر / QUOTATION" sits at the top left, with a black rule b
   `<small>` or `<span class="en">`.
 - **Free items** — `<span class="free-value">FREE</span>` renders the violet pill and
   `<span class="original-price">3,600</span>` the struck-through list price.
-- **Client card** spans the full row while shipping is hidden. For a half-width card, give
-  `.meta-row` a second `<div class="meta-cell last"></div>` spacer.
+- **Client card** is half-width, as in the mockup. Its row always carries a second cell to
+  hold that width; Daftra's `#shipping_options` toggle now sits on the *card* inside that
+  cell, so the left half stays blank until a shipping address is used, then fills with it.
+  To let the client card span the full row instead, move `id="shipping_options"` and its
+  `style="display:none;"` back onto the surrounding `.meta-cell`.
 
 ## Previewing changes
 

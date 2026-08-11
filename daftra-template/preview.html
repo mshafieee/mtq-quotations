@@ -554,8 +554,10 @@
                     <div class="meta-value">م. يسري</div>
                 </div>
             </div>
-            <div class="meta-cell last" id="shipping_options" style="display:none;">
-                <div class="meta-card">
+            <!-- Cell always present so the client card stays half-width; Daftra toggles
+                 display on #shipping_options, which is the card inside it. -->
+            <div class="meta-cell last">
+                <div class="meta-card" id="shipping_options" style="display:none;">
                     <div class="meta-label"><span id="label_ship" class="editable-area">الشحن إلى</span></div>
                     <div class="meta-value"></div>
                 </div>
