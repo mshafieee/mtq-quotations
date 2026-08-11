@@ -154,7 +154,7 @@
     <td><label>السجل التجاري</label>7011019275</td>
   </tr>
   <tr>
-    <td><label>الرقم الضريبي</label>310122334500003</td>
+    <td><label>البطاقة الضريبية</label>310122334500003</td>
     <td><label>جوال</label>0553710221</td>
   </tr>
 </table> as its own table — restyle each cell into a card.
@@ -563,6 +563,20 @@
             letter-spacing: 0.3px;
         }
         .bank-row.last .bank-label, .bank-row.last .bank-value { border-bottom: 0; }
+        /* Account and bank names are Arabic; only the numbers run LTR. */
+        .bank-value.rtl { direction: rtl; text-align: right; }
+        .bank-qr { margin-top: 7px; text-align: center; page-break-inside: avoid; }
+        .bank-qr img {
+            display: inline-block !important;
+            width: auto !important;
+            height: auto !important;
+            max-width: 108px !important;
+            max-height: 108px !important;
+            padding: 4px;
+            border: 1px solid #E4E4EA;
+            border-radius: 8px;
+            background: #ffffff;
+        }
 
         /* ---------- Per-contract notes (<p>إجمالي قيمة العقد شامل ضريبة القيمة المضافة: مبلغ وقدره (13,248.33 ريال سعودي) فقط ثلاثة عشر ألفًا ومائتان وثمانية وأربعون ريالًا سعوديًا وثلاثة وثلاثون هللة لا غير.</p>) — borderless, invisible when empty ------- */
         .extra-notes {
@@ -676,9 +690,19 @@
         <div class="party">
             <div class="party-head"><span class="sq"></span><span id="party1_head" class="editable-area">الطرف الأول (العميل) / FIRST PARTY</span></div>
             <div class="party-body">
-                <span class="pv">شركة المشاريع السكنية للمقاولات العامة المحدودة</span><span id="party1_mid" class="editable-area">، ومقرها: </span><span class="pv">مدينة جدة – حي النهضة</span><span id="party1_tail" class="editable-area">، ويشار إليها لاحقًا بـ "الطرف الأول".</span>
-                <!-- Client CR / VAT / representative / phone: configure them as Daftra custom
-                     fields and they print here as cards. -->
+                <span class="pv">شركة المشاريع السكنية للمقاولات العامة المحدودة</span><span id="party1_mid" class="editable-area">، ويشار إليها لاحقًا بـ "الطرف الأول"، ومقرها: </span><span class="pv">مدينة جدة – حي النهضة</span><span id="party1_tail" class="editable-area">.</span>
+                <!-- The same client fields the quotation app records, printed as cards. A
+                     template cannot invent per-contract values, so create these four in Daftra
+                     as custom fields on the contract, named exactly:
+
+                         السجل التجاري        — client CR number
+                         البطاقة الضريبية      — client VAT number
+                         جوال                 — client mobile
+                         ممثل الطرف الأول      — who signs for the client
+
+                     Daftra prints whatever is configured, in the order it is configured, so the
+                     labels above are what appears on the card. If the account exposes direct
+                     client placeholders instead, drop them into the sentence above. -->
                 <div id="custom-fields" class="editable-area">
 <table cellpadding="0" cellspacing="0">
   <tr>
@@ -686,7 +710,7 @@
     <td><label>السجل التجاري</label>7011019275</td>
   </tr>
   <tr>
-    <td><label>الرقم الضريبي</label>310122334500003</td>
+    <td><label>البطاقة الضريبية</label>310122334500003</td>
     <td><label>جوال</label>0553710221</td>
   </tr>
 </table></div>
@@ -696,7 +720,7 @@
         <div class="party party-second">
             <div class="party-head"><span class="sq"></span><span id="party2_head" class="editable-area">الطرف الثاني (المورد) / SECOND PARTY</span></div>
             <div class="party-body" id="party2_body">
-                <span class="editable-area" id="party2_text"><strong>شركة متقنون تك للتجارة</strong>، ويمثلها الأستاذ/ <strong>محمد عبد الله الحامدي</strong>، ويشار إليها لاحقًا بـ "الطرف الثاني"، فرع مكة المكرمة – حي العوالي – مجمع الشريهي التجاري الإداري، سجل تجاري رقم <strong>4031318733</strong>، الرقم الضريبي <strong>312772334500003</strong>، جوال: <strong>0580136000</strong>.</span>
+                <span class="editable-area" id="party2_text"><strong>شركة متقنون تك للتجارة</strong>، ويمثلها الأستاذ/ <strong>رياض احمد بحير</strong>، ويشار إليها لاحقًا بـ "الطرف الثاني"، فرع مكة المكرمة – حي العوالي – مجمع الشريهي التجاري الإداري، سجل تجاري رقم <strong>4031318733</strong>، الرقم الضريبي <strong>312772334500003</strong>، جوال: <strong>0532799924</strong>.</span>
             </div>
         </div>
 
@@ -822,21 +846,29 @@
             <div class="bank-box">
                 <div class="bank-row">
                     <div id="bank_label_account" class="bank-label editable-area">اسم الحساب / Account Name</div>
-                    <div id="bank_value_account" class="bank-value editable-area">MOTQINON TECH TRADING COMPANY</div>
+                    <div id="bank_value_account" class="bank-value rtl editable-area">شركة متقنون تك للتجارة</div>
                 </div>
                 <div class="bank-row">
                     <div id="bank_label_bank" class="bank-label editable-area">اسم البنك / Bank</div>
-                    <div id="bank_value_bank" class="bank-value editable-area">SABB — البنك السعودي البريطاني (ساب)</div>
+                    <div id="bank_value_bank" class="bank-value rtl editable-area">مصرف الراجحي</div>
                 </div>
                 <div class="bank-row">
                     <div id="bank_label_acc_no" class="bank-label editable-area">رقم الحساب / Account No.</div>
-                    <div id="bank_value_acc_no" class="bank-value editable-area">SASABB034361865001</div>
+                    <div id="bank_value_acc_no" class="bank-value editable-area">2010 0001 0006 0866 08470</div>
                 </div>
                 <div class="bank-row last">
                     <div id="bank_label_iban" class="bank-label editable-area">رقم الآيبان / IBAN</div>
-                    <div id="bank_value_iban" class="bank-value editable-area">SA95 4500 0000 0343 6186 5001</div>
+                    <div id="bank_value_iban" class="bank-value editable-area">SA56 8000 0201 6080 1660 8470</div>
                 </div>
             </div>
+            <!-- The quotation app prints a transfer QR beside these details (qr-code.png). A
+                 Daftra template cannot reach a file on your machine, so to print it here put the
+                 image somewhere with a public URL — or paste it as a data: URI — and uncomment:
+
+            <div class="bank-qr">
+                <img id="bank_qr" class="editable-area" src="PUT_QR_URL_HERE" alt="" />
+            </div>
+            -->
         </div>
 
         <div class="article">
@@ -894,7 +926,7 @@
                 <div class="sign-card">
                     <div id="sign2_role" class="sign-role editable-area">الطرف الثاني / SECOND PARTY</div>
                     <div id="sign2_co" class="sign-co editable-area">شركة متقنون تك للتجارة</div>
-                    <div id="sign2_rep" class="sign-rep editable-area">محمد عبد الله الحامدي</div>
+                    <div id="sign2_rep" class="sign-rep editable-area">رياض احمد بحير</div>
                     <div class="sign-line"></div>
                     <div id="sign2_cap" class="sign-cap editable-area">التوقيع والختم / SIGNATURE &amp; STAMP</div>
                     <!-- Company stamp, same image the quotation app uses. Delete this block to

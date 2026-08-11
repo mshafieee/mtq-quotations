@@ -162,9 +162,18 @@ Points worth knowing:
 - **The company stamp** is the image the quotation app uses. If the PDF renderer cannot reach
   `lh3.googleusercontent.com` the image collapses silently and the signature line still prints;
   delete the `.sign-stamp` block to sign and stamp by hand instead.
-- **Supplier details** come from `index.html` (محمد عبد الله الحامدي, جوال 0580136000), which
-  differs from the older `contract.txt` sample (رياض أحمد بحير, 0532799924). Both the name and
-  the number are `editable-area`, so correct them on the website if the sample was right.
+- **Supplier details and the payment account** track the current `index.html`: رياض احمد بحير,
+  جوال 0532799924, and Al Rajhi (`شركة متقنون تك للتجارة` / `2010 0001 0006 0866 08470` /
+  `SA56 8000 0201 6080 1660 8470`) in place of the earlier SABB account. All are
+  `editable-area`, so they can be corrected on the website without re-pasting.
+- **Client CR / VAT card / mobile / signatory** print as cards under the first party. A template
+  cannot invent per-contract values, so create them in Daftra as custom fields on the contract,
+  named exactly `السجل التجاري`, `البطاقة الضريبية`, `جوال`, `ممثل الطرف الأول` — the same set
+  `index.html` records. If the account exposes direct client placeholders, drop them into the
+  first-party sentence instead.
+- **The transfer QR** that `index.html` prints beside the bank details needs a public URL or a
+  `data:` URI to work in a template; a commented-out `.bank-qr` block sits under the bank box
+  ready for it.
 - **53 editable areas**, same convention as the quotation: every heading, article body, bank
   line and signature label can be edited from Daftra rather than by re-pasting HTML.
 

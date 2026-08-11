@@ -25,7 +25,8 @@ const thumb = 'data:image/svg+xml;base64,' + Buffer.from(`
   <rect x="10" y="16" width="40" height="26" rx="3" fill="#A0A2B1"/>
 </svg>`).toString('base64');
 
-/* {%custom_fields%} — the client details a contract needs beyond name and address. */
+/* {%custom_fields%} — the client fields the contract needs beyond name and address, named as
+   index.html records them: CR, VAT card, mobile and the client's signatory. */
 const customFields = `
 <table cellpadding="0" cellspacing="0">
   <tr>
@@ -33,7 +34,7 @@ const customFields = `
     <td><label>السجل التجاري</label>7011019275</td>
   </tr>
   <tr>
-    <td><label>الرقم الضريبي</label>310122334500003</td>
+    <td><label>البطاقة الضريبية</label>310122334500003</td>
     <td><label>جوال</label>0553710221</td>
   </tr>
 </table>`;
