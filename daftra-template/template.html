@@ -26,29 +26,41 @@
             background: #ffffff;
         }
 
-        /* ---------- Header: logo (from Daftra settings) + document title ---------- */
+        /* ---------- Header: logo (from Daftra settings) + company name + title ----------
+           Auto table layout: the logo cell shrinks to the image, the name cell to its text,
+           and the title cell takes whatever is left over on the far left. */
         .document-header {
             width: 100%;
             display: table;
-            table-layout: fixed;
             padding: 10px 0 4px;
             direction: rtl;
         }
-        .header-logo, .header-title { display: table-cell; vertical-align: middle; }
-        .header-logo { width: 55%; text-align: right; }
+        .header-logo, .header-brand, .header-title { display: table-cell; vertical-align: middle; }
+        .header-logo { width: 1px; text-align: right; white-space: nowrap; }
         .header-logo #logo,
         .header-logo .logo,
         .header-logo img {
             display: block !important;
             width: auto !important;
-            max-width: 400px !important;
-            max-height: 74px !important;
+            max-width: 190px !important;
+            max-height: 58px !important;
             height: auto !important;
             margin: 0 !important;
         }
         .header-logo #logo img,
-        .header-logo .logo img { max-width: 100% !important; max-height: 74px !important; }
-        .header-title { width: 45%; text-align: left; }
+        .header-logo .logo img { max-width: 100% !important; max-height: 58px !important; }
+        /* Delete this cell from the body if the uploaded logo already carries the name. */
+        .header-brand { width: 1px; padding-right: 12px; text-align: right; white-space: nowrap; }
+        .brand-ar { color: #01040B; font-size: 20px; font-weight: bold; line-height: 1.2; }
+        .brand-en {
+            color: #A0A2B1;
+            direction: ltr;
+            text-align: right;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+        .header-title { text-align: left; }
         .header-title .arabic-title {
             color: #7B27FF;
             font-size: 27px;
@@ -142,13 +154,18 @@
             line-height: 1.4 !important;
         }
 
-        /* ---------- Items table emitted by {%items_list%} ---------- */
+        /* ---------- Items table emitted by {%items_list%} ----------
+           Daftra emits the items table first and the totals table(s) after it, and the
+           classes it puts on them differ between accounts — so the two are told apart by
+           position (:nth-of-type) rather than by class, and the items rules are re-asserted
+           further down to win any tie. Column widths are left to `table-layout: auto` so the
+           layout survives whichever columns are switched on in Daftra's item-table settings. */
         #items-list { width: 100%; padding: 5px 0 0; }
-        #items-list table, .listing-table {
+        #items-list table {
             width: 100% !important;
             border-collapse: separate !important;
             border-spacing: 0 !important;
-            table-layout: fixed !important;
+            table-layout: auto !important;
             margin: 0 !important;
             direction: rtl !important;
         }
@@ -184,27 +201,12 @@
         }
         #items-list tbody tr:nth-child(even) td, .listing-table tbody tr:nth-child(even) td { background: #FAF7FF; }
 
-        /* Column widths — matches: # | code | description | unit price | qty | total.
-           If the account's item table still shows an image column instead of "#",
-           swap in the alternative block kept at the bottom of this stylesheet. */
-        #items-list table:not(.total-table):not(.totals) th:nth-child(1),
-        #items-list table:not(.total-table):not(.totals) td:nth-child(1),
-        .listing-table th:nth-child(1), .listing-table td:nth-child(1) { width: 6% !important; color: #A2A2A2; }
-        #items-list table:not(.total-table):not(.totals) th:nth-child(2),
-        #items-list table:not(.total-table):not(.totals) td:nth-child(2),
-        .listing-table th:nth-child(2), .listing-table td:nth-child(2) { width: 12% !important; }
-        #items-list table:not(.total-table):not(.totals) th:nth-child(3),
-        #items-list table:not(.total-table):not(.totals) td:nth-child(3),
-        .listing-table th:nth-child(3), .listing-table td:nth-child(3) { width: 42% !important; }
-        #items-list table:not(.total-table):not(.totals) th:nth-child(4),
-        #items-list table:not(.total-table):not(.totals) td:nth-child(4),
-        .listing-table th:nth-child(4), .listing-table td:nth-child(4) { width: 13% !important; }
-        #items-list table:not(.total-table):not(.totals) th:nth-child(5),
-        #items-list table:not(.total-table):not(.totals) td:nth-child(5),
-        .listing-table th:nth-child(5), .listing-table td:nth-child(5) { width: 10% !important; }
-        #items-list table:not(.total-table):not(.totals) th:nth-child(6),
-        #items-list table:not(.total-table):not(.totals) td:nth-child(6),
-        .listing-table th:nth-child(6), .listing-table td:nth-child(6) { width: 17% !important; }
+        /* The description column takes the slack; every other column sizes to its content
+           (the header labels carry white-space: nowrap, so none of them can be squeezed). */
+        #items-list td.item-description, #items-list td.description,
+        .listing-table td.item-description, .listing-table td.description { width: 42%; }
+        #items-list > table:nth-of-type(1) td:first-child,
+        #items-list > table:nth-of-type(1) th:first-child { text-align: right !important; }
 
         /* Description cell: bold Arabic line + muted English line underneath. */
         #items-list td.item-description, #items-list td.description, #items-list .item-description,
@@ -280,24 +282,28 @@
         #items-list .cur, .listing-table .cur { color: #A2A2A2; font-size: 9px; font-weight: normal; }
         #items-list td:last-child, .listing-table td:last-child { font-size: 11px !important; font-weight: bold; }
 
-        /* ---------- Totals (Daftra emits this as a second table inside #items-list) ---------- */
-        #items-list table.total-table, #items-list .total-table, #items-list table.totals,
-        .total-table, .totals-table {
+        /* ---------- Totals: every table after the first one inside #items-list ----------
+           Selected by position, never by class: the items table carries totals-like classes
+           in some Daftra accounts, and matching on those shrank it to half width and forced
+           its cells onto one line. */
+        #items-list > table:nth-of-type(n+2),
+        #items-list table.total-table:not(:first-of-type),
+        #items-list table.totals:not(:first-of-type) {
             width: 50% !important;
             margin: 16px 0 0 auto !important;
             border: 0 !important;
-            border-collapse: separate !important;
-            border-spacing: 0 !important;
             page-break-inside: avoid !important;
             break-inside: avoid-page !important;
         }
-        #items-list > table:nth-of-type(2),
-        #items-list > table:nth-of-type(2) tr,
-        #items-list > table:nth-of-type(2) td {
+        #items-list > table:nth-of-type(n+2) tr,
+        #items-list table.total-table:not(:first-of-type) tr,
+        #items-list table.totals:not(:first-of-type) tr {
             page-break-inside: avoid !important;
             break-inside: avoid-page !important;
         }
-        .total-table td, .totals-table td, #items-list .total-table td, #items-list .totals td {
+        #items-list > table:nth-of-type(n+2) td,
+        #items-list table.total-table:not(:first-of-type) td,
+        #items-list table.totals:not(:first-of-type) td {
             padding: 9px 14px !important;
             border: 0 !important;
             border-bottom: 1px solid #EFEFEF !important;
@@ -306,38 +312,46 @@
             font-size: 10px !important;
             font-weight: bold;
             white-space: nowrap !important;
+            page-break-inside: avoid !important;
         }
-        .total-table tr:first-child td:first-child, .totals-table tr:first-child td:first-child,
-        #items-list .total-table tr:first-child td:first-child { border-radius: 0 10px 0 0; }
-        .total-table tr:first-child td:last-child, .totals-table tr:first-child td:last-child,
-        #items-list .total-table tr:first-child td:last-child { border-radius: 10px 0 0 0; }
-        .total-table td:first-child, .totals-table td:first-child,
-        #items-list .total-table td:first-child, #items-list .totals td:first-child {
-            text-align: right !important;
-        }
-        .total-table td:last-child, .totals-table td:last-child,
-        #items-list .total-table td:last-child, #items-list .totals td:last-child {
-            direction: ltr;
-            text-align: left !important;
-        }
-        .total-table tr:last-child td, .totals-table tr:last-child td,
-        #items-list .total-table tr:last-child td, #items-list .totals tr:last-child td {
+        #items-list > table:nth-of-type(n+2) tr:first-child td:first-child,
+        #items-list table.total-table:not(:first-of-type) tr:first-child td:first-child,
+        #items-list table.totals:not(:first-of-type) tr:first-child td:first-child { border-radius: 0 10px 0 0; }
+        #items-list > table:nth-of-type(n+2) tr:first-child td:last-child,
+        #items-list table.total-table:not(:first-of-type) tr:first-child td:last-child,
+        #items-list table.totals:not(:first-of-type) tr:first-child td:last-child { border-radius: 10px 0 0 0; }
+        #items-list > table:nth-of-type(n+2) td:first-child,
+        #items-list table.total-table:not(:first-of-type) td:first-child,
+        #items-list table.totals:not(:first-of-type) td:first-child { text-align: right !important; }
+        #items-list > table:nth-of-type(n+2) td:last-child,
+        #items-list table.total-table:not(:first-of-type) td:last-child,
+        #items-list table.totals:not(:first-of-type) td:last-child { direction: ltr; text-align: left !important; }
+        #items-list > table:nth-of-type(n+2) tr:last-child td,
+        #items-list table.total-table:not(:first-of-type) tr:last-child td,
+        #items-list table.totals:not(:first-of-type) tr:last-child td {
             padding: 12px 14px !important;
             border-bottom: 0 !important;
             background: #01040B !important;
             color: #ffffff !important;
             font-size: 13px !important;
         }
-        .total-table tr:last-child td:first-child, #items-list .total-table tr:last-child td:first-child,
-        .totals-table tr:last-child td:first-child { border-radius: 0 10px 10px 0; }
-        .total-table tr:last-child td:last-child, #items-list .total-table tr:last-child td:last-child,
-        .totals-table tr:last-child td:last-child {
+        #items-list > table:nth-of-type(n+2) tr:last-child td:first-child,
+        #items-list table.total-table:not(:first-of-type) tr:last-child td:first-child,
+        #items-list table.totals:not(:first-of-type) tr:last-child td:first-child { border-radius: 0 10px 10px 0; }
+        #items-list > table:nth-of-type(n+2) tr:last-child td:last-child,
+        #items-list table.total-table:not(:first-of-type) tr:last-child td:last-child,
+        #items-list table.totals:not(:first-of-type) tr:last-child td:last-child {
             border-radius: 10px 0 0 10px;
             color: #7B27FF !important;
             font-size: 17px !important;
         }
-        .total-table tr:last-child .cur, #items-list .total-table tr:last-child .cur { color: #A0A2B1; }
+        #items-list > table:nth-of-type(n+2) tr:last-child .cur,
+        #items-list table.total-table:not(:first-of-type) tr:last-child .cur { color: #A0A2B1; }
         .totals-clear { clear: both; height: 1px; font-size: 1px; line-height: 1px; }
+
+        /* Daftra's per-column summary row under the items (0.00 / 0 / 0.00 when the account
+           has no per-column sums to show). Uncomment to hide it. */
+        /* #items-list > table:nth-of-type(1) tfoot { display: none !important; } */
 
         /* ---------- Terms & technical notes ---------- */
         .info-grid {
@@ -420,23 +434,11 @@
             @page { size: A4 portrait; margin: 7mm 8mm 16mm; }
         }
 
-        /* ----------------------------------------------------------------------
-           ALTERNATIVE COLUMN WIDTHS
-           Use these instead of the block above if the item table is still
-           item | description | image | unit price | qty | total (i.e. it shows a
-           picture column and no "#" column):
-
-           …th:nth-child(1) { width: 11% !important; }   item / code
-           …th:nth-child(2) { width: 37% !important; }   description
-           …th:nth-child(3) { width: 12% !important; }   image
-           …th:nth-child(4) { width: 15% !important; }   unit price
-           …th:nth-child(5) { width: 10% !important; }   quantity
-           …th:nth-child(6) { width: 15% !important; }   total
-        ---------------------------------------------------------------------- */
+        /* Product image column — bounded so it cannot widen and squeeze the description. */
         #items-list td img, .listing-table td img {
             display: block !important;
-            max-width: 50px !important;
-            max-height: 50px !important;
+            max-width: 46px !important;
+            max-height: 46px !important;
             width: auto !important;
             height: auto !important;
             margin: 0 auto !important;
@@ -451,6 +453,11 @@
         <div class="document-header">
             <div class="header-logo">
                 <img style="vertical-align:top;" id="logo" class="editable-area" src="{%logo%}" width="{%logo-width%}" height="{%logo-height%}" />
+            </div>
+            <!-- Remove this cell if the logo uploaded in Daftra already includes the name. -->
+            <div class="header-brand">
+                <div class="brand-ar">شركة متقنون تك للتجارة</div>
+                <div class="brand-en">MOTQINON TECH</div>
             </div>
             <div class="header-title">
                 <div class="arabic-title">عرض سعر</div>

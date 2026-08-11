@@ -28,11 +28,18 @@ Paste each file's contents into the matching box in Daftra's template editor.
 
 The logo is **not** hardcoded — it still renders through `{%logo%}` / `{%logo-width%}` /
 `{%logo-height%}`, so it keeps coming from the website's template settings. It sits at the
-top right; "عرض سعر / QUOTATION" sits at the top left, with a black rule beneath both.
+top right, the company name beside it, and "عرض سعر / QUOTATION" at the top left, with a
+black rule beneath all three.
+
+The logo is capped at 58 px tall / 190 px wide, which suits a square mark. **If the logo
+uploaded in Daftra already contains the company name, delete the `.header-brand` block from
+the body** — otherwise the name prints twice.
 
 ## Layout
 
-1. **Header** — logo (right) · عرض سعر / QUOTATION (left) · black rule.
+1. **Header** — logo (right) · company name (beside it) · عرض سعر / QUOTATION (left) · black
+   rule. The name is set as text in `.header-brand` so the header reads correctly even when
+   the uploaded logo is only the mark, or fails to load.
 2. **Meta cards** — rounded, bordered cards with a small grey label over a bold value:
    - Row 1: `{%invoice_number%}` (violet) · `{%invoice_date%}` · validity.
    - Row 2: `{%client_info%}`, plus the shipping card when Daftra reveals it.
@@ -57,12 +64,20 @@ top right; "عرض سعر / QUOTATION" sits at the top left, with a black rule b
 - **Terms and technical notes** are static company boilerplate in `template.html`. Per-quote
   notes typed into Daftra still print, via `{%footer%}` in the borderless `.extra-notes`
   block underneath the two panels — it stays invisible when the field is empty.
-- **Item columns** are sized for `# | code | description | unit price | qty | total`. If the
-  account's item table still emits an image column instead of `#`, the alternative widths are
-  in a comment at the bottom of the stylesheet.
-- **Item code pill** — the black rounded badge applies when Daftra wraps the code in a
-  `<span>`. When it emits bare text the cell falls back to bold monospace, which still reads
-  correctly; no layout breaks either way.
+- **Item columns** are not pinned to fixed widths. `table-layout: auto` sizes each column to
+  its content, so whichever columns are switched on in Daftra's item-table settings, the row
+  stays organised — the description simply absorbs the slack. The mockup's `#` and `الكود`
+  columns are Daftra settings, not template markup; today the account emits
+  `البند/الوصف | صورة المنتج | سعر الوحدة | الكمية | المجموع`.
+- **Items vs totals** are told apart by position (`:nth-of-type`), never by class. The account
+  puts totals-like classes on the *items* table too, and matching those shrank it to half
+  width and forced every cell onto a single overflowing line.
+- **Per-column summary row** — Daftra prints a `tfoot` row of column sums beneath the items
+  (`0.00 / 0 / 0.00` when there is nothing to sum). A commented-out one-liner in the
+  stylesheet hides it: search for `tfoot { display: none`.
+- **Item code pill** — the black rounded badge renders for `<span class="code-badge">DL-711</span>`
+  typed into an item's description, and for a code column when Daftra wraps its value in a
+  `<span>`. Bare text falls back to bold monospace; no layout breaks either way.
 - **English sub-line** in a description renders muted, LTR and left-aligned when wrapped in
   `<small>` or `<span class="en">`.
 - **Free items** — `<span class="free-value">FREE</span>` renders the violet pill and

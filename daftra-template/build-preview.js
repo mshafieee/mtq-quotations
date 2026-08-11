@@ -14,13 +14,16 @@ const stickyFooter = fs.readFileSync(path.join(dir, 'footer.html'), 'utf8');
 
 /* Inline SVG stand-in for the logo Daftra serves from template settings. */
 const logo = 'data:image/svg+xml;base64,' + Buffer.from(`
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60" viewBox="0 0 400 60">
-  <rect x="352" y="7" width="46" height="46" rx="11" fill="#01040B"/>
-  <rect x="367" y="22" width="16" height="16" rx="3" fill="#7B27FF"/>
-  <text x="338" y="31" text-anchor="end" font-family="Tahoma, Arial" font-size="20"
-        font-weight="bold" fill="#01040B">&#x634;&#x631;&#x643;&#x629; &#x645;&#x62A;&#x642;&#x646;&#x648;&#x646; &#x62A;&#x643; &#x644;&#x644;&#x62A;&#x62C;&#x627;&#x631;&#x629;</text>
-  <text x="338" y="47" text-anchor="end" font-family="Arial" font-size="10"
-        letter-spacing="3" fill="#A0A2B1">MOTQINON TECH</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
+  <rect x="0" y="0" width="56" height="56" rx="13" fill="#01040B"/>
+  <rect x="18" y="18" width="20" height="20" rx="4" fill="#7B27FF"/>
+</svg>`).toString('base64');
+
+/* Stand-in for the product thumbnail Daftra puts in the image column. */
+const thumb = 'data:image/svg+xml;base64,' + Buffer.from(`
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60">
+  <rect width="60" height="60" rx="6" fill="#EFEFEF"/>
+  <rect x="10" y="16" width="40" height="26" rx="3" fill="#A0A2B1"/>
 </svg>`).toString('base64');
 
 /* {%custom_fields%} — Daftra emits a plain table of label/value pairs. */
@@ -40,6 +43,9 @@ const money = (v) => `${v} <span class="cur">ر.س</span>`;
 const was = (v) => `<span class="original-price">${v}</span>`;
 const free = '<span class="free-value">FREE</span>';
 
+/* Column set actually emitted by the account today:
+   البند/الوصف | صورة المنتج | سعر الوحدة | الكمية | المجموع, plus a per-column summary
+   row in <tfoot>, then the real totals as a separate table.class="total-table". */
 const rows = [
   ['1', 'DL-711',
     'قفل فندقي إلكتروني ببطاقات RF ام1 ار اف، يدعم القراءة والكتابة والتشفير، يعمل بـ 4 بطاريات AAA، إنذار انخفاض البطارية.',
@@ -61,24 +67,26 @@ const rows = [
 ];
 
 const itemsList = `
-<table class="listing-table" cellpadding="0" cellspacing="0">
+<table class="listing-table total-table" cellpadding="0" cellspacing="0">
   <thead>
     <tr>
-      <th>#</th><th>الكود</th><th>Description / الوصف</th>
-      <th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th>
+      <th>البند / الوصف</th><th>صورة المنتج</th>
+      <th>سعر الوحدة</th><th>الكمية</th><th>المجموع</th>
     </tr>
   </thead>
   <tbody>
     ${rows.map(([n, code, ar, en, unit, qty, total]) => `
     <tr>
-      <td>${n}</td>
-      <td class="item-code"><span>${code}</span></td>
-      <td class="item-description">${ar}<small>${en}</small></td>
+      <td class="item-description"><span class="code-badge">${code}</span> ${ar}<small>${en}</small></td>
+      <td><img src="${thumb}" alt="" /></td>
       <td>${unit}</td>
       <td>${qty}</td>
       <td>${total}</td>
     </tr>`).join('')}
   </tbody>
+  <tfoot>
+    <tr><td></td><td></td><td>0.00</td><td>0</td><td>0.00</td></tr>
+  </tfoot>
 </table>
 <table class="total-table" cellpadding="0" cellspacing="0">
   <tr><td>المجموع / Subtotal</td><td>178,000 <span class="cur">ر.س</span></td></tr>
