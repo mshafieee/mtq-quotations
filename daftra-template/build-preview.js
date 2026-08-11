@@ -106,6 +106,7 @@ const values = {
   '{%client_address%}': 'مكة المكرمة – حي العوالي',
   '{%label_ship%}': 'الشحن إلى',
   '{%ship_info%}': '',
+  '{%invoice_notes%}': 'توريد وتركيب بدون تخريم الأبواب.',
   '{%custom_fields%}': customFields,
   '{%items_list%}': itemsList,
   '{%footer%}': '',

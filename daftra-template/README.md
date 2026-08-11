@@ -90,9 +90,13 @@ itself, not here.
   panel). Swap in a placeholder there if the account exposes one for it.
 - **CR No. / VAT No.** are hardcoded (`4031318733`, `312772334500003`) — they are company
   constants, not per-quote values.
-- **Terms and conditions** are static company boilerplate in `template.html`. Per-quote notes
-  typed into Daftra still print, via `{%footer%}` in the borderless `.extra-notes` block
-  underneath the panel — it stays invisible when the field is empty.
+- **Terms and conditions** are static company boilerplate in `template.html`, with one
+  exception: the scope-of-supply line reads `نطاق العرض: {%invoice_notes%}`, so it comes from
+  the quotation's Notes field and can differ per quote. It carries no trailing full stop — the
+  typed value supplies its own punctuation, and an empty Notes field leaves the label bare.
+- **`{%footer%}` still renders** in the borderless `.extra-notes` block under the panels, and
+  stays invisible when empty. If it turns out to hold the same text as `{%invoice_notes%}`, the
+  value will print twice on the page — drop one of the two.
 - **The footer is self-contained.** wkhtmltopdf renders the footer section as its own
   document, inheriting nothing from the HTML section — so `footer.html` carries its own Cairo
   `@import`, the full Arabic-capable font stack, *and* its own margin reset. Without the font

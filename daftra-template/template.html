@@ -592,7 +592,10 @@
                             <li>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</li>
                             <li>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</li>
                             <li>صلاحية العرض: 10 أيام من تاريخه.</li>
-                            <li>نطاق العرض: توريد فقط.</li>
+                            <!-- Scope of supply varies per quotation, so it is taken from the
+                                 document's Notes field. No trailing full stop here — the typed
+                                 value carries its own punctuation. -->
+                            <li>نطاق العرض: {%invoice_notes%}</li>
                         </ul>
                     </div>
                 </div>
