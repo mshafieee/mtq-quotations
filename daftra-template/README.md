@@ -9,7 +9,7 @@ brand identity (the previous orange `#ef5b00` is gone entirely).
 | --- | --- | --- |
 | Black | `#01040B` | table header, grand-total bar, sticky footer, body text |
 | Violet | `#7B27FF` | "عرض سعر", quote number, FREE pills, bullets, panel markers |
-| Cool grey | `#A0A2B1` | card labels, "QUOTATION", footer cities |
+| Cool grey | `#A0A2B1` | card labels, English half of bilingual labels |
 | Grey | `#A2A2A2` | English item descriptions, struck-through list prices, row numbers |
 | Light | `#EFEFEF` | row separators |
 
@@ -39,8 +39,8 @@ documents carry the same sticky bar.
 
 The logo is **not** hardcoded — it still renders through `{%logo%}` / `{%logo-width%}` /
 `{%logo-height%}`, so it keeps coming from the website's template settings. It sits at the
-top right, the company name beside it, and "عرض سعر / QUOTATION" at the top left, with a
-black rule beneath all three.
+top right, the Arabic company name beside it, and "عرض سعر" at the top left, with a black rule
+beneath all three.
 
 The logo is capped at 58 px tall / 190 px wide, which suits a square mark. **If the logo
 uploaded in Daftra already contains the company name, delete the `.header-brand` block from
@@ -48,9 +48,10 @@ the body** — otherwise the name prints twice.
 
 ## Layout
 
-1. **Header** — logo (right) · company name (beside it) · عرض سعر / QUOTATION (left) · black
-   rule. The name is set as text in `.header-brand` so the header reads correctly even when
-   the uploaded logo is only the mark, or fails to load.
+1. **Header** — logo (right) · company name in Arabic (beside it) · عرض سعر (left) · black
+   rule. Arabic only: the English company name and the word QUOTATION are both gone. The name
+   is set as text in `.header-brand` so the header reads correctly even when the uploaded logo
+   is only the mark, or fails to load.
 2. **Meta cards** — rounded, bordered cards with a small grey label over a bold value:
    - Row 1: `{%invoice_number%}` (violet) · `{%invoice_date%}` · validity.
    - Row 2: `{%client_info%}`, plus the shipping card when Daftra reveals it.
@@ -62,21 +63,23 @@ the body** — otherwise the name prints twice.
    rows, and hairline separators.
 4. **Totals** — Daftra's totals table, pinned to the right at 50 % width; subtotal and VAT on
    a tinted panel, grand total on a black rounded bar with the figure in white.
-5. **Terms & technical notes** — two static panels.
+5. **Terms & conditions** — one static panel, sized to its own content rather than to the
+   sheet (`display: table; width: auto`), sitting at the right edge under the totals. The
+   technical-notes panel has been removed.
 6. **Bank details** — Al Rajhi and SAB IBANs.
-7. **Sticky footer** — black bar: company (right) · cities (centre) · phone (left).
+7. **Sticky footer** — black bar: company (right) · الإدارة + phone (left).
 
 ## Editing text from Daftra's template editor
 
 Every hardcoded string carries a unique `id` and `class="editable-area"`, so it can be edited
-in place on the website rather than by re-pasting HTML: the company name and `MOTQINON TECH`,
-the `عرض سعر` / `QUOTATION` title, all six meta-card labels, the validity value, the CR and VAT
-numbers, both panel headings, both bullet lists, all four bank lines, and the three strings in
-the sticky footer.
+in place on the website rather than by re-pasting HTML: the company name, the `عرض سعر` title,
+all seven meta-card labels, the validity value, the CR and VAT numbers, the terms heading and
+its bullet list, all four bank lines, and `الإدارة` plus the company name and phone in the
+sticky footer.
 
-The bullet lists are `<ul>` elements whose diamond comes from a `:before` pseudo-element, so a
-line added or removed in the editor picks up (or drops) its marker automatically — there is no
-inner markup for the editor to preserve.
+The terms list is a `<ul>` whose diamond comes from a `:before` pseudo-element, so a line added
+or removed in the editor picks up (or drops) its marker automatically — there is no inner markup
+for the editor to preserve.
 
 Anything wrapped in `{%…%}` is quotation data, not template text; it is edited on the quotation
 itself, not here.
@@ -87,9 +90,14 @@ itself, not here.
   panel). Swap in a placeholder there if the account exposes one for it.
 - **CR No. / VAT No.** are hardcoded (`4031318733`, `312772334500003`) — they are company
   constants, not per-quote values.
-- **Terms and technical notes** are static company boilerplate in `template.html`. Per-quote
-  notes typed into Daftra still print, via `{%footer%}` in the borderless `.extra-notes`
-  block underneath the two panels — it stays invisible when the field is empty.
+- **Terms and conditions** are static company boilerplate in `template.html`. Per-quote notes
+  typed into Daftra still print, via `{%footer%}` in the borderless `.extra-notes` block
+  underneath the panel — it stays invisible when the field is empty.
+- **The footer's `الإدارة` and phone are inline-blocks on purpose.** As plain inline text the
+  digits join the Arabic run beside them and bidi reorders the pair, printing the number to the
+  *left* of `الإدارة`; `unicode-bidi: embed` does not help, because the embedding still nests
+  inside that run. As inline-blocks both are neutral objects and stay in source order.
+  `footer.html` is shared with the contract template, so this change reaches both.
 - **Item columns** are not pinned to fixed widths. `table-layout: auto` sizes each column to
   its content, so whichever columns are switched on in Daftra's item-table settings, the row
   stays organised — the description simply absorbs the slack. The mockup's `#` and `الكود`

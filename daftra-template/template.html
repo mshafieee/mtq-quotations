@@ -27,7 +27,7 @@
         }
         /* Latin runs — numbers, IBANs, English descriptions — stay on the brand's Latin face
            rather than borrowing the Arabic font's Latin glyphs. */
-        .brand-en, .header-title .english-title, .bank-iban, .meta-value.ltr,
+        .bank-iban, .meta-value.ltr,
         #items-list td.item-description small, #items-list td.item-description .en,
         #items-list td.description small, #items-list td.description .en,
         #items-list .code-badge, #items-list td.item-code, #items-list td.code {
@@ -67,29 +67,12 @@
         /* Delete this cell from the body if the uploaded logo already carries the name. */
         .header-brand { width: 1px; padding-right: 12px; text-align: right; white-space: nowrap; }
         .brand-ar { color: #01040B; font-size: 20px; font-weight: bold; line-height: 1.2; }
-        .brand-en {
-            color: #A0A2B1;
-            direction: ltr;
-            text-align: right;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 3px;
-        }
         .header-title { text-align: left; }
         .header-title .arabic-title {
             color: #7B27FF;
             font-size: 27px;
             font-weight: bold;
             line-height: 1.1;
-        }
-        .header-title .english-title {
-            margin-top: 1px;
-            color: #A0A2B1;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            direction: ltr;
-            text-align: left;
         }
         .rule-black { height: 3px; margin: 9px 0 14px; background: #01040B; }
 
@@ -368,25 +351,22 @@
            has no per-column sums to show). Uncomment to hide it. */
         /* #items-list > table:nth-of-type(1) tfoot { display: none !important; } */
 
-        /* ---------- Terms & technical notes ---------- */
-        .info-grid {
-            display: table;
-            width: 100%;
-            table-layout: fixed;
-            margin-top: 14px;
-            direction: rtl;
-            page-break-inside: avoid;
-        }
-        .info-cell { display: table-cell; vertical-align: top; }
+        /* ---------- Terms & conditions ----------
+           display:table with width:auto shrinks the panel to its longest line instead of
+           stretching it across the sheet; max-width keeps an over-long line wrapping inside
+           the page rather than overflowing it. It sits at the right — the RTL start edge. */
         .info-panel {
-            margin-left: 12px;
+            display: table;
+            width: auto;
+            max-width: 100%;
+            margin: 14px 0 0 0;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
             background: #ffffff;
             overflow: hidden;
+            direction: rtl;
             page-break-inside: avoid;
         }
-        .info-cell.last .info-panel { margin-left: 0; }
         .info-head {
             padding: 6px 11px;
             border-bottom: 1px solid #E4E4EA;
@@ -480,11 +460,9 @@
             <!-- Remove this cell if the logo uploaded in Daftra already includes the name. -->
             <div class="header-brand">
                 <div id="brand_ar" class="brand-ar editable-area">شركة متقنون تك للتجارة</div>
-                <div id="brand_en" class="brand-en editable-area">MOTQINON TECH</div>
             </div>
             <div class="header-title">
                 <div id="doc_title_ar" class="arabic-title editable-area">عرض سعر</div>
-                <div id="doc_title_en" class="english-title editable-area">QUOTATION</div>
             </div>
         </div>
 
@@ -559,36 +537,17 @@
         <div id="items-list">{%items_list%}</div>
         <div class="totals-clear"></div>
 
-        <div class="info-grid">
-            <div class="info-cell">
-                <div class="info-panel">
-                    <div class="info-head"><span class="sq"></span><span id="terms_head" class="editable-area">الشروط والأحكام / TERMS &amp; CONDITIONS</span></div>
-                    <div class="info-body">
-                        <ul id="terms_body" class="editable-area">
-                            <li>الدفعات: 50% مقدمة عند التوقيع، 40% قبل التوريد، 10% بعد التركيب وقبل البرمجة.</li>
-                            <li>مدة التوريد: 45-60 يوم عمل من تاريخ التعميد واستلام الدفعة الأولى واعتماد التفاصيل.</li>
-                            <li>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</li>
-                            <li>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</li>
-                            <li>صلاحية العرض: 10 أيام من تاريخه.</li>
-                            <li>نطاق العرض: توريد فقط.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="info-cell last">
-                <div class="info-panel">
-                    <div class="info-head"><span class="sq"></span><span id="notes_head" class="editable-area">الملاحظات الفنية / TECHNICAL NOTES</span></div>
-                    <div class="info-body">
-                        <ul id="notes_body" class="editable-area">
-                            <li>تعتمد على تقنيات لاسلكية عالية الكفاءة (غير مرتبطة بالواي فاي) لضمان استمرار العمل.</li>
-                            <li>توفير نقطة كهرباء و (Data) لوحدة التحكم الرئيسية (Gateway).</li>
-                            <li>توفير نقطة كهرباء لوحدة التحكم بالمكيف ضمن نطاق الغرفة المباشرة.</li>
-                            <li>نظام إنتركوم مرئي حديث بتقنية TCP/IP.</li>
-                            <li>يتطلب تشغيل نظام الإنتركوم كابلات CAT6 ومبدلات (Switches) مخصصة.</li>
-                            <li>تعتمد لوحة الجرس الخارجية على توصيل 220V مباشر ونظام جرس داخلي.</li>
-                        </ul>
-                    </div>
-                </div>
+        <div class="info-panel">
+            <div class="info-head"><span class="sq"></span><span id="terms_head" class="editable-area">الشروط والأحكام / TERMS &amp; CONDITIONS</span></div>
+            <div class="info-body">
+                <ul id="terms_body" class="editable-area">
+                    <li>الدفعات: 50% مقدمة عند التوقيع، 40% قبل التوريد، 10% بعد التركيب وقبل البرمجة.</li>
+                    <li>مدة التوريد: 45-60 يوم عمل من تاريخ التعميد واستلام الدفعة الأولى واعتماد التفاصيل.</li>
+                    <li>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</li>
+                    <li>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</li>
+                    <li>صلاحية العرض: 10 أيام من تاريخه.</li>
+                    <li>نطاق العرض: توريد فقط.</li>
+                </ul>
             </div>
         </div>
 
