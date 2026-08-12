@@ -69,10 +69,11 @@ the body** — otherwise the name prints twice.
 4. **Totals** — Daftra's totals table, pushed to the **left** at 50 % width so it sits under
    the price columns; subtotal and VAT on a tinted panel, grand total on a black rounded bar
    with the figure in white.
-5. **Bottom row** — two columns. The right one carries the client signature card
-   (`توقيع وختم العميل` and a rule to sign on, no name printed) over the الحسابات البنكية panel,
-   Al Rajhi first then SAB. The left one carries terms & conditions, directly under the totals.
-   The technical-notes panel has been removed.
+5. **Bottom block** — a two-column, two-row table. The first row holds the client signature
+   card alone (`توقيع وختم العميل` and a rule to sign on, no name printed). The second row puts
+   the الحسابات البنكية panel — Al Rajhi first, then SAB — opposite terms & conditions, so the
+   two start level whatever height the signature card ends up. The technical-notes panel has
+   been removed.
 6. **Sticky footer** — black bar: company (right) · phone + الإدارة (left).
 
 ## Editing text from Daftra's template editor

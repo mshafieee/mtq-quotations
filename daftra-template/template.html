@@ -397,6 +397,9 @@
             direction: rtl;
             page-break-inside: avoid;
         }
+        /* Two rows: the signature sits alone in the first, so the bank panel and the terms
+           panel start level in the second whatever height the signature card ends up. */
+        .bottom-row { display: table-row; }
         .bottom-cell { display: table-cell; width: 50%; vertical-align: top; }
         /* No explicit width: as a block it fills the cell minus its margin, which is what makes
            the 12px gutter between the two columns. width:100% would cancel that. */
@@ -584,43 +587,50 @@
         <!-- RTL: the first cell is the right-hand column. The client signature heads it with the
              bank accounts beneath; terms & conditions fill the left column, under the totals. -->
         <div class="bottom-grid">
-            <div class="bottom-cell">
-                <!-- Client acceptance: the label, then a rule to sign and stamp on. -->
-                <div class="sign-card">
-                    <div class="sign-row">
-                        <span id="sign_label" class="sign-label editable-area">توقيع وختم العميل</span>
-                        <span class="sign-rule"></span>
-                    </div>
-                </div>
-                <div class="info-panel">
-                    <div class="info-head"><span class="sq"></span><span id="banks_head" class="editable-area">الحسابات البنكية / BANK ACCOUNTS</span></div>
-                    <div class="info-body">
-                        <div class="bank-line">
-                            <div id="bank1_name" class="bank-name editable-area">مصرف الراجحي</div>
-                            <div id="bank1_iban" class="bank-iban editable-area">SA56 8000 0201 6080 1660 8470</div>
-                        </div>
-                        <div class="bank-line last">
-                            <div id="bank2_name" class="bank-name editable-area">البنك الأول (SAB)</div>
-                            <div id="bank2_iban" class="bank-iban editable-area">SA95 4500 0000 0343 6186 5001</div>
+            <div class="bottom-row">
+                <div class="bottom-cell">
+                    <!-- Client acceptance: the label, then a rule to sign and stamp on. -->
+                    <div class="sign-card">
+                        <div class="sign-row">
+                            <span id="sign_label" class="sign-label editable-area">توقيع وختم العميل</span>
+                            <span class="sign-rule"></span>
                         </div>
                     </div>
                 </div>
+                <div class="bottom-cell last"></div>
             </div>
-            <div class="bottom-cell last">
-                <div class="info-panel">
-                    <div class="info-head"><span class="sq"></span><span id="terms_head" class="editable-area">الشروط والأحكام / TERMS &amp; CONDITIONS</span></div>
-                    <div class="info-body">
-                        <ul id="terms_body" class="editable-area">
-                            <li>الدفعات: 50% مقدمة عند التوقيع، 40% قبل التوريد، 10% بعد التركيب وقبل البرمجة.</li>
-                            <li>مدة التوريد: 45-60 يوم عمل من تاريخ التعميد واستلام الدفعة الأولى واعتماد التفاصيل.</li>
-                            <li>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</li>
-                            <li>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</li>
-                            <li>صلاحية العرض: 10 أيام من تاريخه.</li>
-                            <!-- Scope of supply varies per quotation, so it is taken from the
-                                 document's Notes field. No trailing full stop here — the typed
-                                 value carries its own punctuation. -->
-                            <li>نطاق العرض: {%invoice_notes%}</li>
-                        </ul>
+            <div class="bottom-row">
+                <div class="bottom-cell">
+                    <div class="info-panel">
+                        <div class="info-head"><span class="sq"></span><span id="banks_head" class="editable-area">الحسابات البنكية / BANK ACCOUNTS</span></div>
+                        <div class="info-body">
+                            <div class="bank-line">
+                                <div id="bank1_name" class="bank-name editable-area">مصرف الراجحي</div>
+                                <div id="bank1_iban" class="bank-iban editable-area">SA56 8000 0201 6080 1660 8470</div>
+                            </div>
+                            <div class="bank-line last">
+                                <div id="bank2_name" class="bank-name editable-area">البنك الأول (SAB)</div>
+                                <div id="bank2_iban" class="bank-iban editable-area">SA95 4500 0000 0343 6186 5001</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-cell last">
+                    <div class="info-panel">
+                        <div class="info-head"><span class="sq"></span><span id="terms_head" class="editable-area">الشروط والأحكام / TERMS &amp; CONDITIONS</span></div>
+                        <div class="info-body">
+                            <ul id="terms_body" class="editable-area">
+                                <li>الدفعات: 50% مقدمة عند التوقيع، 40% قبل التوريد، 10% بعد التركيب وقبل البرمجة.</li>
+                                <li>مدة التوريد: 45-60 يوم عمل من تاريخ التعميد واستلام الدفعة الأولى واعتماد التفاصيل.</li>
+                                <li>الأسعار والكميات تقديرية وتُعدّل بعد المعاينة الفعلية للموقع.</li>
+                                <li>الضمان: سنتان ضد عيوب المصنعية وقطع الغيار متوفرة لعشر سنوات.</li>
+                                <li>صلاحية العرض: 10 أيام من تاريخه.</li>
+                                <!-- Scope of supply varies per quotation, so it is taken from the
+                                     document's Notes field. No trailing full stop here — the typed
+                                     value carries its own punctuation. -->
+                                <li>نطاق العرض: {%invoice_notes%}</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
