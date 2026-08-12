@@ -107,6 +107,7 @@ const values = {
   '{%label_ship%}': 'الشحن إلى',
   '{%ship_info%}': '',
   '{%staff_member_name%}': 'بشار عادل',
+  '{%staff_member_phone%}': '+966 55 123 4567',
   '{%invoice_notes%}': 'توريد وتركيب بدون تخريم الأبواب.',
   '{%custom_fields%}': customFields,
   '{%items_list%}': itemsList,
