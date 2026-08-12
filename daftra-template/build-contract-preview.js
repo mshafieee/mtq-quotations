@@ -86,7 +86,11 @@ const itemsList = `
   <tr><td>الإجمالي شامل الضريبة / Grand Total</td><td>13,248.33 <span class="cur">ر.س</span></td></tr>
 </table>`;
 
-const notes = `<p>إجمالي قيمة العقد شامل ضريبة القيمة المضافة: مبلغ وقدره (13,248.33 ريال سعودي) فقط ثلاثة عشر ألفًا ومائتان وثمانية وأربعون ريالًا سعوديًا وثلاثة وثلاثون هللة لا غير.</p>`;
+/* {%invoice_notes%} — the scope of works, typed per contract, printed inside المادة (3). */
+const invoiceNotes = `توريد وتركيب وبرمجة نظام انتركوم فيديو لعدد 18 وحدة سكنية، شاملًا الوحدة الخارجية والشاشات الداخلية ولوحات الأبواب والأقفال المغناطيسية وأزرار الخروج وسويتش الشبكة، مع تمديد الكابلات وربط النظام وتشغيله واختباره وتسليمه جاهزًا للعمل، دون أعمال دهان أو ترميم للجدران.`;
+
+/* {%footer%} — a per-contract note printed just above the signatures. */
+const notes = `<p>يتم التسليم على دفعتين حسب جاهزية الموقع، ويلتزم الطرف الأول بتوفير تغذية كهربائية 220 فولت لكل نقطة قبل موعد التركيب.</p>`;
 
 const values = {
   '{%logo%}': logo,
@@ -100,6 +104,7 @@ const values = {
   '{%client_mobile%}': '0553710221',
   '{%client_bn2%}': '7011019275',
   '{%custom_fields%}': customFields,
+  '{%invoice_notes%}': invoiceNotes,
   '{%items_list%}': itemsList,
   '{%footer%}': notes,
   '{%html_sticky_footer%}': stickyFooter,

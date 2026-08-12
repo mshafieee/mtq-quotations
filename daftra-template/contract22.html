@@ -234,6 +234,11 @@
             list-style: none;
         }
         .art-body li:last-child { margin-bottom: 0; }
+        /* Notes pulled into an article body. Collapses completely when the field is empty, so the
+           article reads as though the block were not there. */
+        .art-notes { margin-top: 4px; }
+        .art-notes:empty { display: none; margin: 0; }
+        .art-notes p:last-child { margin-bottom: 0; }
         /* The marker is a pseudo-element, so a line added in Daftra's editor gets its diamond
            without the editor having to preserve any inner markup. */
         .art-body li:before {
@@ -665,6 +670,10 @@
             <div class="art-head"><span class="sq"></span><span class="art-no">المادة (3):</span> <span id="art3_head" class="art-title editable-area">نطاق الأعمال</span></div>
             <div class="art-body">
                 <p class="editable-area" id="art3_body">يشمل هذا العقد توريد وتركيب المواد والأنظمة الواردة فيه وفقًا للمواصفات الفنية المعتمدة وجداول الكميات المرفقة.</p>
+                <!-- The scope itself is per-contract, so it comes from the contract's Notes field
+                     in Daftra. The sentence above stands on its own, so an empty Notes field costs
+                     nothing; delete it from the editor to let the notes carry the article alone. -->
+                <div id="art3_notes" class="art-notes">{%invoice_notes%}</div>
             </div>
         </div>
 
@@ -745,8 +754,9 @@
             </div>
         </div>
 
-        <!-- Per-contract notes typed into Daftra. Use this field for anything specific to one
-             contract — the total in words (تفقيط), an agreed exception, a delivery address. -->
+        <!-- {%footer%} — anything to state just above the signatures: an agreed exception, a
+             delivery address. Invisible when empty. Note that some accounts map this to the same
+             field as {%invoice_notes%}; if the scope prints twice, delete one of the two. -->
         <div class="extra-notes">
             <div id="footer" class="editable-area">{%footer%}</div>
         </div>
