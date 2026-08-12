@@ -76,23 +76,29 @@
         }
         .rule-black { height: 3px; margin: 9px 0 14px; background: #01040B; }
 
-        /* ---------- Meta cards (quote no / date / client / custom fields …) ---------- */
+        /* ---------- Meta cards (quote no / date / client / custom fields …) ----------
+           The cell IS the card: table cells in a row are always the same height, so no card can
+           end up shorter than its neighbour however many lines its value runs to. The gutter is
+           border-spacing, and the row's negative margin pulls the outer edges back into line —
+           the same arrangement {%custom_fields%} gets below. */
         .meta-row {
             display: table;
             width: 100%;
             table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 7px 0;
+            margin: 0 -7px 7px;
             direction: rtl;
         }
-        .meta-cell { display: table-cell; vertical-align: top; }
-        .meta-card {
-            margin: 0 0 7px 7px;
+        .meta-cell {
+            display: table-cell;
+            height: 52px;
             padding: 5px 11px 6px;
-            min-height: 38px;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
             background: #FBFBFD;
+            vertical-align: top;
         }
-        .meta-cell.last .meta-card { margin-left: 0; }
         .meta-label {
             color: #A0A2B1;
             font-size: 8px;
@@ -135,7 +141,7 @@
         #custom-fields tr { page-break-inside: avoid; }
         #custom-fields td {
             padding: 5px 11px 6px !important;
-            min-height: 38px;
+            min-height: 52px;
             border: 1px solid #E4E4EA !important;
             border-radius: 10px;
             background: #FBFBFD !important;
@@ -392,8 +398,9 @@
             page-break-inside: avoid;
         }
         .bottom-cell { display: table-cell; width: 50%; vertical-align: top; }
+        /* No explicit width: as a block it fills the cell minus its margin, which is what makes
+           the 12px gutter between the two columns. width:100% would cancel that. */
         .info-panel {
-            width: 100%;
             margin-left: 12px;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
@@ -469,18 +476,10 @@
         }
 
         /* ---------- Client signature ----------
-           A label with a rule running off to the left, inside the same rounded card the meta
-           fields use, in the same two-cell row; the facing cell stays empty. */
-        .sign-grid {
-            display: table;
-            width: 100%;
-            table-layout: fixed;
-            margin-top: 12px;
-            direction: rtl;
-            page-break-inside: avoid;
-        }
-        .sign-cell { display: table-cell; width: 50%; vertical-align: top; }
+           A label with a rule running off to the left, in the same rounded card the meta fields
+           use. It heads the right-hand column of the bottom row, above the bank accounts. */
         .sign-card {
+            margin: 0 0 10px 12px;
             padding: 10px 12px 12px;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
@@ -504,8 +503,8 @@
             html, body { min-height: 0; }
             body { background: #ffffff !important; }
             .invoice-wrap { width: 100%; max-width: none; min-height: 0; padding: 0; }
-            .sign-grid { margin-bottom: 0; }
-            @page { size: A4 portrait; margin: 7mm 8mm 20mm; }
+            .bottom-grid { margin-bottom: 0; }
+            @page { size: A4 portrait; margin: 7mm 8mm 26mm; }
         }
 
         /* Product image column — bounded so it cannot widen and squeeze the description. */
@@ -541,56 +540,28 @@
 
         <div class="meta-row">
             <div class="meta-cell">
-                <div class="meta-card">
-                    <div id="label_quote_no" class="meta-label editable-area">رقم العرض / QUOTE No.</div>
-                    <div class="meta-value accent ltr">{%invoice_number%}</div>
-                </div>
+                <div id="label_quote_no" class="meta-label editable-area">رقم العرض / QUOTE No.</div>
+                <div class="meta-value accent ltr">{%invoice_number%}</div>
             </div>
             <div class="meta-cell">
-                <div class="meta-card">
-                    <div class="meta-label"><span id="label_date" class="editable-area">{%label_date%}</span> / <span id="label_date_en" class="editable-area">DATE</span></div>
-                    <div class="meta-value ltr">{%invoice_date%}</div>
-                </div>
+                <div class="meta-label"><span id="label_date" class="editable-area">{%label_date%}</span> / <span id="label_date_en" class="editable-area">DATE</span></div>
+                <div class="meta-value ltr">{%invoice_date%}</div>
             </div>
-            <div class="meta-cell last">
-                <div class="meta-card">
-                    <div id="label_valid" class="meta-label editable-area">صلاحية العرض / VALID</div>
-                    <div id="value_valid" class="meta-value editable-area">10 أيام</div>
-                </div>
+            <div class="meta-cell">
+                <div id="label_valid" class="meta-label editable-area">صلاحية العرض / VALID</div>
+                <div id="value_valid" class="meta-value editable-area">10 أيام</div>
             </div>
         </div>
 
         <div class="meta-row">
             <div class="meta-cell">
-                <div class="meta-card">
-                    <div id="label_client" class="meta-label editable-area">اسم العميل / CLIENT</div>
-                    <div class="meta-value">{%client_info%}</div>
-                </div>
+                <div id="label_client" class="meta-label editable-area">اسم العميل / CLIENT</div>
+                <div class="meta-value">{%client_info%}</div>
             </div>
-            <div class="meta-cell last">
-                <div class="meta-card">
-                    <div id="label_address" class="meta-label editable-area">العنوان / ADDRESS</div>
-                    <div class="meta-value">{%client_address%}</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sales rep on the right; the shipping card fills the facing half when Daftra reveals
-             it. The cell is always present so the rep card keeps half width, and the toggle sits
-             on #shipping_options — the card inside — rather than on the cell. -->
-        <div class="meta-row">
             <div class="meta-cell">
-                <div class="meta-card">
-                    <div id="label_staff" class="meta-label editable-area">المندوب المسؤول / SALES REP</div>
-                    <div class="meta-value">{%staff_member_name%}</div>
-                    <div class="meta-sub">{%staff_member_phone%}</div>
-                </div>
-            </div>
-            <div class="meta-cell last">
-                <div class="meta-card" id="shipping_options" style="display:none;">
-                    <div class="meta-label"><span id="label_ship" class="editable-area">{%label_ship%}</span></div>
-                    <div class="meta-value">{%ship_info%}</div>
-                </div>
+                <div id="label_staff" class="meta-label editable-area">المندوب المسؤول / SALES REP</div>
+                <div class="meta-value">{%staff_member_name%}</div>
+                <div class="meta-sub">{%staff_member_phone%}</div>
             </div>
         </div>
 
@@ -598,26 +569,29 @@
 
         <div class="meta-row">
             <div class="meta-cell">
-                <div class="meta-card">
-                    <div id="label_cr" class="meta-label editable-area">السجل التجاري / CR No.</div>
-                    <div id="value_cr" class="meta-value ltr editable-area">4031318733</div>
-                </div>
+                <div id="label_cr" class="meta-label editable-area">السجل التجاري / CR No.</div>
+                <div id="value_cr" class="meta-value ltr editable-area">4031318733</div>
             </div>
-            <div class="meta-cell last">
-                <div class="meta-card">
-                    <div id="label_vat" class="meta-label editable-area">الرقم الضريبي / VAT No.</div>
-                    <div id="value_vat" class="meta-value ltr editable-area">312772334500003</div>
-                </div>
+            <div class="meta-cell">
+                <div id="label_vat" class="meta-label editable-area">الرقم الضريبي / VAT No.</div>
+                <div id="value_vat" class="meta-value ltr editable-area">312772334500003</div>
             </div>
         </div>
 
         <div id="items-list">{%items_list%}</div>
         <div class="totals-clear"></div>
 
-        <!-- RTL: the first cell is the right-hand one. Bank accounts face the terms panel,
-             which lands directly under the totals on the left. -->
+        <!-- RTL: the first cell is the right-hand column. The client signature heads it with the
+             bank accounts beneath; terms & conditions fill the left column, under the totals. -->
         <div class="bottom-grid">
             <div class="bottom-cell">
+                <!-- Client acceptance: the label, then a rule to sign and stamp on. -->
+                <div class="sign-card">
+                    <div class="sign-row">
+                        <span id="sign_label" class="sign-label editable-area">توقيع وختم العميل</span>
+                        <span class="sign-rule"></span>
+                    </div>
+                </div>
                 <div class="info-panel">
                     <div class="info-head"><span class="sq"></span><span id="banks_head" class="editable-area">الحسابات البنكية / BANK ACCOUNTS</span></div>
                     <div class="info-body">
@@ -654,20 +628,6 @@
 
         <div class="extra-notes">
             <div id="footer" class="editable-area">{%footer%}</div>
-        </div>
-
-        <!-- Client acceptance: the label, then a rule to sign and stamp on. Half width, with
-             the facing cell left empty so the block keeps the rhythm of the rows above. -->
-        <div class="sign-grid">
-            <div class="sign-cell">
-                <div class="sign-card">
-                    <div class="sign-row">
-                        <span id="sign_label" class="sign-label editable-area">توقيع وختم العميل</span>
-                        <span class="sign-rule"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="sign-cell last"></div>
         </div>
 
         {%html_sticky_footer%}

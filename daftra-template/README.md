@@ -54,24 +54,26 @@ the body** — otherwise the name prints twice.
    is only the mark, or fails to load.
 2. **Meta cards** — rounded, bordered cards with a small grey label over a bold value:
    - Row 1: `{%invoice_number%}` (violet) · `{%invoice_date%}` · validity.
-   - Row 2: `{%client_info%}` and `{%client_address%}`.
-   - Row 3: `{%staff_member_name%}` over `{%staff_member_phone%}` as المندوب المسؤول, plus the
-     shipping card in the facing half when Daftra reveals it.
-   - Row 4+: `{%custom_fields%}` — Daftra's own table, restyled cell-by-cell into the same
+   - Row 2: `{%client_info%}` facing `{%staff_member_name%}` over `{%staff_member_phone%}`.
+   - Row 3+: `{%custom_fields%}` — Daftra's own table, restyled cell-by-cell into the same
      cards, so Project / Scope / anything else configured picks up the look automatically.
+
+   The cell *is* the card. Table cells in a row are always the same height, so no card can end
+   up shorter than its neighbour however many lines its value runs to; the gutter is
+   `border-spacing` and the row's negative margin pulls the outer edges back into line. There is
+   no client-address card and no shipping card — `{%client_address%}`, `{%label_ship%}` and
+   `{%ship_info%}` are all gone from this template.
    - Last row: CR No. and VAT No.
 3. **Items** — `{%items_list%}` with a black rounded header row, alternating violet-tinted
    rows, and hairline separators.
 4. **Totals** — Daftra's totals table, pushed to the **left** at 50 % width so it sits under
    the price columns; subtotal and VAT on a tinted panel, grand total on a black rounded bar
    with the figure in white.
-5. **Bottom row** — bank accounts (right) facing terms & conditions (left). The terms panel
-   lands directly under the totals; the bank panel is headed الحسابات البنكية with Al Rajhi
-   first, then SAB. The technical-notes panel has been removed.
-6. **Client signature** — a half-width card holding `توقيع وختم العميل` and a rule running off
-   to the left. No name is printed. The facing cell is left empty so the block keeps the page's
-   rhythm.
-7. **Sticky footer** — black bar: company (right) · phone + الإدارة (left).
+5. **Bottom row** — two columns. The right one carries the client signature card
+   (`توقيع وختم العميل` and a rule to sign on, no name printed) over the الحسابات البنكية panel,
+   Al Rajhi first then SAB. The left one carries terms & conditions, directly under the totals.
+   The technical-notes panel has been removed.
+6. **Sticky footer** — black bar: company (right) · phone + الإدارة (left).
 
 ## Editing text from Daftra's template editor
 
@@ -106,8 +108,8 @@ itself, not here.
   `@import`, the full Arabic-capable font stack, *and* its own margin reset. Without the font
   stack the bar falls back to a Latin-only face and the Arabic company name silently drops out
   of the PDF; without `html, body { margin: 0 }` the renderer's default ~8 px body margin pushes
-  the bar down out of the strip reserved for it and the bottom gets clipped. The bar is 30 px
-  tall against a 20 mm bottom page margin, which leaves headroom for both.
+  the bar down out of the strip reserved for it and the bottom gets clipped. The bar is 26 px
+  tall against a 26 mm bottom page margin, which leaves headroom for both.
 - **Item table boundaries** — cells carry a left border (`#EFEFEF` in the body, `#33333C` in the
   black header) to draw vertical column rules; the last cell in each row drops it so no line is
   painted on the outer left edge.
