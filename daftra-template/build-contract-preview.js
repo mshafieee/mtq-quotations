@@ -31,11 +31,7 @@ const customFields = `
 <table cellpadding="0" cellspacing="0">
   <tr>
     <td><label>ممثل الطرف الأول</label>ثامر محمد راشد حسن</td>
-    <td><label>السجل التجاري</label>7011019275</td>
-  </tr>
-  <tr>
     <td><label>البطاقة الضريبية</label>310122334500003</td>
-    <td><label>جوال</label>0553710221</td>
   </tr>
 </table>`;
 
@@ -101,6 +97,8 @@ const values = {
   '{%invoice_date%}': '2026 / 04 / 13',
   '{%client_info%}': 'شركة المشاريع السكنية للمقاولات العامة المحدودة',
   '{%client_address%}': 'مدينة جدة – حي النهضة',
+  '{%client_mobile%}': '0553710221',
+  '{%client_bn2%}': '7011019275',
   '{%custom_fields%}': customFields,
   '{%items_list%}': itemsList,
   '{%footer%}': notes,

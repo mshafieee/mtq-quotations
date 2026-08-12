@@ -154,17 +154,29 @@ Same identity as the quotation — Cairo, the five brand colours, the rounded ca
 item-table header and grand-total bar, the violet diamonds — applied to the contract the
 quotation app generates (`index.html`, `buildContract`) and to the wording in `contract.txt`.
 
-Document order: header · contract no + date · title block · الطرف الأول (with `{%client_info%}`,
-`{%client_address%}` and the custom-field cards) · الطرف الثاني (static supplier details) ·
-تمهيد · eight numbered articles, with `{%items_list%}` and its totals inside المادة (2) ·
-bank box · `{%footer%}` notes · two signature cards · sticky footer.
+Document order: header · contract no + date · title block · الطرف الأول (`{%client_info%}` over a
+card row of `{%client_address%}` / `{%client_mobile%}` / `{%client_bn2%}`, then the custom-field
+cards) · الطرف الثاني (static supplier details) · تمهيد · eight numbered articles, with
+`{%items_list%}` and its totals inside المادة (2) · bank box · `{%footer%}` notes · two
+signature cards · sticky footer.
 
 Points worth knowing:
 
-- **Amounts in words (تفقيط)** cannot be computed by a template — Daftra does no arithmetic.
-  المادة (4) therefore states the 50 / 40 / 10 % split and refers to the grand total in
-  المادة (2) rather than restating figures. Type the written total into the document's Notes
-  field in Daftra and it prints, justified, just above the signatures.
+- **The payment figures in المادة (4) are computed in the browser**, not by Daftra — Daftra does
+  no arithmetic, so a short ES5 script at the end of the body reads the grand total out of the
+  rendered totals table (last table in `#items-list`, last row, last cell), takes 100 / 50 / 40 /
+  10 % of it, and writes each one into its `<span class="amt" data-amt="…">` as `مبلغ وقدره
+  <words> ريالًا سعوديًا (<figure> ر.س)`. The تفقيط routine is ported verbatim from `index.html`
+  so both documents spell an amount identically.
+  - **The sentences are written to read correctly with the spans empty.** If Daftra strips the
+    script, or wkhtmltopdf runs with JavaScript disabled, المادة (4) still states the
+    50 / 40 / 10 % split and refers to the total in المادة (2) — nothing prints as a blank or a
+    dangling comma. Check one real PDF to see which way the account behaves.
+  - Percentages live in the markup (`data-amt`), so changing a split means editing that attribute
+    and the neighbouring text — the script has no percentages of its own.
+  - Arabic-Indic digits in the total are normalised before parsing, and the thousands separator is
+    inserted manually rather than through `toLocaleString`, which QtWebKit does not implement
+    usefully.
 - **Article 2 is the one section allowed to break across pages** (`page-break-inside: auto`),
   because it carries the item table. Every other article, the bank box and the signature block
   stay whole.
@@ -177,11 +189,17 @@ Points worth knowing:
   جوال 0532799924, and Al Rajhi (`شركة متقنون تك للتجارة` / `2010 0001 0006 0866 08470` /
   `SA56 8000 0201 6080 1660 8470`) in place of the earlier SABB account. All are
   `editable-area`, so they can be corrected on the website without re-pasting.
-- **Client CR / VAT card / mobile / signatory** print as cards under the first party. A template
-  cannot invent per-contract values, so create them in Daftra as custom fields on the contract,
-  named exactly `السجل التجاري`, `البطاقة الضريبية`, `جوال`, `ممثل الطرف الأول` — the same set
-  `index.html` records. If the account exposes direct client placeholders, drop them into the
-  first-party sentence instead.
+- **Client address / mobile / CR** come straight from the client record — `{%client_address%}`,
+  `{%client_mobile%}` and `{%client_bn2%}` — in a three-card row directly under the first party's
+  name, built on the same cell-is-card row as the quotation's meta cards, so the three stay level
+  however long the address runs. Anything the client record does not carry (the VAT card, the
+  signatory) stays a Daftra custom field on the contract, named exactly `البطاقة الضريبية` and
+  `ممثل الطرف الأول` — the same names `index.html` records.
+- **The delivery window is editable.** المادة (5)'s `(45)` and `(60)` are each their own
+  `editable-area` span (`art5_days_from` / `art5_days_to`), so the range can be changed per
+  contract from the website without touching the surrounding sentence.
+- **Neither signature card is tinted.** Both sit on the plain white card so the two halves of the
+  signature row read as one block; the supplier's violet `#FAF7FF` fill is gone.
 - **The transfer QR** that `index.html` prints beside the bank details needs a public URL or a
   `data:` URI to work in a template; a commented-out `.bank-qr` block sits under the bank box
   ready for it.

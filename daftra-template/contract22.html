@@ -83,23 +83,31 @@
         .contract-title .ct-main { color: #01040B; font-size: 15px; font-weight: bold; line-height: 1.35; }
         .contract-title .ct-sub { margin-top: 2px; color: #7B27FF; font-size: 11px; font-weight: bold; }
 
-        /* ---------- Meta cards (contract no / date / …) ---------- */
+        /* ---------- Meta cards (contract no / date / client fields) ----------
+           Same arrangement as the quotation: the cell IS the card, so table-row equal heights
+           keep neighbours matched; the gutter is border-spacing and the row's negative margin
+           pulls the outer edges back into line. */
         .meta-row {
             display: table;
             width: 100%;
             table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 7px 0;
+            margin: 0 -7px 7px;
             direction: rtl;
         }
-        .meta-cell { display: table-cell; vertical-align: top; }
-        .meta-card {
-            margin: 0 0 7px 7px;
+        .meta-cell {
+            display: table-cell;
+            height: 52px;
             padding: 5px 11px 6px;
-            min-height: 38px;
             border: 1px solid #E4E4EA;
             border-radius: 10px;
             background: #FBFBFD;
+            vertical-align: top;
         }
-        .meta-cell.last .meta-card { margin-left: 0; }
+        /* The client's fields sit inside the first-party panel; the negative margin lines their
+           edges up with the prose above them. */
+        .party-fields { margin: 6px -7px 0; }
         .meta-label {
             color: #A0A2B1;
             font-size: 8px;
@@ -150,24 +158,25 @@
         /* Daftra renders {%custom_fields%} as its own table — restyle each cell into a card.
            Sits inside the first-party panel, so client CR / VAT / representative / phone
            configured as custom fields land with the rest of the client's details. */
-        #custom-fields { display: block; margin: 6px 0 0; }
+        #custom-fields { display: block; margin: 6px -7px 0; }
         #custom-fields table {
             width: 100% !important;
             table-layout: fixed !important;
             border-collapse: separate !important;
-            border-spacing: 6px 6px !important;
-            margin: -6px !important;
+            border-spacing: 7px 7px !important;
+            margin: -7px 0 !important;
         }
         #custom-fields tr { page-break-inside: avoid; }
         #custom-fields td {
-            padding: 5px 10px 6px !important;
+            padding: 5px 11px 6px !important;
+            min-height: 52px;
             border: 1px solid #E4E4EA !important;
-            border-radius: 8px;
+            border-radius: 10px;
             background: #FBFBFD !important;
             color: #01040B !important;
             text-align: right !important;
             vertical-align: top !important;
-            font-size: 11px !important;
+            font-size: 12px !important;
             font-weight: bold !important;
             line-height: 1.45 !important;
         }
@@ -178,7 +187,7 @@
         #custom-fields b,
         #custom-fields th {
             display: block !important;
-            margin: 0 0 1px !important;
+            margin: 0 0 2px !important;
             padding: 0 !important;
             border: 0 !important;
             background: none !important;
@@ -525,7 +534,7 @@
             text-align: center;
             page-break-inside: avoid;
         }
-        .sign-cell.last .sign-card { margin-left: 0; background: #FAF7FF; }
+        .sign-cell.last .sign-card { margin-left: 0; }
         .sign-role { color: #7B27FF; font-size: 9px; font-weight: bold; letter-spacing: 0.4px; }
         /* Fixed heights so both signature rules sit at the same level whatever the length of
            the client's name. */
@@ -580,16 +589,12 @@
 
         <div class="meta-row">
             <div class="meta-cell">
-                <div class="meta-card">
-                    <div id="label_contract_no" class="meta-label editable-area">رقم العقد / CONTRACT No.</div>
-                    <div class="meta-value accent ltr">{%invoice_number%}</div>
-                </div>
+                <div id="label_contract_no" class="meta-label editable-area">رقم العقد / CONTRACT No.</div>
+                <div class="meta-value accent ltr">{%invoice_number%}</div>
             </div>
-            <div class="meta-cell last">
-                <div class="meta-card">
-                    <div class="meta-label"><span id="label_date" class="editable-area">{%label_date%}</span> / <span id="label_date_en" class="editable-area">DATE</span></div>
-                    <div class="meta-value ltr">{%invoice_date%}</div>
-                </div>
+            <div class="meta-cell">
+                <div class="meta-label"><span id="label_date" class="editable-area">{%label_date%}</span> / <span id="label_date_en" class="editable-area">DATE</span></div>
+                <div class="meta-value ltr">{%invoice_date%}</div>
             </div>
         </div>
 
@@ -603,19 +608,24 @@
         <div class="party">
             <div class="party-head"><span class="sq"></span><span id="party1_head" class="editable-area">الطرف الأول (العميل) / FIRST PARTY</span></div>
             <div class="party-body">
-                <span class="pv">{%client_info%}</span><span id="party1_mid" class="editable-area">، ويشار إليها لاحقًا بـ "الطرف الأول"، ومقرها: </span><span class="pv">{%client_address%}</span><span id="party1_tail" class="editable-area">.</span>
-                <!-- The same client fields the quotation app records, printed as cards. A
-                     template cannot invent per-contract values, so create these four in Daftra
-                     as custom fields on the contract, named exactly:
-
-                         السجل التجاري        — client CR number
-                         البطاقة الضريبية      — client VAT number
-                         جوال                 — client mobile
-                         ممثل الطرف الأول      — who signs for the client
-
-                     Daftra prints whatever is configured, in the order it is configured, so the
-                     labels above are what appears on the card. If the account exposes direct
-                     client placeholders instead, drop them into the sentence above. -->
+                <span class="pv">{%client_info%}</span><span id="party1_tail" class="editable-area">، ويشار إليها لاحقًا بـ "الطرف الأول".</span>
+                <div class="meta-row party-fields">
+                    <div class="meta-cell">
+                        <div id="label_c_addr" class="meta-label editable-area">العنوان / ADDRESS</div>
+                        <div class="meta-value">{%client_address%}</div>
+                    </div>
+                    <div class="meta-cell">
+                        <div id="label_c_mobile" class="meta-label editable-area">جوال / MOBILE</div>
+                        <div class="meta-value ltr">{%client_mobile%}</div>
+                    </div>
+                    <div class="meta-cell">
+                        <div id="label_c_cr" class="meta-label editable-area">السجل التجاري / CR No.</div>
+                        <div class="meta-value ltr">{%client_bn2%}</div>
+                    </div>
+                </div>
+                <!-- Anything else the contract needs about the client — the VAT card and who
+                     signs for them — comes through as custom fields on the contract, printed as
+                     matching cards. Name them البطاقة الضريبية and ممثل الطرف الأول. -->
                 <custom_field id="custom-fields" class="editable-area">{%custom_fields%}</custom_field>
             </div>
         </div>
@@ -661,11 +671,14 @@
         <div class="article">
             <div class="art-head"><span class="sq"></span><span class="art-no">المادة (4):</span> <span id="art4_head" class="art-title editable-area">الدفعات وآلية السداد</span></div>
             <div class="art-body">
-                <p class="editable-area" id="art4_intro">يتم سداد قيمة هذا العقد على دفعات، استنادًا إلى إجمالي قيمة العقد شامل ضريبة القيمة المضافة المبيّن في المادة (2) أعلاه، ووفقًا لآلية السداد التالية:</p>
-                <ul id="art4_payments" class="editable-area">
-                    <li><strong>الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد.</li>
-                    <li><strong>الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع.</li>
-                    <li><strong>الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة.</li>
+                <!-- Each .amt span is filled by the script at the end of the body with that
+                     percentage of the grand total, in figures and in words. Every sentence reads
+                     correctly with the span empty, so nothing breaks if the script does not run. -->
+                <p id="art4_intro">يتم سداد قيمة هذا العقد على دفعات، استنادًا إلى إجمالي قيمة العقد شامل ضريبة القيمة المضافة المبيّن في المادة (2) أعلاه<span class="amt" data-amt="100" data-lead="، مبلغ وقدره"></span>، ووفقًا لآلية السداد التالية:</p>
+                <ul id="art4_payments">
+                    <li><strong>الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد<span class="amt" data-amt="50"></span>.</li>
+                    <li><strong>الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع<span class="amt" data-amt="40"></span>.</li>
+                    <li><strong>الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة<span class="amt" data-amt="10"></span>.</li>
                 </ul>
                 <p class="editable-area" id="art4_bank_intro" style="margin-top:5px">يتم تحويل الدفعات إلى الحساب البنكي التالي الخاص بالطرف الثاني:</p>
             </div>
@@ -700,7 +713,9 @@
         <div class="article">
             <div class="art-head"><span class="sq"></span><span class="art-no">المادة (5):</span> <span id="art5_head" class="art-title editable-area">مدة التوريد والتركيب والبرمجة</span></div>
             <div class="art-body">
-                <p class="editable-area" id="art5_body1">يتم توريد المواد والمعدات المتفق عليها خلال فترة تتراوح من (45) إلى (60) يوم عمل، تبدأ من تاريخ استلام الطرف الثاني للدفعة الأولى المنصوص عليها في المادة (4)، وبعد استلام التعميد الخطي النهائي من الطرف الأول على المواصفات، واتجاهات الأبواب، وأرقام الغرف، والتصميم.</p>
+                <!-- The delivery window changes from contract to contract; both numbers are their own
+                     editable areas so they can be set on the website. -->
+                <p id="art5_body1">يتم توريد المواد والمعدات المتفق عليها خلال فترة تتراوح من (<span id="art5_days_from" class="editable-area">45</span>) إلى (<span id="art5_days_to" class="editable-area">60</span>) يوم عمل، تبدأ من تاريخ استلام الطرف الثاني للدفعة الأولى المنصوص عليها في المادة (4)، وبعد استلام التعميد الخطي النهائي من الطرف الأول على المواصفات، واتجاهات الأبواب، وأرقام الغرف، والتصميم.</p>
                 <p class="editable-area" id="art5_body2">لا يبدأ تنفيذ العقد ولا يلتزم الطرف الثاني بأي أعمال توريد أو تجهيز أو تركيب، إلا بعد استكمال المتطلبات المذكورة أعلاه واستلام الدفعة الأولى.</p>
             </div>
         </div>
@@ -766,5 +781,112 @@
 
         {%html_sticky_footer%}
     </div>
+    <!-- Payment amounts.
+         A Daftra template cannot do arithmetic, so the three instalments are computed here from
+         the grand total the item table already prints. wkhtmltopdf runs JavaScript, so this fills
+         in during PDF generation; if the renderer has it disabled, or Daftra strips the script,
+         every sentence above still reads correctly — it simply states the percentage without
+         restating the figure. Written in ES5 only, for the renderer's older engine. -->
+    <script type="text/javascript">
+    (function () {
+        /* Arabic-Indic digits, if the renderer emits them, back to ASCII. */
+        function westernise(t) {
+            return String(t)
+                .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 1632); })
+                .replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 1776); });
+        }
+        function parseAmount(t) {
+            var v = parseFloat(westernise(t).replace(/[^\d.,]/g, '').replace(/,/g, ''));
+            return isFinite(v) ? v : null;
+        }
+        /* The totals table is the last one Daftra emits inside #items-list; the grand total is
+           the last cell of its last row. */
+        function grandTotal() {
+            var host = document.getElementById('items-list');
+            if (!host) { return null; }
+            var tables = host.getElementsByTagName('table');
+            if (!tables.length) { return null; }
+            var rows = tables[tables.length - 1].rows;
+            if (!rows || !rows.length) { return null; }
+            var cells = rows[rows.length - 1].cells;
+            if (!cells || !cells.length) { return null; }
+            return parseAmount(cells[cells.length - 1].innerHTML.replace(/<[^>]*>/g, ' '));
+        }
+        /* Thousands separators without depending on toLocaleString. */
+        function f2(v) {
+            var s = (Math.round(v * 100) / 100).toFixed(2).split('.');
+            return s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + s[1];
+        }
+        /* Ported from the quotation app so both documents spell amounts the same way. */
+        function tafqit(amount) {
+            amount = Math.round(amount * 100) / 100;
+            var riyals = Math.floor(amount);
+            var halalas = Math.round((amount - riyals) * 100);
+            var ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة',
+                'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+            var tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+            var hundreds = ['', 'مائة', 'مئتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+            var scales = [
+                { one: '', two: '', plural: '' },
+                { one: 'ألف', two: 'ألفان', plural: 'آلاف' },
+                { one: 'مليون', two: 'مليونان', plural: 'ملايين' },
+                { one: 'مليار', two: 'ملياران', plural: 'مليارات' }
+            ];
+            function three(n) {
+                var h = Math.floor(n / 100), rem = n % 100, parts = [];
+                if (h) { parts.push(hundreds[h]); }
+                if (rem) {
+                    if (rem < 20) { parts.push(ones[rem]); }
+                    else {
+                        var o = rem % 10, t = Math.floor(rem / 10);
+                        parts.push(o ? ones[o] + ' و' + tens[t] : tens[t]);
+                    }
+                }
+                return parts.join(' و');
+            }
+            function convert(num) {
+                if (num === 0) { return 'صفر'; }
+                var groups = [];
+                while (num > 0) { groups.push(num % 1000); num = Math.floor(num / 1000); }
+                var words = [];
+                for (var i = groups.length - 1; i >= 0; i--) {
+                    var g = groups[i];
+                    if (g === 0) { continue; }
+                    var sc = scales[i];
+                    if (i === 0) { words.push(three(g)); }
+                    else if (g === 1) { words.push(sc.one); }
+                    else if (g === 2) { words.push(sc.two); }
+                    else if (g <= 10) { words.push(three(g) + ' ' + sc.plural); }
+                    else { words.push(three(g) + ' ' + sc.one); }
+                }
+                return words.join(' و');
+            }
+            var out = convert(riyals) + ' ريال سعودي';
+            if (halalas > 0) { out += ' و' + convert(halalas) + ' هللة'; }
+            return out;
+        }
+        function fill() {
+            try {
+                var total = grandTotal();
+                if (total === null || !isFinite(total) || total <= 0) { return; }
+                var nodes = document.getElementsByClassName('amt');
+                for (var i = 0; i < nodes.length; i++) {
+                    var pct = parseFloat(nodes[i].getAttribute('data-amt'));
+                    if (!isFinite(pct)) { continue; }
+                    /* Round each share to the halala, so the three instalments add back to the
+                       grand total exactly. */
+                    var v = Math.round(total * pct) / 100;
+                    var lead = nodes[i].getAttribute('data-lead') || '، وقدرها';
+                    nodes[i].innerHTML = lead + ' (<strong>' + f2(v) + ' ريال سعودي</strong>) فقط ' + tafqit(v) + ' لا غير';
+                }
+            } catch (e) { /* leave the sentences as written */ }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fill, false);
+        } else {
+            fill();
+        }
+    })();
+    </script>
 </body>
 </html>
