@@ -86,8 +86,9 @@ const itemsList = `
   <tr><td>الإجمالي شامل الضريبة / Grand Total</td><td>13,248.33 <span class="cur">ر.س</span></td></tr>
 </table>`;
 
-/* {%invoice_notes%} — the scope of works, typed per contract, printed inside المادة (3). */
-const invoiceNotes = `توريد وتركيب وبرمجة نظام انتركوم فيديو لعدد 18 وحدة سكنية، شاملًا الوحدة الخارجية والشاشات الداخلية ولوحات الأبواب والأقفال المغناطيسية وأزرار الخروج وسويتش الشبكة، مع تمديد الكابلات وربط النظام وتشغيله واختباره وتسليمه جاهزًا للعمل، دون أعمال دهان أو ترميم للجدران.`;
+/* {%invoice_notes%} — the scope of works, typed per contract, set into المادة (3)'s sentence.
+   A phrase that reads on from "يشمل هذا العقد", not a sentence of its own. */
+const invoiceNotes = `توريد وتركيب وبرمجة`;
 
 /* {%footer%} — a per-contract note printed just above the signatures. */
 const notes = `<p>يتم التسليم على دفعتين حسب جاهزية الموقع، ويلتزم الطرف الأول بتوفير تغذية كهربائية 220 فولت لكل نقطة قبل موعد التركيب.</p>`;

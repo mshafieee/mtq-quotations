@@ -198,13 +198,16 @@ Points worth knowing:
 - **The delivery window is editable.** المادة (5)'s `(45)` and `(60)` are each their own
   `editable-area` span (`art5_days_from` / `art5_days_to`), so the range can be changed per
   contract from the website without touching the surrounding sentence.
-- **نطاق الأعمال comes from the contract's Notes field.** المادة (3) prints `{%invoice_notes%}`
-  under a static framing sentence, so the actual scope is typed per contract rather than edited
-  into the template — the same field the quotation uses for its نطاق العرض line. The framing
-  sentence stands on its own, so an empty Notes field leaves the article reading correctly and
-  the block collapses to nothing (`.art-notes:empty`); delete that sentence in Daftra's editor to
-  let the notes carry the article alone. If the account maps `{%footer%}` to the same field, the
-  scope will print twice — above the signatures as well — so drop one of the two.
+- **نطاق الأعمال comes from the contract's Notes field.** المادة (3) reads
+  `يشمل هذا العقد {%invoice_notes%} المواد والأنظمة الواردة فيه…`, so the scope is typed per
+  contract rather than edited into the template — the same field the quotation uses for its
+  نطاق العرض line. Type a **phrase that reads on from the opening words** (`توريد وتركيب وبرمجة`),
+  not a sentence of its own with its own full stop; with the field empty the two halves close up
+  and the sentence still reads correctly. Both halves are separate `editable-area` spans
+  (`art3_lead` / `art3_tail`), so the wording around the value can be changed on the website.
+  `#art3_body p { display: inline }` keeps the value on the same line for accounts that wrap it
+  in a paragraph. If the account maps `{%footer%}` to the same field, the value will also print
+  above the signatures — drop one of the two.
 - **Neither signature card is tinted.** Both sit on the plain white card so the two halves of the
   signature row read as one block; the supplier's violet `#FAF7FF` fill is gone.
 - **The transfer QR** that `index.html` prints beside the bank details needs a public URL or a

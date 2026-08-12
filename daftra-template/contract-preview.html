@@ -240,11 +240,9 @@
             list-style: none;
         }
         .art-body li:last-child { margin-bottom: 0; }
-        /* Notes pulled into an article body. Collapses completely when the field is empty, so the
-           article reads as though the block were not there. */
-        .art-notes { margin-top: 4px; }
-        .art-notes:empty { display: none; margin: 0; }
-        .art-notes p:last-child { margin-bottom: 0; }
+        /* توريد وتركيب وبرمجة sits mid-sentence in المادة (3). Some accounts wrap the value in a
+           <p>; keep it inline so it does not break the sentence onto its own line. */
+        #art3_body p { display: inline; margin: 0; }
         /* The marker is a pseudo-element, so a line added in Daftra's editor gets its diamond
            without the editor having to preserve any inner markup. */
         .art-body li:before {
@@ -835,11 +833,11 @@
         <div class="article">
             <div class="art-head"><span class="sq"></span><span class="art-no">المادة (3):</span> <span id="art3_head" class="art-title editable-area">نطاق الأعمال</span></div>
             <div class="art-body">
-                <p class="editable-area" id="art3_body">يشمل هذا العقد توريد وتركيب المواد والأنظمة الواردة فيه وفقًا للمواصفات الفنية المعتمدة وجداول الكميات المرفقة.</p>
-                <!-- The scope itself is per-contract, so it comes from the contract's Notes field
-                     in Daftra. The sentence above stands on its own, so an empty Notes field costs
-                     nothing; delete it from the editor to let the notes carry the article alone. -->
-                <div id="art3_notes" class="art-notes">توريد وتركيب وبرمجة نظام انتركوم فيديو لعدد 18 وحدة سكنية، شاملًا الوحدة الخارجية والشاشات الداخلية ولوحات الأبواب والأقفال المغناطيسية وأزرار الخروج وسويتش الشبكة، مع تمديد الكابلات وربط النظام وتشغيله واختباره وتسليمه جاهزًا للعمل، دون أعمال دهان أو ترميم للجدران.</div>
+                <!-- The scope is per-contract, so it comes from the contract's Notes field in
+                     Daftra, set into the sentence. Type a phrase that reads on from "يشمل هذا
+                     العقد" — "توريد وتركيب وبرمجة" — not a sentence of its own. With the field
+                     empty the two halves close up and the sentence still reads correctly. -->
+                <p id="art3_body"><span id="art3_lead" class="editable-area">يشمل هذا العقد</span> توريد وتركيب وبرمجة <span id="art3_tail" class="editable-area">المواد والأنظمة الواردة فيه وفقًا للمواصفات الفنية المعتمدة وجداول الكميات المرفقة.</span></p>
             </div>
         </div>
 
@@ -922,7 +920,7 @@
 
         <!-- <p>يتم التسليم على دفعتين حسب جاهزية الموقع، ويلتزم الطرف الأول بتوفير تغذية كهربائية 220 فولت لكل نقطة قبل موعد التركيب.</p> — anything to state just above the signatures: an agreed exception, a
              delivery address. Invisible when empty. Note that some accounts map this to the same
-             field as توريد وتركيب وبرمجة نظام انتركوم فيديو لعدد 18 وحدة سكنية، شاملًا الوحدة الخارجية والشاشات الداخلية ولوحات الأبواب والأقفال المغناطيسية وأزرار الخروج وسويتش الشبكة، مع تمديد الكابلات وربط النظام وتشغيله واختباره وتسليمه جاهزًا للعمل، دون أعمال دهان أو ترميم للجدران.; if the scope prints twice, delete one of the two. -->
+             field as توريد وتركيب وبرمجة; if the scope prints twice, delete one of the two. -->
         <div class="extra-notes">
             <div id="footer" class="editable-area"><p>يتم التسليم على دفعتين حسب جاهزية الموقع، ويلتزم الطرف الأول بتوفير تغذية كهربائية 220 فولت لكل نقطة قبل موعد التركيب.</p></div>
         </div>
