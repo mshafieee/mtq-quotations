@@ -57,13 +57,13 @@ the body** — otherwise the name prints twice.
    - Row 2: `{%client_info%}` facing `{%staff_member_name%}` over `{%staff_member_phone%}`.
    - Row 3+: `{%custom_fields%}` — Daftra's own table, restyled cell-by-cell into the same
      cards, so Project / Scope / anything else configured picks up the look automatically.
+   - Last row: CR No. and VAT No.
 
    The cell *is* the card. Table cells in a row are always the same height, so no card can end
    up shorter than its neighbour however many lines its value runs to; the gutter is
    `border-spacing` and the row's negative margin pulls the outer edges back into line. There is
    no client-address card and no shipping card — `{%client_address%}`, `{%label_ship%}` and
    `{%ship_info%}` are all gone from this template.
-   - Last row: CR No. and VAT No.
 3. **Items** — `{%items_list%}` with a black rounded header row, alternating violet-tinted
    rows, and hairline separators.
 4. **Totals** — Daftra's totals table, pushed to the **left** at 50 % width so it sits under
