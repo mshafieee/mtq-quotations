@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 230 950 660" width="950" height="660">
+  <title>MTQ — متقنون تيك / MUTQINUN TIK</title>
+  <defs>
+    <linearGradient id="mtqDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#0d0d16"/>
+      <stop offset=".55" stop-color="#1b1b28"/>
+      <stop offset="1"   stop-color="#33334a"/>
+    </linearGradient>
+    <linearGradient id="mtqPurple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#4c11e8"/>
+      <stop offset=".45" stop-color="#6d28ff"/>
+      <stop offset="1"   stop-color="#c69bff"/>
+    </linearGradient>
+    <linearGradient id="mtqPurple2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#5a18f5"/>
+      <stop offset="1"   stop-color="#b784ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ══ M ══ -->
+  <path d="M120 560 V300 L232 462 L344 300 V560"
+        fill="none" stroke="url(#mtqDark)" stroke-width="72"
+        stroke-linejoin="miter" stroke-miterlimit="6"/>
+  <path d="M152 346 L232 462" fill="none" stroke="url(#mtqPurple)"
+        stroke-width="72" stroke-linecap="butt"/>
+
+  <!-- ══ T ══ -->
+  <g fill="url(#mtqDark)">
+    <path d="M400 252 H590 V324 H364 Z"/>
+    <path d="M459 252 H531 V560 H459 Z"/>
+  </g>
+
+  <!-- ══ Q ══ -->
+  <path fill="url(#mtqDark)" fill-rule="evenodd"
+        d="M660 252 h204 a44 44 0 0 1 44 44 v220 a44 44 0 0 1 -44 44 h-204 a44 44 0 0 1 -44 -44 v-220 a44 44 0 0 1 44 -44 z
+           M708 330 h108 a26 26 0 0 1 26 26 v96 l-70 70 h-64 a26 26 0 0 1 -26 -26 v-140 a26 26 0 0 1 26 -26 z"/>
+  <path d="M812 452 H946 L862 560 H728 Z" fill="url(#mtqPurple2)"/>
+
+  <!-- ══ ® ══ -->
+  <g transform="translate(940 270)">
+    <circle r="28" fill="none" stroke="#1b1b28" stroke-width="7"/>
+    <text x="0" y="11" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+          font-size="32" font-weight="700" fill="#1b1b28">R</text>
+  </g>
+
+  <!-- ══ Arabic name ══ -->
+  <text x="512" y="712" text-anchor="middle" fill="#15151f"
+        font-family="'Cairo','Tahoma','Segoe UI','Arial',sans-serif" font-size="118" font-weight="600"
+        direction="rtl">متقنون تيك</text>
+
+  <!-- ══ Latin name ══ -->
+  <text x="512" y="838" text-anchor="middle" fill="#15151f"
+        font-family="'Cairo','Tahoma','Segoe UI','Arial',sans-serif" font-size="82" font-weight="500"
+        letter-spacing="15">MUTQINUN TIK</text>
+</svg>

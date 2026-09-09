@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <title>ختم العقود — شركة متقنون تيك</title>
+
+  <circle cx="500" cy="500" r="478" fill="none" stroke="#1560c8" stroke-width="17"/>
+  <circle cx="500" cy="500" r="387" fill="none" stroke="#1560c8" stroke-width="9"/>
+
+  <defs>
+    <path id="arcLatin"  d="M86.88,373.7 A432,432 0 0 1 462.35,69.64"/>
+    <path id="arcArabic" d="M537.48,71.64 A430,430 0 0 1 913.34,381.48"/>
+    <path id="arcCR"     d="M135.34,727.87 A430,430 0 0 0 864.66,727.87"/>
+    <path id="arcST"     d="M902.19,646.38 A428,428 0 0 0 927.74,514.94"/>
+  </defs>
+
+  <g fill="#1560c8" font-family="'Cairo','Tahoma','Segoe UI','Arial',sans-serif">
+    <text font-size="60" font-weight="700" letter-spacing="2">
+      <textPath href="#arcLatin" startOffset="50%" text-anchor="middle">MUTQINUN TIK</textPath>
+    </text>
+    <text font-size="58" font-weight="600">
+      <textPath href="#arcArabic" startOffset="50%" text-anchor="middle">شركة متقنون تيك</textPath>
+    </text>
+    <text font-size="60" font-weight="700" letter-spacing="2">
+      <textPath href="#arcCR" startOffset="50%" text-anchor="middle">C.R.: 7055150366</textPath>
+    </text>
+    <text font-size="34" font-weight="600">
+      <textPath href="#arcST" startOffset="50%" text-anchor="middle">س . ت</textPath>
+    </text>
+  </g>
+
+  <g stroke="#1560c8" stroke-width="9"><line x1="500" y1="22" x2="500" y2="113"/><line x1="56.81" y1="679.06" x2="141.18" y2="644.97"/><line x1="876.67" y1="794.29" x2="804.96" y2="738.26"/><line x1="963.8" y1="384.36" x2="875.5" y2="406.38"/></g>
+
+  <g transform="translate(273.4 224) scale(0.44)" fill="#1560c8">
+    <path d="M120 560 V300 L232 462 L344 300 V560" fill="none" stroke="#1560c8"
+          stroke-width="72" stroke-linejoin="miter" stroke-miterlimit="6"/>
+    <path d="M400 252 H590 V324 H364 Z"/>
+    <path d="M459 252 H531 V560 H459 Z"/>
+    <path fill-rule="evenodd" d="M660 252 h204 a44 44 0 0 1 44 44 v220 a44 44 0 0 1 -44 44 h-204 a44 44 0 0 1 -44 -44 v-220 a44 44 0 0 1 44 -44 z
+                                 M708 330 h108 a26 26 0 0 1 26 26 v96 l-70 70 h-64 a26 26 0 0 1 -26 -26 v-140 a26 26 0 0 1 26 -26 z"/>
+    <path d="M812 452 H946 L862 560 H728 Z"/></g>
+  <g fill="#1560c8" font-family="'Cairo','Tahoma','Segoe UI','Arial',sans-serif" text-anchor="middle">
+    <text x="500" y="560" font-size="76" font-weight="600">متقنون تيك</text>
+    <text x="500" y="632" font-size="56" font-weight="700" letter-spacing="4">MUTQINUN TIK</text>
+    
+  </g>
+</svg>
