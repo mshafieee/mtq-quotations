@@ -103,8 +103,8 @@ body{font-family:'Cairo',sans-serif;background:var(--page);color:var(--text);min
   border-bottom:1px solid var(--border);
 }
 .doc-hdr-left{display:flex;align-items:center;gap:1rem;}
-.company-logo{height:52px;object-fit:contain;}
-.hdr-divider{width:1px;height:44px;background:var(--border2);flex-shrink:0;}
+.company-logo{height:96px;object-fit:contain;}
+.hdr-divider{width:1px;height:66px;background:var(--border2);flex-shrink:0;}
 .doc-hdr-title h1{color:var(--primary);font-size:1.3rem;font-weight:900;}
 .doc-hdr-title p{color:var(--muted);font-size:.68rem;margin-top:.04rem;letter-spacing:.1em;}
 .doc-meta-blocks{display:flex;gap:.6rem;}
@@ -299,6 +299,10 @@ table.qt tbody tr.dragging{opacity:.4;}
   .doc-hdr{
     flex-direction:column; align-items:flex-start; gap:.7rem; padding:.75rem 1rem;
   }
+  /* The lockup stacks monogram over two name lines, so it needs height to
+     stay legible; trim it a little where the screen is narrow. */
+  .company-logo{ height:78px; }
+  .hdr-divider{ height:54px; }
   .doc-meta-blocks{ flex-direction:row; width:100%; }
   .meta-block{ flex:1; min-width:0; }
 
@@ -453,7 +457,7 @@ table.qt tbody tr.dragging{opacity:.4;}
 .ct-toolbar-title::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--brand);display:block;}
 .ct-page{max-width:820px;margin:1.5rem auto 3rem;background:white;padding:1.8cm 2cm;box-shadow:0 4px 24px rgba(0,0,0,.14);border-radius:4px;font-size:.79rem;line-height:1.85;direction:rtl;}
 .ct-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
-.ct-logo{height:58px;object-fit:contain;}
+.ct-logo{height:96px;object-fit:contain;}
 .ct-hdr-center{flex:1;text-align:center;}
 .ct-contract-title{font-size:1.1rem;font-weight:900;color:var(--primary);line-height:1.4;}
 .ct-contract-subtitle{font-size:.88rem;color:var(--brand);font-weight:700;}
