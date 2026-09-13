@@ -2186,7 +2186,7 @@ function openContract(){
       <div class="ct-sig-line"></div>
       <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">التوقيع والختم / Signature &amp; Stamp</div>
       <div style="width:166px;height:166px;margin:0 auto;">
-        <img src="${contractStamp()}" alt="ختم العقد"
+        <img src="${contractStamp()}" alt="ختم العقد" class="ct-stamp"
              style="width:166px;height:166px;object-fit:contain;opacity:.9"
              onerror="this.style.display='none'">
       </div>
@@ -2417,7 +2417,14 @@ async function loadContractFromDrive(fileId, name){
     if(!res.ok) throw new Error('HTTP '+res.status);
     const state=await res.json();
     if(!state.html) throw new Error('ملف غير صالح');
-    document.getElementById('ctContent').innerHTML=state.html;
+    const ctc=document.getElementById('ctContent');
+    ctc.innerHTML=state.html;
+    // A saved contract is a snapshot of rendered HTML, so it carries the brand
+    // art that was current the day it was saved. Re-point the imagery at
+    // today's assets; the legal text stays exactly as it was signed. Older
+    // contracts predate the .ct-stamp class, hence the alt fallback.
+    ctc.querySelectorAll('.ct-logo').forEach(img => img.src = brandAsset('logo'));
+    ctc.querySelectorAll('.ct-stamp, img[alt="ختم العقد"]').forEach(img => img.src = contractStamp());
     closeLoadContract();
     document.getElementById('contractOverlay').style.display='block';
     document.body.classList.add('contract-mode');

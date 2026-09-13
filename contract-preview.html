@@ -1,0 +1,732 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نموذج عقد — متقنون تيك</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+
+/* ══ VARIABLES ══════════════════════════════════ */
+:root{
+  --primary:  #1b1b28;
+  --brand:    #6d28ff;
+  --brand3:   #4c11e8;
+  --brand2:   #a855f7;
+  --brandbg:  #f7f3ff;
+  --page:     #f0f2f5;
+  --surface:  #ffffff;
+  --border:   #dde1e7;
+  --border2:  #c8cdd5;
+  --text:     #1c1c1c;
+  --muted:    #7a8394;
+  --th-bg:    #f8f9fb;
+  --red:      #c0392b;
+  --green:    #1a7a4a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:var(--page);color:var(--text);min-height:100vh;}
+
+/* ══ NAV ════════════════════════════════════════ */
+.topnav{
+  background:var(--surface);
+  height:54px;border-bottom:2px solid var(--brand);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.5rem;position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.nav-brand{display:flex;align-items:center;gap:.5rem;color:var(--primary);font-weight:800;font-size:.9rem;}
+.nav-brand::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--brand);display:block;}
+.nav-btns{display:flex;gap:.5rem;}
+.btn{display:inline-flex;align-items:center;gap:.3rem;padding:.36rem .85rem;border:none;border-radius:6px;font-family:'Cairo',sans-serif;font-size:.79rem;font-weight:700;cursor:pointer;transition:all .14s;}
+.btn-brand{background:linear-gradient(135deg,var(--brand3),var(--brand) 55%,var(--brand2));color:white;}
+.btn-brand:hover{filter:brightness(1.08);}
+.btn-outline{background:var(--surface);color:var(--primary);border:1.5px solid var(--border2);}
+.btn-outline:hover{border-color:var(--brand);color:var(--brand);}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary);}
+.btn-del{background:#fde8e8;color:var(--red);border:1px solid #f5c6c6;padding:.22rem .5rem;font-size:.72rem;}
+.btn-del:hover{background:#fbd0d0;}
+.btn-sm{padding:.26rem .6rem;font-size:.73rem;}
+
+/* ══ MOBILE CATALOG TOGGLE ══════════════════════ */
+.catalog-toggle{display:none;}
+
+/* ══ LAYOUT ═════════════════════════════════════ */
+.workspace{
+  display:grid;grid-template-columns:300px 1fr;gap:1rem;
+  max-width:1380px;margin:0 auto;padding:1rem;align-items:start;
+}
+
+/* ══ SIDEBAR ════════════════════════════════════ */
+.sidebar{
+  background:var(--surface);border-radius:10px;border:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden;position:sticky;top:64px;
+}
+.sb-head{
+  background:var(--primary);padding:.6rem 1rem;color:white;
+  font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:space-between;
+}
+.sb-body{padding:.75rem;}
+.search-wrap{position:relative;margin-bottom:.65rem;}
+.search-wrap input{
+  width:100%;padding:.48rem .85rem .48rem 2rem;border:1.5px solid var(--border);
+  border-radius:7px;font-family:'Cairo',sans-serif;font-size:.83rem;
+  background:var(--th-bg);direction:rtl;transition:border-color .14s;
+}
+.search-wrap input:focus{outline:none;border-color:var(--brand);background:white;}
+.search-wrap .sico{position:absolute;left:.65rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;}
+.cat-list{display:flex;flex-direction:column;gap:.4rem;max-height:calc(100vh - 175px);overflow-y:auto;padding-right:1px;}
+.cat-list::-webkit-scrollbar{width:3px;}
+.cat-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.cat-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .65rem;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:var(--th-bg);transition:all .13s;}
+.cat-row:hover{border-color:var(--brand);background:white;box-shadow:0 2px 8px rgba(109,40,255,.13);}
+.cat-row.in{border-color:var(--green);background:#f0faf5;}
+.cat-img{width:56px;height:56px;border-radius:6px;object-fit:contain;background:white;border:1px solid var(--border);flex-shrink:0;}
+.cat-ph{width:56px;height:56px;border-radius:6px;background:var(--border);display:grid;place-items:center;font-size:1.2rem;flex-shrink:0;}
+.cat-info{flex:1;min-width:0;}
+.cat-code{font-size:.68rem;font-weight:800;color:var(--brand);display:block;margin-bottom:.1rem;}
+.cat-name{font-size:.76rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cat-price{font-size:.72rem;color:var(--muted);font-weight:500;}
+.add-btn2{width:22px;height:22px;border-radius:50%;background:var(--primary);color:white;border:none;font-size:.9rem;cursor:pointer;display:grid;place-items:center;transition:all .13s;flex-shrink:0;}
+.add-btn2:hover{background:var(--brand);transform:scale(1.1);}
+.add-btn2.done{background:var(--green);}
+.nav-arrow-btn{width:34px;min-width:34px;display:grid;place-items:center;padding:.25rem .3rem;font-size:.9rem;}
+.nav-arrow-btn[disabled]{opacity:.35;cursor:not-allowed;}
+
+/* ══ DOCUMENT ═══════════════════════════════════ */
+.doc{background:var(--surface);border-radius:10px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;}
+
+/* doc header – light */
+.doc-hdr{
+  background:var(--surface);padding:.85rem 1.4rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  border-bottom:1px solid var(--border);
+}
+.doc-hdr-left{display:flex;align-items:center;gap:1rem;}
+.company-logo{height:96px;object-fit:contain;}
+.hdr-divider{width:1px;height:66px;background:var(--border2);flex-shrink:0;}
+.doc-hdr-title h1{color:var(--primary);font-size:1.3rem;font-weight:900;}
+.doc-hdr-title p{color:var(--muted);font-size:.68rem;margin-top:.04rem;letter-spacing:.1em;}
+.doc-meta-blocks{display:flex;gap:.6rem;}
+.meta-block{
+  background:var(--th-bg);border:1.5px solid var(--border);
+  border-radius:7px;padding:.5rem .9rem;text-align:center;min-width:140px;
+}
+.meta-block label{display:block;color:var(--muted);font-size:.6rem;margin-bottom:.18rem;font-weight:700;}
+.meta-block input{
+  background:transparent;border:none;color:var(--text);text-align:center;
+  font-family:'Cairo',sans-serif;font-size:.88rem;font-weight:700;width:100%;
+}
+.meta-block input:focus{outline:none;}
+.meta-block input::placeholder{color:#bbb;}
+
+/* orange accent bar */
+.accent-bar{height:4px;background:linear-gradient(90deg,var(--brand3),var(--brand) 30%,var(--brand2) 62%,#e3d1ff,transparent);}
+
+/* info strip */
+.info-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-bottom:1.5px solid var(--border);background:var(--brandbg);
+}
+.info-cell{padding:.5rem .85rem;border-left:1px solid var(--border);}
+.info-cell:last-child{border-left:none;}
+.info-cell label{display:block;font-size:.6rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem;}
+.info-cell input{border:none;background:transparent;font-family:'Cairo',sans-serif;font-size:.86rem;font-weight:600;color:var(--text);direction:rtl;width:100%;}
+.info-cell input:focus{outline:none;}
+.info-cell input::placeholder{color:#ccc;}
+
+/* toolbar */
+.doc-toolbar{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:var(--th-bg);border-bottom:1px solid var(--border);}
+.count-badge{background:var(--brand);color:white;border-radius:20px;padding:.1rem .55rem;font-size:.7rem;font-weight:800;margin-right:.4rem;}
+.vat-lbl{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--muted);cursor:pointer;}
+.vat-lbl input{cursor:pointer;accent-color:var(--brand);}
+
+/* ══ TABLE ══════════════════════════════════════ */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table.qt{width:100%;border-collapse:collapse;font-size:.81rem;}
+table.qt thead tr{background:var(--primary);color:white;}
+table.qt th{padding:.58rem .7rem;font-size:.71rem;font-weight:700;text-align:center;white-space:nowrap;border-left:1px solid rgba(255,255,255,.12);}
+table.qt th:last-child{border-left:none;}
+table.qt tbody tr{border-bottom:1px solid var(--border);}
+table.qt tbody tr:nth-child(even){background:#fafafa;}
+table.qt tbody tr:hover{background:#f7f2ff;}
+table.qt td{padding:.52rem .7rem;text-align:center;vertical-align:middle;border-left:1px solid var(--border);}
+table.qt td:last-child{border-left:none;}
+.drag-handle{cursor:grab;color:var(--muted);font-size:1.1rem;user-select:none;padding:0 .3rem !important;width:18px;}.drag-handle:active{cursor:grabbing;}
+table.qt tbody tr.drag-over{background:#f3ecff !important;box-shadow:inset 0 -2px 0 var(--brand);}
+table.qt tbody tr.dragging{opacity:.4;}
+.td-desc{text-align:right !important;white-space:normal;word-break:break-word;}
+.td-pic{width:86px;}
+.td-pic img{width:72px;height:72px;object-fit:contain;border-radius:6px;border:1px solid var(--border);background:white;display:block;margin:0 auto;}
+.td-pic-ph{width:72px;height:72px;border-radius:6px;background:var(--th-bg);display:grid;place-items:center;font-size:1.4rem;margin:0 auto;border:1px solid var(--border);}
+.code-tag{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.04em;color:var(--brand);border:1px solid #dcc7ff;background:#f5efff;padding:.2rem .6rem;border-radius:4px;white-space:nowrap;min-width:72px;text-align:center;}
+.desc-text{font-size:.79rem;font-weight:600;line-height:1.4;word-break:break-word;}
+.desc-edit{
+  min-width:60px;width:100%;cursor:text;border-radius:4px;
+  padding:.1rem .2rem;outline:none;word-break:break-word;
+  transition:background .12s,outline .12s;
+  font-size:.79rem;font-weight:600;line-height:1.4;font-family:'Cairo',sans-serif;
+}
+.desc-edit:hover{background:#faf7ff;outline:1px dashed #c4a3ff;}
+.desc-edit:focus{background:#f6f1ff;outline:2px solid var(--brand);}
+.desc-modified{text-decoration:underline;}
+.editable{
+  border:1.5px solid transparent;border-radius:5px;
+  padding:.22rem .38rem;font-family:'Cairo',sans-serif;
+  font-size:.81rem;font-weight:700;text-align:center;
+  background:transparent;color:var(--text);transition:all .14s;width:100%;
+}
+.editable:hover{border-color:var(--border2);background:white;}
+.editable:focus{outline:none;border-color:var(--brand);background:white;box-shadow:0 0 0 2px rgba(109,40,255,.13);}
+.price-f{color:var(--primary);}
+.free-tag{display:inline-block;font-weight:800;font-size:.82rem;color:#c0392b;cursor:pointer;letter-spacing:.04em;}
+.qty-f{color:#1a6b6b;}
+.qty-f::-webkit-outer-spin-button,.qty-f::-webkit-inner-spin-button,
+.price-f::-webkit-outer-spin-button,.price-f::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.price-f{-moz-appearance:textfield;appearance:textfield;}
+.row-total{font-weight:800;color:var(--primary);font-size:.86rem;}
+
+/* ══ TOTALS – below main table ══════════════════ */
+.totals-section{
+  display:flex;justify-content:flex-end;
+  padding:.8rem 1.2rem;
+  border-top:1.5px solid var(--border);
+  background:var(--th-bg);
+}
+.totals-card{
+  min-width:300px;max-width:380px;width:100%;
+  border:1.5px solid var(--border);border-radius:8px;overflow:hidden;background:white;
+}
+.tot-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .85rem;border-bottom:1px solid var(--border);}
+.tot-r:last-child{border-bottom:none;}
+.tot-r .tl{color:var(--muted);font-weight:600;font-size:.78rem;}
+.tot-r .tv{font-weight:800;color:var(--text);font-size:.84rem;}
+.discount-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem .85rem;border-bottom:1px solid var(--border);}
+.discount-row .tl{color:var(--muted);font-weight:600;font-size:.78rem;}
+.discount-row .tv{font-weight:800;display:flex;align-items:center;gap:4px;}
+.discount-row input{width:54px;border:1.5px solid var(--border);border-radius:6px;padding:.2rem;font-family:'Cairo',sans-serif;font-size:.82rem;text-align:center;direction:ltr;}
+.discount-row input:focus{outline:none;border-color:var(--brand);}
+.disc-sep{font-size:.7rem;color:var(--border2);margin:0 1px;}
+.disc-print-only{display:none;font-weight:800;font-size:.84rem;}
+.tot-r.grand-row{background:var(--primary);padding:.55rem .85rem;}
+.tot-r.grand-row .tl{color:rgba(255,255,255,.65);font-size:.78rem;}
+.tot-r.grand-row .tv{color:var(--brand2);font-size:1rem;font-weight:900;}
+
+/* ══ FOOTER (notes / terms) ═════════════════════ */
+.doc-ftr{
+  padding:.9rem 1.2rem;border-top:1.5px solid var(--border);
+  background:var(--th-bg);display:flex;flex-direction:column;gap:.7rem;
+}
+.notes-area{display:flex;flex-direction:column;gap:.4rem;}
+.notes-area label{font-size:.64rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.notes-area textarea{
+  border:1.5px solid var(--border);border-radius:6px;padding:.4rem .6rem;
+  font-family:'Cairo',sans-serif;font-size:.82rem;background:white;direction:rtl;
+  width:100%;line-height:1.65;resize:vertical;min-height:80px;
+}
+.notes-area textarea:focus{outline:none;border-color:var(--brand);}
+.validity-inp{
+  border:1.5px solid var(--border);border-radius:6px;padding:.34rem .6rem;
+  font-family:'Cairo',sans-serif;font-size:.82rem;background:white;direction:rtl;width:100%;
+}
+.validity-inp:focus{outline:none;border-color:var(--brand);}
+
+/* ══ EMPTY / LOADING ════════════════════════════ */
+.empty-s{text-align:center;padding:3.5rem 1rem;color:var(--muted);}
+.empty-s .ei{font-size:3rem;opacity:.2;margin-bottom:.65rem;}
+.empty-s p{font-size:.85rem;}
+.loading-s{text-align:center;padding:2rem;color:var(--muted);}
+.print-footer{ display:none; }
+.qt-stamp-block{ display:none; }  /* print only – see @media print */
+.print-mirror{ display:none; } /* hidden on screen, shown in print */
+.spin{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto .6rem;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ══ TOAST ══════════════════════════════════════ */
+#toast{position:fixed;bottom:1.1rem;left:50%;transform:translateX(-50%) translateY(50px);background:var(--primary);color:white;padding:.55rem 1.2rem;border-radius:20px;font-size:.8rem;font-weight:700;opacity:0;transition:all .28s;z-index:999;pointer-events:none;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* ══ MODAL ══════════════════════════════════════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:none;place-items:center;}
+.overlay.open{display:grid;}
+.modal{background:white;border-radius:12px;padding:1.7rem;width:450px;max-width:95vw;direction:rtl;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:92vh;overflow-y:auto;}
+#settingsOverlay .modal{width:560px;}
+
+/* ══ BRAND PANEL (settings) ═════════════════════════════════ */
+.brand-panel{border-top:1.5px solid var(--border);margin-top:.4rem;padding-top:.9rem;}
+.brand-panel h3{font-size:.84rem;font-weight:800;color:var(--brand);margin-bottom:.5rem;}
+.brand-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 .7rem;}
+.brand-hint{font-size:.7rem;color:var(--muted);line-height:1.6;margin-bottom:.5rem;}
+.brand-asset{display:flex;align-items:center;gap:.7rem;border:1.5px solid var(--border);border-radius:9px;padding:.5rem .6rem;margin-bottom:.5rem;background:var(--th-bg);}
+.brand-asset img{width:58px;height:58px;object-fit:contain;background:white;border:1px solid var(--border);border-radius:6px;flex-shrink:0;}
+.brand-asset-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:.2rem;}
+.brand-asset-body strong{font-size:.78rem;}
+.brand-tag{font-size:.66rem;color:var(--muted);font-weight:600;}
+.brand-asset-btns{display:flex;gap:.4rem;margin-top:.15rem;}
+.brand-asset-btns label{display:inline-flex;margin:0;cursor:pointer;font-size:.73rem;}
+.brand-asset-btns input[type=file]{display:none;}
+.brand-panel label.brand-swap{display:flex;align-items:center;gap:.45rem;font-size:.75rem;font-weight:600;color:var(--text);cursor:pointer;margin:.2rem 0 0;}
+.brand-panel .brand-swap input{width:auto;margin:0;accent-color:var(--brand);flex-shrink:0;}
+.modal h2{font-size:.98rem;font-weight:800;margin-bottom:.3rem;}
+.modal .sub{font-size:.76rem;color:var(--muted);margin-bottom:1rem;}
+.modal label{display:block;font-size:.74rem;font-weight:700;margin-bottom:.28rem;color:var(--text);}
+.modal input{width:100%;padding:.48rem .78rem;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:.86rem;margin-bottom:.85rem;direction:ltr;}
+.modal input:focus{outline:none;border-color:var(--brand);}
+.modal-btns{display:flex;gap:.6rem;justify-content:flex-end;}
+
+/* ══ MOBILE ══════════════════════════════════════
+   Phone layout: single column, collapsible catalog
+═══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .workspace{ display:block; padding:.6rem; }
+
+  /* Catalog toggle button */
+  .catalog-toggle{
+    display:flex; align-items:center; justify-content:center; gap:.4rem;
+    width:100%; padding:.55rem; margin-bottom:.6rem;
+    background:var(--primary); color:white; border:none; border-radius:8px;
+    font-family:'Cairo',sans-serif; font-size:.85rem; font-weight:700; cursor:pointer;
+  }
+
+  .sidebar{
+    position:static; margin-bottom:.6rem;
+    display:none; /* hidden by default on mobile */
+  }
+  .sidebar.open{ display:block; }
+  .cat-list{ max-height:280px; }
+
+  /* Header: stack on mobile */
+  .doc-hdr{
+    flex-direction:column; align-items:flex-start; gap:.7rem; padding:.75rem 1rem;
+  }
+  /* The lockup stacks monogram over two name lines, so it needs height to
+     stay legible; trim it a little where the screen is narrow. */
+  .company-logo{ height:78px; }
+  .hdr-divider{ height:54px; }
+  .doc-meta-blocks{ flex-direction:row; width:100%; }
+  .meta-block{ flex:1; min-width:0; }
+
+  /* Info strip: 2 col grid */
+  .info-strip{ grid-template-columns:1fr 1fr; }
+  .info-cell{ border-left:none; border-bottom:1px solid var(--border); }
+  .info-cell:nth-child(odd){ border-right:1px solid var(--border); }
+
+  /* Toolbar: wrap */
+  .doc-toolbar{ flex-wrap:wrap; gap:.4rem; }
+
+  /* Totals: full width */
+  .totals-section{ padding:.6rem; }
+  .totals-card{ max-width:100%; }
+
+  /* Footer */
+  .doc-ftr{ padding:.75rem; }
+
+  /* Nav */
+  .topnav{ padding:0 .85rem; }
+  .nav-brand{ font-size:.8rem; }
+  .btn{ padding:.32rem .65rem; font-size:.75rem; }
+
+  /* Table: min column widths for scroll */
+  table.qt th, table.qt td{ padding:.4rem .5rem; font-size:.75rem; }
+  .td-pic img, .td-pic-ph{ width:56px; height:56px; }
+  .editable{ font-size:.75rem; }
+}
+
+/* ══ PRINT ═══════════════════════════════════════
+   Always renders as A4, clean, no sidebar/nav
+═══════════════════════════════════════════════ */
+@media print {
+  * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body{ background:white !important; font-size:10pt; position:relative; }
+  .topnav, .sidebar, .catalog-toggle, .doc-toolbar,
+  .btn, .add-btn2, .no-print, .vat-lbl, .overlay, #toast { display:none !important; }
+  .workspace{ display:block !important; padding:0; max-width:100% !important; }
+  .doc{ box-shadow:none; border:none; border-radius:0; overflow:visible !important; width:100% !important; }
+
+  /* Header: light stays light – logo shows on white */
+  .doc-hdr{ background:white !important; border-bottom:2px solid var(--brand) !important; padding:.6rem 1rem; }
+  .doc-hdr-left{ flex-wrap:wrap; }
+  .meta-block{ background:var(--th-bg) !important; border:1px solid var(--border) !important; }
+
+  /* Accent bar */
+  .accent-bar{ background:linear-gradient(90deg,var(--brand3),var(--brand) 35%,var(--brand2) 70%,transparent) !important; height:3px; }
+
+  /* Info strip */
+  .info-strip{ background:var(--brandbg) !important; border-bottom:2px solid var(--primary) !important; }
+  .info-cell label{ color:var(--brand) !important; }
+
+  /* Table */
+  table.qt{ width:100% !important; font-size:8.5pt !important; page-break-inside:auto; }
+  table.qt thead tr{ background:var(--primary) !important; color:white !important; }
+  table.qt th, table.qt td{ padding:.28rem .45rem !important; }
+  table.qt tbody tr{ page-break-inside:avoid; }
+  table.qt tbody tr:last-child td{ padding-bottom:.6rem !important; }
+  table.qt tbody tr:nth-child(even){ background:#fafafa !important; }
+  .tbl-wrap{ overflow:visible !important; }
+  .td-pic img, .td-pic-ph{ width:52px !important; height:52px !important; }
+  .td-pic{ width:64px !important; }
+
+  /* Totals */
+  .totals-section{
+    padding:.5rem 0 .6rem 0 !important; background:white !important;
+    page-break-inside:avoid;
+  }
+  .totals-card{ border:1px solid var(--border) !important; }
+  .tot-r.grand-row{ background:var(--primary) !important; color:white !important; }
+
+  /* Footer: notes/terms — no forced break, let browser flow naturally */
+  .doc-ftr{
+    background:white !important; border-top:1px solid var(--border) !important;
+    padding:.5rem 0 .6rem 0 !important;
+  }
+  /* Each notes block avoids splitting internally */
+  .notes-area{ page-break-inside:avoid; margin-bottom:.3rem !important; }
+  /* Hide textareas in print, show mirror divs instead */
+  .notes-area textarea{ display:none !important; }
+  .discount-row.no-discount,
+  #afterDiscountRow.no-discount {
+    display:none !important;
+  }
+  .print-mirror{
+    display:block !important;
+    white-space:pre-wrap !important;
+    word-break:break-word !important;
+    font-family:'Cairo',sans-serif !important;
+    font-size:8pt !important;
+    line-height:1.65 !important;
+    direction:rtl !important;
+  }
+  .notes-area label{ color:var(--muted) !important; }
+  .validity-inp{ border:none !important; background:transparent !important; font-size:8pt !important; }
+
+  /* Editable description in print */
+  .desc-edit{ outline:none !important; background:transparent !important; padding:0 !important; cursor:default !important; }
+
+  /* Remove all input borders */
+  .editable{ border:none !important; background:transparent !important; padding:0 !important; }
+  .info-cell input{ border:none !important; background:transparent !important; }
+  .meta-block input{ border:none !important; background:transparent !important; color:var(--text) !important; }
+  .discount-row .disc-inputs{ display:none !important; }
+  .disc-print-only{ display:block !important; }
+
+
+
+  /* Switch to system font so Arabic text is selectable/copyable in the PDF */
+  body, * { font-family:'Tahoma','Arial',sans-serif !important; }
+
+  @page{ margin:1cm; margin-bottom:1.7cm; size:A4 portrait; }
+
+  /* ── Orange fixed footer: position:fixed repeats on every printed page ── */
+  .print-footer{
+    display:flex !important;
+    position:fixed;
+    bottom:0; left:0; right:0;
+    height:0.9cm;
+    background:linear-gradient(90deg,#4c11e8,#6d28ff 55%,#a855f7) !important;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color:white !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    padding:0 1cm !important;
+    font-family:'Cairo',sans-serif !important;
+    font-size:8pt !important;
+    font-weight:600 !important;
+    z-index:9999;
+  }
+  .pf-left  { text-align:right; flex:1; }
+  .pf-right { text-align:left; direction:ltr; flex:1; }
+
+  /* ── Quotation stamp: dropped onto the PDF automatically ── */
+  .qt-stamp-block{
+    display:flex !important; justify-content:flex-start;
+    padding:.15rem 0 .3rem; page-break-inside:avoid; break-inside:avoid;
+  }
+  .qt-stamp-col{ width:215px; text-align:center; }
+  .qt-stamp-title{ font-size:8.5pt; font-weight:800; color:var(--primary) !important; }
+  .qt-stamp-sub{ font-size:7pt; color:var(--muted) !important; margin-top:.08rem; }
+  .qt-stamp-img{
+    width:112px; height:112px; object-fit:contain; margin-top:.12rem; opacity:.92;
+  }
+}
+
+/* ══ CONTRACT ═══════════════════════════════════════════════════════════ */
+.contract-overlay{position:fixed;inset:0;z-index:9998;background:#dde1e7;overflow-y:auto;display:none;}
+.ct-toolbar{position:sticky;top:0;z-index:10;background:var(--primary);color:white;display:flex;align-items:center;justify-content:space-between;padding:.55rem 1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.ct-toolbar-title{font-weight:800;font-size:.85rem;display:flex;align-items:center;gap:.5rem;}
+.ct-toolbar-title::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--brand);display:block;}
+.ct-page{max-width:820px;margin:1.5rem auto 3rem;background:white;padding:1.8cm 2cm;box-shadow:0 4px 24px rgba(0,0,0,.14);border-radius:4px;font-size:.79rem;line-height:1.85;direction:rtl;}
+.ct-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
+.ct-logo{height:96px;object-fit:contain;}
+.ct-hdr-center{flex:1;text-align:center;}
+.ct-contract-title{font-size:1.1rem;font-weight:900;color:var(--primary);line-height:1.4;}
+.ct-contract-subtitle{font-size:.88rem;color:var(--brand);font-weight:700;}
+.ct-meta-box{min-width:170px;}
+.ct-meta-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;}
+.ct-meta-row label{font-size:.68rem;color:var(--muted);font-weight:700;white-space:nowrap;min-width:58px;text-align:right;}
+.ct-meta-row input{border:1px solid var(--border);border-radius:4px;padding:.22rem .45rem;font-size:.78rem;font-family:'Cairo',sans-serif;width:115px;text-align:right;}
+.ct-accent{height:3px;background:linear-gradient(90deg,var(--brand3),var(--brand) 35%,var(--brand2) 70%,transparent);margin-bottom:1rem;}
+.ct-parties{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem;}
+.ct-party{border:1.5px solid var(--border);border-radius:6px;padding:.7rem .8rem;}
+.ct-party-second{border-color:var(--brand);background:#faf7ff;}
+.ct-party-lbl{font-size:.7rem;font-weight:800;color:var(--brand);border-bottom:1px solid var(--border);padding-bottom:.3rem;margin-bottom:.4rem;}
+.ct-section{margin-bottom:.85rem;}
+.ct-section-title{font-size:.85rem;font-weight:900;color:var(--primary);border-right:3px solid var(--brand);padding-right:.5rem;margin-bottom:.4rem;}
+[contenteditable]{border-radius:3px;transition:background .12s,outline .12s;}
+[contenteditable]:hover{background:#faf7ff;outline:1px dashed #c4a3ff;cursor:text;}
+[contenteditable]:focus{background:#faf7ff;outline:2px solid var(--brand);}
+.ct-table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.4rem 0;}
+.ct-table thead tr{background:var(--primary);color:white;}
+.ct-table th,.ct-table td{padding:.38rem .5rem;text-align:center;border:1px solid var(--border);}
+.ct-table td.td-desc-ct{text-align:right;padding:.38rem .6rem;}
+.ct-edit{width:62px;border:1px solid var(--border);border-radius:4px;padding:.18rem .25rem;font-family:'Cairo',sans-serif;font-size:.78rem;text-align:center;direction:ltr;background:#fdfbff;}
+.ct-edit:focus{outline:2px solid var(--brand);border-color:var(--brand);}
+#ctDiscAmt{width:80px;}
+.ct-words{font-weight:700;color:var(--primary);}
+.ct-totals{margin-top:.4rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.ct-tot-row{display:flex;justify-content:space-between;padding:.28rem .75rem;font-size:.82rem;border-bottom:1px solid var(--border);}
+.ct-tot-row:last-child{border-bottom:none;}
+.ct-tot-row.grand{background:var(--primary);color:white;font-weight:800;font-size:.88rem;}
+.ct-bank-wrap{display:flex;align-items:stretch;gap:.7rem;margin-top:.4rem;page-break-inside:avoid;break-inside:avoid;}
+.ct-bank{flex:1;background:var(--th-bg);border:1px solid var(--border);border-radius:6px;padding:.55rem .8rem;font-size:.8rem;line-height:2.05;direction:rtl;text-align:right;}
+.ct-bank-lbl{color:var(--muted);font-weight:700;}
+.ct-iban{font-weight:800;letter-spacing:.055em;color:var(--primary);}
+.ct-qr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
+  border:1px solid var(--border);border-radius:6px;background:white;padding:.4rem .5rem;flex-shrink:0;}
+.ct-qr img{width:96px;height:96px;object-fit:contain;display:block;}
+.ct-qr-cap{font-size:.62rem;color:var(--muted);font-weight:700;}
+.ct-signature{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:2rem;border-top:1.5px solid var(--border);padding-top:1.5rem;}
+.ct-sig-col{text-align:center;}
+.ct-sig-line{border-bottom:1.5px solid var(--primary);margin:2.2rem 1rem .3rem;}
+@media print{
+  body.contract-mode .topnav,body.contract-mode .workspace,body.contract-mode #toast,
+  body.contract-mode .overlay,body.contract-mode #loadOverlay,body.contract-mode #print-footer{display:none !important;}
+  body.contract-mode{min-height:0 !important;height:auto !important;overflow:visible !important;}
+  html{height:auto !important;overflow:visible !important;}
+  body.contract-mode .contract-overlay{position:static !important;overflow:visible !important;background:white !important;display:block !important;height:auto !important;}
+  body.contract-mode .ct-toolbar{display:none !important;}
+  body.contract-mode .ct-page{box-shadow:none !important;margin:0 !important;padding:.3cm 1cm !important;max-width:100% !important;height:auto !important;overflow:visible !important;}
+  .ct-totals{overflow:visible !important;}
+  [contenteditable]:hover,[contenteditable]:focus{background:transparent !important;outline:none !important;}
+  .ct-table{font-size:7.5pt !important;}
+  body.contract-mode .ct-edit{border:none !important;background:transparent !important;padding:0 !important;}
+  .ct-section-title{page-break-after:avoid;}
+  .ct-signature{page-break-inside:avoid;}
+  .ct-bank-wrap{page-break-inside:avoid !important;}
+  .ct-qr img{width:84px !important;height:84px !important;}
+}
+
+/* Preview shell. In the app this document lives inside an overlay; standing
+   alone it needs the page ground, and the notice must never reach paper. */
+body{background:#dde1e7;margin:0;padding:0;}
+.pv-note{max-width:820px;margin:1.2rem auto .2rem;padding:.6rem .9rem;border-radius:8px;
+  background:#fff;border:1px solid #d7dbe2;color:#5b6270;font-size:.72rem;
+  font-family:'Cairo',sans-serif;direction:rtl;text-align:center;}
+@media print{ .pv-note{display:none!important;} body{background:white;}
+  .ct-page{box-shadow:none;margin:0;max-width:none;} }
+</style>
+<div class="pv-note">نموذج توضيحي لشكل العقد — جميع البيانات والأسعار الواردة أدناه افتراضية لغرض العرض فقط</div>
+
+<div class="ct-page">
+
+  <!-- Header -->
+  <div class="ct-hdr">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjUwIDIzMCA5NTAgNjYwIiB3aWR0aD0iOTUwIiBoZWlnaHQ9IjY2MCI+CiAgPHRpdGxlPk1UUSDigJQg2YXYqtmC2YbZiNmGINiq2YrZgyAvIE1VVFFJTlVOIFRJSzwvdGl0bGU+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9Im10cURhcmsiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiAgIHN0b3AtY29sb3I9IiMwZDBkMTYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMxYjFiMjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiAgIHN0b3AtY29sb3I9IiMzMzMzNGEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9Im10cVB1cnBsZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiICAgc3RvcC1jb2xvcj0iIzRjMTFlOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii40NSIgc3RvcC1jb2xvcj0iIzZkMjhmZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiICAgc3RvcC1jb2xvcj0iI2M2OWJmZiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ibXRxUHVycGxlMiIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiICAgc3RvcC1jb2xvcj0iIzVhMThmNSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiICAgc3RvcC1jb2xvcj0iI2I3ODRmZiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CgogIDwhLS0g4pWQ4pWQIE0g4pWQ4pWQIC0tPgogIDxwYXRoIGQ9Ik0xMjAgNTYwIFYzMDAgTDIzMiA0NjIgTDM0NCAzMDAgVjU2MCIKICAgICAgICBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbXRxRGFyaykiIHN0cm9rZS13aWR0aD0iNzIiCiAgICAgICAgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjYiLz4KICA8cGF0aCBkPSJNMTUyIDM0NiBMMjMyIDQ2MiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI210cVB1cnBsZSkiCiAgICAgICAgc3Ryb2tlLXdpZHRoPSI3MiIgc3Ryb2tlLWxpbmVjYXA9ImJ1dHQiLz4KCiAgPCEtLSDilZDilZAgVCDilZDilZAgLS0+CiAgPGcgZmlsbD0idXJsKCNtdHFEYXJrKSI+CiAgICA8cGF0aCBkPSJNNDAwIDI1MiBINTkwIFYzMjQgSDM2NCBaIi8+CiAgICA8cGF0aCBkPSJNNDU5IDI1MiBINTMxIFY1NjAgSDQ1OSBaIi8+CiAgPC9nPgoKICA8IS0tIOKVkOKVkCBRIOKVkOKVkCAtLT4KICA8cGF0aCBmaWxsPSJ1cmwoI210cURhcmspIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiCiAgICAgICAgZD0iTTY2MCAyNTIgaDIwNCBhNDQgNDQgMCAwIDEgNDQgNDQgdjIyMCBhNDQgNDQgMCAwIDEgLTQ0IDQ0IGgtMjA0IGE0NCA0NCAwIDAgMSAtNDQgLTQ0IHYtMjIwIGE0NCA0NCAwIDAgMSA0NCAtNDQgegogICAgICAgICAgIE03MDggMzMwIGgxMDggYTI2IDI2IDAgMCAxIDI2IDI2IHY5NiBsLTcwIDcwIGgtNjQgYTI2IDI2IDAgMCAxIC0yNiAtMjYgdi0xNDAgYTI2IDI2IDAgMCAxIDI2IC0yNiB6Ii8+CiAgPHBhdGggZD0iTTgxMiA0NTIgSDk0NiBMODYyIDU2MCBINzI4IFoiIGZpbGw9InVybCgjbXRxUHVycGxlMikiLz4KCiAgPCEtLSDilZDilZAgwq4g4pWQ4pWQIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDk0MCAyNzApIj4KICAgIDxjaXJjbGUgcj0iMjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFiMWIyOCIgc3Ryb2tlLXdpZHRoPSI3Ii8+CiAgICA8dGV4dCB4PSIwIiB5PSIxMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiCiAgICAgICAgICBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWIxYjI4Ij5SPC90ZXh0PgogIDwvZz4KCiAgPCEtLSDilZDilZAgQXJhYmljIG5hbWUg4pWQ4pWQIC0tPgogIDx0ZXh0IHg9IjUxMiIgeT0iNzEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTUxNTFmIgogICAgICAgIGZvbnQtZmFtaWx5PSInQ2Fpcm8nLCdUYWhvbWEnLCdTZWdvZSBVSScsJ0FyaWFsJyxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExOCIgZm9udC13ZWlnaHQ9IjYwMCIKICAgICAgICBkaXJlY3Rpb249InJ0bCI+2YXYqtmC2YbZiNmGINiq2YrZgzwvdGV4dD4KCiAgPCEtLSDilZDilZAgTGF0aW4gbmFtZSDilZDilZAgLS0+CiAgPHRleHQgeD0iNTEyIiB5PSI4MzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMxNTE1MWYiCiAgICAgICAgZm9udC1mYW1pbHk9IidDYWlybycsJ1RhaG9tYScsJ1NlZ29lIFVJJywnQXJpYWwnLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iODIiIGZvbnQtd2VpZ2h0PSI1MDAiCiAgICAgICAgbGV0dGVyLXNwYWNpbmc9IjE1Ij5NVVRRSU5VTiBUSUs8L3RleHQ+Cjwvc3ZnPgo=" class="ct-logo" alt="MUTQINUN TIK">
+    <div class="ct-meta-box">
+      <div class="ct-meta-row"><label>رقم العقد</label>MTQCT-1</div>
+      <div class="ct-meta-row"><label>رقم العرض</label>Q-2026-80014</div>
+      <div class="ct-meta-row"><label>التاريخ</label>13 / 09 / 2026 م</div>
+    </div>
+  </div>
+  <div style="text-align:center;margin:.6rem 0 .2rem">
+    <div class="ct-contract-title">عقد توريد وتركيب</div>
+    <div class="ct-contract-subtitle">نظام الانتركوم والمنزل الذكي</div>
+  </div>
+  <div class="ct-accent"></div>
+
+  <!-- Parties -->
+  <div class="ct-section">
+    <div class="ct-section-title">الطرف الأول (العميل / First Party)</div>
+    <div class="ct-section-body">
+      <strong>شركة المشاريع السكنية للمقاولات العامة المحدودة</strong>، سجل تجاري رقم <strong>7011019275</strong>، البطاقة الضريبية رقم <strong>311234567800003</strong>،
+      ويمثلها الأستاذ/ <strong>ثامر محمد راشد حسن</strong> ويشار إليها لاحقًا بـ "الطرف الأول"،
+      ومقرها: <strong>جدة – حي النهضة</strong> جوال: <strong>0553710221</strong>
+    </div>
+  </div>
+  <div class="ct-section">
+    <div class="ct-section-title">الطرف الثاني (المورد / Second Party)</div>
+    <div class="ct-section-body">
+      <strong>شركة متقنون تيك</strong>، ويمثلها الأستاذ/ <strong>محمد عبد الله الحامدي</strong>،
+      ويشار إليها لاحقًا بـ "الطرف الثاني"، فرع مكة المكرمة – حي العوالي – مجمع الشريهي التجاري الإداري،
+      سجل تجاري رقم 7055150366، جوال: 0580136000.
+    </div>
+  </div>
+
+  <!-- Preamble -->
+  <div class="ct-section">
+    <div class="ct-section-title">تمهيد</div>
+    <div class="ct-section-body">
+      حيث إن الطرف الأول يرغب في تنفيذ أعمال توريد وتركيب المواد محل العقد،
+      وحيث أبدى الطرف الثاني استعداده لتنفيذ تلك الأعمال بما لديه من خبرة فنية وإمكانات تؤهله لذلك،
+      وبعد قيامه بزيارة الموقع والاطلاع على المواصفات المطلوبة، فقد تم الاتفاق بين الطرفين على ما يلي:
+    </div>
+  </div>
+
+  <!-- Article 1 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (1): مرفقات العقد</div>
+    <div class="ct-section-body">
+      تُعد المقدمة أعلاه، وجداول الكميات والأسعار والمواصفات الفنية المرفقة والمعتمدة من الطرفين، جزءًا لا يتجزأ من هذا العقد، وتُعد أساسًا للتوريد والتنفيذ.
+    </div>
+  </div>
+
+  <!-- Article 2 (specs + prices table) -->
+  <div class="ct-section ct-section-table">
+    <div class="ct-section-title">المادة (2): المواصفات الفنية والأسعار</div>
+    <div style="font-size:.8rem;margin-bottom:.45rem">
+      يلتزم الطرف الثاني بتوريد جميع المواد طبقًا للمواصفات الفنية المعتمدة لكل صنف كما هو موضح في الجدول التالي، وتُعد الأسعار الواردة نهائية وثابتة، ولا يجوز تعديلها إلا بموافقة خطية من الطرفين عند حدوث تغييرات رسمية في المشروع أو المواصفات.
+    </div>
+    <table class="ct-table">
+      <thead>
+        <tr>
+          <th>#</th><th>صورة</th><th>الموديل</th>
+          <th>الوصف / Description</th>
+          <th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody><tr data-ct-item="">
+      <td>1</td>
+      <td style="width:62px;padding:.25rem"><div style="width:50px;height:50px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div></td>
+      <td style="font-weight:700">IP-OUT</td>
+      <td class="td-desc-ct">لوحة خارجية للباب بإطار معدني أسود أنيق، كاميرا عالية الدقة واتصال IP</td>
+      <td>2</td>
+      <td style="white-space:nowrap">2450 ر.س</td>
+      <td style="white-space:nowrap;font-weight:700"><span class="ct-line-total">4,900.00</span> ر.س</td>
+    </tr><tr data-ct-item="">
+      <td>2</td>
+      <td style="width:62px;padding:.25rem"><div style="width:50px;height:50px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div></td>
+      <td style="font-weight:700">IP-IN</td>
+      <td class="td-desc-ct">شاشة داخلية 7 بوصة تعمل باللمس، مزودة بخاصية الرد عن بُعد عبر التطبيق</td>
+      <td>8</td>
+      <td style="white-space:nowrap">1180 ر.س</td>
+      <td style="white-space:nowrap;font-weight:700"><span class="ct-line-total">9,440.00</span> ر.س</td>
+    </tr><tr data-ct-item="">
+      <td>3</td>
+      <td style="width:62px;padding:.25rem"><div style="width:50px;height:50px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div></td>
+      <td style="font-weight:700">SW-SMART</td>
+      <td class="td-desc-ct">مفتاح إضاءة ذكي، تحكم عبر التطبيق والأوامر الصوتية</td>
+      <td>34</td>
+      <td style="white-space:nowrap">215 ر.س</td>
+      <td style="white-space:nowrap;font-weight:700"><span class="ct-line-total">7,310.00</span> ر.س</td>
+    </tr><tr data-ct-item="">
+      <td>4</td>
+      <td style="width:62px;padding:.25rem"><div style="width:50px;height:50px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div></td>
+      <td style="font-weight:700">GW-HUB</td>
+      <td class="td-desc-ct">بوابة تحكم مركزية للمنزل الذكي، تدعم Zigbee و Wi-Fi</td>
+      <td>1</td>
+      <td style="white-space:nowrap">1650 ر.س</td>
+      <td style="white-space:nowrap;font-weight:700"><span class="ct-line-total">1,650.00</span> ر.س</td>
+    </tr><tr data-ct-item="">
+      <td>5</td>
+      <td style="width:62px;padding:.25rem"><div style="width:50px;height:50px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">🔧</div></td>
+      <td style="font-weight:700">INS</td>
+      <td class="td-desc-ct">أعمال التركيب والبرمجة والتشغيل والتدريب</td>
+      <td>1</td>
+      <td style="white-space:nowrap">6800 ر.س</td>
+      <td style="white-space:nowrap;font-weight:700"><span class="ct-line-total">6,800.00</span> ر.س</td>
+    </tr></tbody>
+    </table>
+    <div class="ct-totals" data-vat="1">
+      <div class="ct-tot-row"><span>المجموع / Subtotal</span><span id="ctSub">30,100.00 ر.س</span></div>
+      <div class="ct-tot-row"><span>خصم / Discount</span>
+        <span style="display:flex;align-items:center;gap:5px;color:var(--red)">-  ر.س</span></div>
+      <div class="ct-tot-row" id="ctAfterRow" style="display:none"><span>السعر بعد الخصم</span><span id="ctAfter">30,100.00 ر.س</span></div>
+      <div class="ct-tot-row" id="ctVatRow" style=""><span>ضريبة القيمة المضافة 15% / VAT</span><span id="ctVat">4,515.00 ر.س</span></div>
+      <div class="ct-tot-row grand"><span>الإجمالي شامل ضريبة القيمة المضافة / Grand Total</span><span id="ctGrand">34,615.00 ر.س</span></div>
+    </div>
+  </div>
+
+  <!-- Article 3 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (3): نطاق الأعمال</div>
+    <div class="ct-section-body">
+      يشمل هذا العقد توريد وتركيب المواد والأنظمة الواردة فيه وفقًا للمواصفات الفنية المعتمدة وجداول الكميات المرفقة.
+    </div>
+  </div>
+
+  <!-- Article 4 -->
+  <div class="ct-section">
+    <div class="ct-section-title" style="page-break-after:avoid">المادة (4): الدفعات وآلية السداد</div>
+    <div class="ct-section-body">
+      <p>يتم سداد قيمة هذا العقد على دفعات وفقًا لآلية السداد التالية:</p>
+      <p><strong>إجمالي قيمة العقد (شامل ضريبة القيمة المضافة):</strong> مبلغ وقدره (<strong><span id="ctGrandText">34,615.00</span> ريال سعودي</strong>) فقط <span id="ctGrandWords" class="ct-words">أربعة وثلاثون ألف وستمائة وخمسة عشر ريال سعودي</span> لا غير.</p>
+      <p><strong>1- الدفعة الأولى (دفعة مقدمة):</strong> بنسبة 50% من إجمالي قيمة العقد، تُستحق وتُدفع عند توقيع العقد، وقدرها (<strong><span id="ctP50">17,307.50</span> ريال سعودي</strong>) فقط <span id="ctP50Words" class="ct-words">سبعة عشر ألف وثلاثمائة وسبعة ريال سعودي وخمسون هللة</span> لا غير.</p>
+      <p><strong>2- الدفعة الثانية (عند التوريد):</strong> بنسبة 40% من إجمالي قيمة العقد، تُستحق وتُدفع قبل توريد المواد إلى الموقع، وقدرها (<strong><span id="ctP40">13,846.00</span> ريال سعودي</strong>) فقط <span id="ctP40Words" class="ct-words">ثلاثة عشر ألف وثمانمائة وستة وأربعون ريال سعودي</span> لا غير.</p>
+      <p><strong>3- الدفعة الثالثة (بعد البرمجة):</strong> بنسبة 10% من إجمالي قيمة العقد، تُستحق وتُدفع عند الانتهاء من البرمجة، وقدرها (<strong><span id="ctP10">3,461.50</span> ريال سعودي</strong>) فقط <span id="ctP10Words" class="ct-words">ثلاثة آلاف وأربعمائة وواحد وستون ريال سعودي وخمسون هللة</span> لا غير.</p>
+      <p style="margin-top:.5rem">يتم تحويل الدفعات إلى الحساب البنكي التالي الخاص بالطرف الثاني:</p>
+    </div>
+    <div class="ct-bank-wrap">
+      <div class="ct-bank">
+        <div><span class="ct-bank-lbl">اسم الحساب:</span> <span dir="ltr">MUTQINUN TIK</span></div>
+        <div><span class="ct-bank-lbl">اسم البنك:</span> مصرف الراجحي – Al Rajhi Bank</div>
+        <div><span class="ct-bank-lbl">رقم الآيبان / IBAN:</span> <span dir="ltr" class="ct-iban">SA2280000201608016609858</span></div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Article 5 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (5): مدة التوريد والتركيب والبرمجة</div>
+    <div class="ct-section-body">
+      يتم توريد المواد والمعدات المتفق عليها خلال فترة تتراوح من (45) إلى (60) يوم عمل، تبدأ من تاريخ استلام الطرف الثاني للدفعة الأولى المنصوص عليها في المادة (4)، وبعد استلام التعميد الخطي النهائي من الطرف الأول على المواصفات، واتجاهات الأبواب، وأرقام الغرف، والتصميم.
+      لا يبدأ تنفيذ العقد ولا يلتزم الطرف الثاني بأي أعمال توريد أو تجهيز أو تركيب، إلا بعد استكمال المتطلبات المذكورة أعلاه واستلام الدفعة الأولى.
+    </div>
+  </div>
+
+  <!-- Article 6 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (6): الاختصاص القضائي</div>
+    <div class="ct-section-body">
+      تخضع أحكام هذا العقد للأنظمة واللوائح المعمول بها في المملكة العربية السعودية، وتكون المحاكم المختصة داخل المملكة هي المرجع الحصري للفصل في أي خلاف أو نزاع ينشأ عن تنفيذ أو تفسير أي بند من بنود العقد.
+    </div>
+  </div>
+
+  <!-- Article 7 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (7): الضمان والصيانة</div>
+    <div class="ct-section-body">
+      <p>• يضمن الطرف الثاني جميع المواد والأنظمة محل العقد لمدة سنتين تبدأ من تاريخ التركيب والتشغيل الفعلي، ويقتصر نطاق الضمان على العيوب المصنعية وأي خلل ناتج عن البرمجة.</p>
+      <p>لا يشمل الضمان أعطال ناجمة عن سوء الاستخدام، العبث، التعديلات غير المصرح بها، التوصيلات الكهربائية غير المطابقة للمواصفات، أو الاستهلاك الطبيعي، أو العوامل الخارجية، أو انقطاع أو تذبذب التيار الكهربائي.</p>
+      <p>• يلتزم الطرف الثاني بتوفير قطع الغيار لمدة لا تقل عن عشر (10) سنوات من تاريخ التوريد.</p>
+    </div>
+  </div>
+
+  <!-- Article 8 -->
+  <div class="ct-section">
+    <div class="ct-section-title">المادة (8): نسخ العقد</div>
+    <div class="ct-section-body">
+      حرر هذا العقد من نسختين أصليتين، تسلم كل طرف نسخة للعمل بموجبها، وتعد كلا النسختين متطابقتين في الحجية القانونية.
+    </div>
+  </div>
+
+  <!-- Signatures -->
+  <div class="ct-signature">
+    <div class="ct-sig-col">
+      <div style="font-weight:800;font-size:.88rem;color:var(--brand)">الطرف الأول / First Party</div>
+      <div style="font-weight:700;margin:.3rem 0">شركة المشاريع السكنية للمقاولات العامة المحدودة</div>
+      <div style="font-size:.82rem;color:var(--muted)">ثامر محمد راشد حسن</div>
+      <div class="ct-sig-line"></div>
+      <div style="font-size:.72rem;color:var(--muted)">التوقيع والختم / Signature &amp; Stamp</div>
+    </div>
+    <div class="ct-sig-col">
+      <div style="font-weight:800;font-size:.88rem;color:var(--brand)">الطرف الثاني / Second Party</div>
+      <div style="font-weight:700;margin:.3rem 0">شركة متقنون تيك</div>
+      <div style="font-size:.82rem;color:var(--muted)">محمد عبد الله الحامدي</div>
+      <div class="ct-sig-line"></div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">التوقيع والختم / Signature &amp; Stamp</div>
+      <div style="width:166px;height:166px;margin:0 auto;">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDEwMDAiIHdpZHRoPSIxMDAwIiBoZWlnaHQ9IjEwMDAiPgogIDx0aXRsZT7Yrtiq2YUg2KfZhNi52YLZiNivIOKAlCDYtNix2YPYqSDZhdiq2YLZhtmI2YYg2KrZitmDPC90aXRsZT4KCiAgPGNpcmNsZSBjeD0iNTAwIiBjeT0iNTAwIiByPSI0NzgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE1NjBjOCIgc3Ryb2tlLXdpZHRoPSIxNyIvPgogIDxjaXJjbGUgY3g9IjUwMCIgY3k9IjUwMCIgcj0iMzg3IiBmaWxsPSJub25lIiBzdHJva2U9IiMxNTYwYzgiIHN0cm9rZS13aWR0aD0iOSIvPgoKICA8ZGVmcz4KICAgIDxwYXRoIGlkPSJhcmNMYXRpbiIgIGQ9Ik04Ni44OCwzNzMuNyBBNDMyLDQzMiAwIDAgMSA0NjIuMzUsNjkuNjQiLz4KICAgIDxwYXRoIGlkPSJhcmNBcmFiaWMiIGQ9Ik01MzcuNDgsNzEuNjQgQTQzMCw0MzAgMCAwIDEgOTEzLjM0LDM4MS40OCIvPgogICAgPHBhdGggaWQ9ImFyY0NSIiAgICAgZD0iTTEzNS4zNCw3MjcuODcgQTQzMCw0MzAgMCAwIDAgODY0LjY2LDcyNy44NyIvPgogICAgPHBhdGggaWQ9ImFyY1NUIiAgICAgZD0iTTkwMi4xOSw2NDYuMzggQTQyOCw0MjggMCAwIDAgOTI3Ljc0LDUxNC45NCIvPgogIDwvZGVmcz4KCiAgPGcgZmlsbD0iIzE1NjBjOCIgZm9udC1mYW1pbHk9IidDYWlybycsJ1RhaG9tYScsJ1NlZ29lIFVJJywnQXJpYWwnLHNhbnMtc2VyaWYiPgogICAgPHRleHQgZm9udC1zaXplPSI2MCIgZm9udC13ZWlnaHQ9IjcwMCIgbGV0dGVyLXNwYWNpbmc9IjIiPgogICAgICA8dGV4dFBhdGggaHJlZj0iI2FyY0xhdGluIiBzdGFydE9mZnNldD0iNTAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NVVRRSU5VTiBUSUs8L3RleHRQYXRoPgogICAgPC90ZXh0PgogICAgPHRleHQgZm9udC1zaXplPSI1OCIgZm9udC13ZWlnaHQ9IjYwMCI+CiAgICAgIDx0ZXh0UGF0aCBocmVmPSIjYXJjQXJhYmljIiBzdGFydE9mZnNldD0iNTAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7YtNix2YPYqSDZhdiq2YLZhtmI2YYg2KrZitmDPC90ZXh0UGF0aD4KICAgIDwvdGV4dD4KICAgIDx0ZXh0IGZvbnQtc2l6ZT0iNjAiIGZvbnQtd2VpZ2h0PSI3MDAiIGxldHRlci1zcGFjaW5nPSIyIj4KICAgICAgPHRleHRQYXRoIGhyZWY9IiNhcmNDUiIgc3RhcnRPZmZzZXQ9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Qy5SLjogNzA1NTE1MDM2NjwvdGV4dFBhdGg+CiAgICA8L3RleHQ+CiAgICA8dGV4dCBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNjAwIj4KICAgICAgPHRleHRQYXRoIGhyZWY9IiNhcmNTVCIgc3RhcnRPZmZzZXQ9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+2LMgLiDYqjwvdGV4dFBhdGg+CiAgICA8L3RleHQ+CiAgPC9nPgoKICA8ZyBzdHJva2U9IiMxNTYwYzgiIHN0cm9rZS13aWR0aD0iOSI+PGxpbmUgeDE9IjUwMCIgeTE9IjIyIiB4Mj0iNTAwIiB5Mj0iMTEzIi8+PGxpbmUgeDE9IjU2LjgxIiB5MT0iNjc5LjA2IiB4Mj0iMTQxLjE4IiB5Mj0iNjQ0Ljk3Ii8+PGxpbmUgeDE9Ijg3Ni42NyIgeTE9Ijc5NC4yOSIgeDI9IjgwNC45NiIgeTI9IjczOC4yNiIvPjxsaW5lIHgxPSI5NjMuOCIgeTE9IjM4NC4zNiIgeDI9Ijg3NS41IiB5Mj0iNDA2LjM4Ii8+PC9nPgoKICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzMuNCAyMjQpIHNjYWxlKDAuNDQpIiBmaWxsPSIjMTU2MGM4Ij4KICAgIDxwYXRoIGQ9Ik0xMjAgNTYwIFYzMDAgTDIzMiA0NjIgTDM0NCAzMDAgVjU2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTU2MGM4IgogICAgICAgICAgc3Ryb2tlLXdpZHRoPSI3MiIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjYiLz4KICAgIDxwYXRoIGQ9Ik00MDAgMjUyIEg1OTAgVjMyNCBIMzY0IFoiLz4KICAgIDxwYXRoIGQ9Ik00NTkgMjUyIEg1MzEgVjU2MCBINDU5IFoiLz4KICAgIDxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTY2MCAyNTIgaDIwNCBhNDQgNDQgMCAwIDEgNDQgNDQgdjIyMCBhNDQgNDQgMCAwIDEgLTQ0IDQ0IGgtMjA0IGE0NCA0NCAwIDAgMSAtNDQgLTQ0IHYtMjIwIGE0NCA0NCAwIDAgMSA0NCAtNDQgegogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBNNzA4IDMzMCBoMTA4IGEyNiAyNiAwIDAgMSAyNiAyNiB2OTYgbC03MCA3MCBoLTY0IGEyNiAyNiAwIDAgMSAtMjYgLTI2IHYtMTQwIGEyNiAyNiAwIDAgMSAyNiAtMjYgeiIvPgogICAgPHBhdGggZD0iTTgxMiA0NTIgSDk0NiBMODYyIDU2MCBINzI4IFoiLz48L2c+CiAgPGcgZmlsbD0iIzE1NjBjOCIgZm9udC1mYW1pbHk9IidDYWlybycsJ1RhaG9tYScsJ1NlZ29lIFVJJywnQXJpYWwnLHNhbnMtc2VyaWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPgogICAgPHRleHQgeD0iNTAwIiB5PSI1NjAiIGZvbnQtc2l6ZT0iNzYiIGZvbnQtd2VpZ2h0PSI2MDAiPtmF2KrZgtmG2YjZhiDYqtmK2YM8L3RleHQ+CiAgICA8dGV4dCB4PSI1MDAiIHk9IjYzMiIgZm9udC1zaXplPSI1NiIgZm9udC13ZWlnaHQ9IjcwMCIgbGV0dGVyLXNwYWNpbmc9IjQiPk1VVFFJTlVOIFRJSzwvdGV4dD4KICAgIAogIDwvZz4KPC9zdmc+Cg==" alt="ختم العقد" class="ct-stamp" style="width:166px;height:166px;object-fit:contain;opacity:.9">
+      </div>
+    </div>
+  </div>
+
+</div>

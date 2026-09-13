@@ -29,12 +29,13 @@ jobs:
         with:
           enablement: true
 
-      # The app is a single page plus its brand assets; contract.txt is a
+      # The app is a single page plus its brand assets, and the static
+      # contract sample that gets sent to clients; contract.txt is a
       # reference template that does not belong on the served site.
       - name: Stage the site
         run: |
           mkdir -p _site
-          cp index.html _site/
+          cp index.html contract-preview.html _site/
           cp -r assets _site/
 
       - uses: actions/upload-pages-artifact@v3
