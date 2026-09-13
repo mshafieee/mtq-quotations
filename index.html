@@ -989,21 +989,63 @@ function refreshBrandPreview(key){
   if (tag) tag.textContent = brand[key] ? 'صورة مرفوعة' : (BRAND_ASSETS[key] ? 'النسخة المدمجة' : 'لم تُرفع بعد');
 }
 
-// Read an uploaded file, downscale it so localStorage stays healthy, and
-// hand back a data URL.
-function readBrandImage(file, cb){
+// Crop the uniform border that logo files usually carry. The documents size
+// brand art by height, so margin baked into the file eats that budget and the
+// mark lands small no matter how tall the box is. Returns cv untouched when
+// there is nothing to crop or the pixels cannot be read.
+function trimCanvas(cv){
+  const w = cv.width, h = cv.height;
+  let d;
+  try { d = cv.getContext('2d').getImageData(0, 0, w, h).data; } catch(e){ return cv; }
+  const bg = [d[0], d[1], d[2], d[3]];          // top-left corner is the background
+  const TOL = 12;                               // tolerate JPEG noise and anti-aliasing
+  const isBg = i => d[i+3] < 8 ? true
+    : bg[3] < 8 ? false
+    : Math.abs(d[i]-bg[0]) <= TOL && Math.abs(d[i+1]-bg[1]) <= TOL && Math.abs(d[i+2]-bg[2]) <= TOL;
+  let top = 0, bottom = h - 1, left = 0, right = w - 1;
+  const rowBg = y => { for (let x = 0; x < w; x++) if (!isBg((y*w + x)*4)) return false; return true; };
+  const colBg = x => { for (let y = top; y <= bottom; y++) if (!isBg((y*w + x)*4)) return false; return true; };
+  while (top < bottom && rowBg(top)) top++;
+  while (bottom > top && rowBg(bottom)) bottom--;
+  while (left < right && colBg(left)) left++;
+  while (right > left && colBg(right)) right--;
+  const cw = right - left + 1, ch = bottom - top + 1;
+  if (cw < 2 || ch < 2 || (cw === w && ch === h)) return cv;
+  const pad = Math.round(Math.max(cw, ch) * 0.02);   // a hair, so it never touches the edge
+  const nx = Math.max(0, left - pad), ny = Math.max(0, top - pad);
+  const nw = Math.min(w - 1, right + pad) - nx + 1, nh = Math.min(h - 1, bottom + pad) - ny + 1;
+  const out = document.createElement('canvas');
+  out.width = nw; out.height = nh;
+  const ctx = out.getContext('2d');
+  if (bg[3] >= 8){ ctx.fillStyle = `rgb(${bg[0]},${bg[1]},${bg[2]})`; ctx.fillRect(0, 0, nw, nh); }
+  ctx.drawImage(cv, nx, ny, nw, nh, 0, 0, nw, nh);
+  return out;
+}
+
+// Read an uploaded file, trim its dead margin, downscale it so localStorage
+// stays healthy, and hand back a data URL. Pass trim=false for artwork whose
+// margin is load-bearing — a QR code needs its quiet zone to stay scannable.
+function readBrandImage(file, cb, trim){
   const fr = new FileReader();
   fr.onerror = () => toast('⚠️ تعذر قراءة الملف');
   fr.onload = () => {
     const img = new Image();
     img.onload = () => {
-      const MAX = 900;
-      let w = img.naturalWidth || MAX, h = img.naturalHeight || MAX;
-      if (w > MAX || h > MAX){ const k = MAX / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k); }
       try {
-        const cv = document.createElement('canvas');
+        const WORK = 1600, MAX = 900;          // trim at WORK, store at MAX
+        let w = img.naturalWidth || MAX, h = img.naturalHeight || MAX;
+        if (w > WORK || h > WORK){ const k = WORK / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k); }
+        let cv = document.createElement('canvas');
         cv.width = w; cv.height = h;
         cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        if (trim !== false) cv = trimCanvas(cv);
+        if (cv.width > MAX || cv.height > MAX){
+          const k = MAX / Math.max(cv.width, cv.height);
+          const sm = document.createElement('canvas');
+          sm.width = Math.round(cv.width * k); sm.height = Math.round(cv.height * k);
+          sm.getContext('2d').drawImage(cv, 0, 0, sm.width, sm.height);
+          cv = sm;
+        }
         cb(cv.toDataURL('image/png'));
       } catch(e){ cb(fr.result); }
     };
@@ -1022,7 +1064,7 @@ function onBrandFile(input, key){
     refreshBrandPreview(key);
     applyBrand();
     toast('✅ تم تحديث الصورة');
-  });
+  }, key !== 'bankQr');
   input.value = '';
 }
 
